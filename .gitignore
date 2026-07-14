@@ -139,4 +139,7 @@ catboost_info/
 # Ruff
 .ruff_cache/
 
+*.pdf
+!recursos/*.pdf
+
 reports/evaluation/explainability_results.joblib
