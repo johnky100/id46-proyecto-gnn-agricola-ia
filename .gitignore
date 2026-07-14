@@ -103,3 +103,40 @@ Desktop.ini
 
 # macOS
 .DS_Store
+
+catboost_info/
+.RData
+.RDataTmp*
+.Rhistory
+.Rproj.user/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# VS Code
+.vscode/
+
+# CatBoost
+catboost_info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Pytest
+.pytest_cache/
+
+# Mypy
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+reports/evaluation/explainability_results.joblib
