@@ -5,7 +5,7 @@ from pathlib import Path # Manejo de rutas
 ROOT_DIR = (
     Path(__file__)
     .resolve()
-    .parents[3]
+    .parents[3] # 0 config. 1 Python. 2 src. 3 avanzado-ia
 ) # Directorio raíz del proyecto
 
 # BLOQUE 2. Directorios principales ---------------------------------------
@@ -234,6 +234,16 @@ FORECAST_RESULTS_FILE = (
     / "forecast_panel.parquet"
 ) # Pronósticos oficiales
 
+SCENARIO_RESULTS_FILE = (
+    FORECAST_DIR
+    / "scenario_results.parquet"
+) # Resultados oficiales de los escenarios
+
+FORECAST_REPORT_FILE = (
+    FORECAST_DIR
+    / "forecast_report.pdf"
+) # Reporte técnico del forecasting
+
 # Productos oficiales del proyecto ---------------------------------------
 PROJECT_FILES = {
     "dataset_scientific": DATASET_FILE,
@@ -329,7 +339,6 @@ PROJECT_DIRECTORIES: dict[str, Path] = {
 } # Directorios oficiales del proyecto
 
 # BLOQUE 8. Validación de directorios --------------------------------------
-
 def validate_directory(directory: Path) -> str:
     """
     Verifica la existencia de un directorio.
