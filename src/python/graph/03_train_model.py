@@ -1,51 +1,43 @@
-# 03_train_model.py
+# graph-03_train_model.py
 
 # BLOQUE 1. Importaciones --------------------------------------------------
-## Objetivo: Importar las librerías, modelos y utilidades necesarias para reentrenar el modelo ganador del Benchmark Científico.
+## Objetivo: Importar las dependencias necesarias para ejecutar el entrenamiento
+# definitivo del modelo oficial GraphSAGE utilizando el Dataset Científico
+# y la colección oficial de GraphData del proyecto.
+### Producto:
+# - Librerías cargadas correctamente.
+### Responde:
+# ¿Qué dependencias requiere el protocolo de entrenamiento para
+# reconstruir, entrenar y exportar el modelo oficial del proyecto?
+
 # Funciones del sistema
-import json # Lectura de configuraciones
-import joblib # Serialización de objetos de Python
-import warnings # Control de advertencias
+import json
+import warnings
+from datetime import datetime
+from pathlib import Path
+
+import joblib
 
 # Librerías científicas
-import torch # Modelos Deep Learning y GNN
-import pandas as pd # Lectura del dataset científico
-#import arrow # Lectura de archivos Parquet
+import pandas as pd
+import torch
 
 # Configuración del proyecto
 from src.python.config.paths import (
     DATASET_FILE,
-    GRAPH_DATA_FILE,
+    GRAPH_DATA_DIR,
     BEST_MODEL_CONFIG_FILE,
     BENCHMARK_RESULTS_FILE,
-    BEST_MODEL_JOBLIB_FILE,
     BEST_MODEL_TORCH_FILE,
-    BEST_MODEL_METADATA_FILE
-) # Productos oficiales del proyecto
-
-from pathlib import Path # Gestión de rutas
-
-from datetime import datetime # Fecha y hora
+    BEST_MODEL_METADATA_FILE,
+    TRAINING_SUMMARY_FILE
+)
 
 from src.python.config.config_project import (
-    DATASET_CONFIG
+    PROJECT_SEED
 )
 
-from src.python.models.statistical import (
-    STATISTICAL_CONFIG,
-    train_linear_regression
-)
-
-from src.python.models.machine_learning import (
-    MACHINE_LEARNING_CONFIG,
-    train_machine_learning_model
-)
-
-from src.python.models.deep_learning import (
-    DEEP_LEARNING_CONFIG,
-    train_mlp
-)
-
+# Modelos Graph Neural Networks
 from src.python.models.graph_neural_networks import (
     GNN_CONFIG,
     build_gnn_model,
@@ -53,846 +45,1263 @@ from src.python.models.graph_neural_networks import (
     train_gnn
 )
 
-warnings.filterwarnings(
-    "ignore"
-) # Ocultar advertencias no críticas
+warnings.filterwarnings("ignore")
 
 print("-" * 80)
 
 # BLOQUE 2. Configuración --------------------------------------------------
-## Objetivo: Definir la configuración oficial utilizada durante el entrenamiento
-# definitivo del modelo ganador del Benchmark Científico.
-### Producto: - TRAINING_CONFIG
-### Responde: ¿El entrenamiento final dispone de una configuración oficial, reproducible y consistente con el protocolo científico?
+## Objetivo: Definir la configuración oficial que gobernará el entrenamiento
+# definitivo del modelo oficial seleccionado durante el Benchmark Científico,
+# garantizando la reproducibilidad y consistencia del protocolo experimental.
+#### Producto:
+# - TRAINING_CONFIG
+#### Responde:
+# ¿El entrenamiento definitivo dispone de una configuración oficial,
+# reproducible y consistente para generar el modelo oficial del proyecto?
 
-# Configuración oficial del entrenamiento ----------------------------------
-TRAINING_CONFIG = {
-    "training_name": "final_training",
-    "training_version": "1.0",
-    "use_full_dataset": True,
-    "save_trained_model": True,
-    "save_training_summary": True,
-    "save_training_metrics": True,
-    "save_training_metadata": True,
-    "overwrite_existing_model": True,
-    "random_state": 42,
-    "verbose": True
-} # Configuración oficial del entrenamiento
+def build_training_configuration() -> dict:
+    """
+    Construye y valida la configuración oficial del entrenamiento definitivo.
 
-# Validación ---------------------------------------------------------------
-required_keys = [
-    "training_name",
-    "training_version",
-    "use_full_dataset",
-    "save_trained_model",
-    "save_training_summary",
-    "save_training_metrics",
-    "save_training_metadata",
-    "overwrite_existing_model",
-    "random_state",
-    "verbose"
-] # Parámetros obligatorios
+    Returns
+    -------
+    dict
+        Configuración oficial del entrenamiento.
+    """
 
-missing_keys = [
-    key
-    for key in required_keys
-    if key not in TRAINING_CONFIG
-] # Parámetros faltantes
+    # Construcción de la configuración
+    training_config = {
+        "training_name": "final_training",
+        "training_version": "1.0",
+        "use_full_dataset": True,
+        "save_trained_model": True,
+        "save_training_summary": True,
+        "save_training_metrics": True,
+        "save_training_metadata": True,
+        "overwrite_existing_model": True,
+        "random_state": PROJECT_SEED,
+        "verbose": True
+    }
 
-if missing_keys:
-    raise ValueError(
-        f"Faltan parámetros en TRAINING_CONFIG: {missing_keys}"
-    )
+    # Validación de la estructura
+    required_keys = [
+        "training_name",
+        "training_version",
+        "use_full_dataset",
+        "save_trained_model",
+        "save_training_summary",
+        "save_training_metrics",
+        "save_training_metadata",
+        "overwrite_existing_model",
+        "random_state",
+        "verbose"
+    ]
 
-print("-" * 80)
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in training_config
+    ]
 
-# BLOQUE 3. Carga del Modelo Ganador ---------------------------------------
-## Objetivo: Recuperar el modelo ganador del Benchmark Científico y reconstruir
-# automáticamente su configuración oficial para el entrenamiento definitivo.
-#### Entradas: - BEST_MODEL_CONFIG_FILE - BENCHMARK_RESULTS_FILE
-#### Producto: - best_model_config - benchmark_results - best_model_result
-#### Responde: ¿La información del modelo ganador fue recuperada correctamente para iniciar el entrenamiento definitivo?
+    if missing_keys:
+        raise RuntimeError(
+            "La configuración oficial del entrenamiento está incompleta: "
+            f"{missing_keys}"
+        )
 
-# Carga de la configuración del modelo ganador -----------------------------
-try:
-    with open(
-        BEST_MODEL_CONFIG_FILE,
-        "r",
-        encoding = "utf-8"
-    ) as file:
+    # Validación de tipos
+    if not isinstance(training_config["training_name"], str):
+        raise TypeError("training_name debe ser una cadena.")
 
-        best_model_config = json.load(
-            file
-        ) # Configuración mínima del modelo ganador
+    if not isinstance(training_config["training_version"], str):
+        raise TypeError("training_version debe ser una cadena.")
 
-except Exception as error:
-    raise RuntimeError(
-        f"Error al cargar la configuración del modelo ganador: {error}"
-    )
+    if not isinstance(training_config["random_state"], int):
+        raise TypeError("random_state debe ser un entero.")
 
-# Validación de la configuración mínima ------------------------------------
-required_config_keys = [
-    "model_code",
-    "model_name",
-    "family"
-] # Parámetros obligatorios
+    boolean_keys = [
+        "use_full_dataset",
+        "save_trained_model",
+        "save_training_summary",
+        "save_training_metrics",
+        "save_training_metadata",
+        "overwrite_existing_model",
+        "verbose"
+    ]
 
-missing_config_keys = [
-    key
-    for key in required_config_keys
-    if key not in best_model_config
-] # Parámetros faltantes
+    for key in boolean_keys:
+        if not isinstance(training_config[key], bool):
+            raise TypeError(f"{key} debe ser un valor booleano.")
 
-if missing_config_keys:
-    raise ValueError(
-        f"Faltan parámetros en best_model_config: {missing_config_keys}"
-    )
+    # Validación del contenido
+    if not training_config["training_name"].strip():
+        raise ValueError("training_name está vacío.")
 
-# Reconstrucción de la configuración oficial -------------------------------
-try:
-    model_family = (
-        best_model_config["family"]
-    ) # Familia del modelo
+    if not training_config["training_version"].strip():
+        raise ValueError("training_version está vacío.")
 
-    model_name = (
-        best_model_config["model_name"]
-    ) # Nombre oficial del modelo
+    return training_config
 
-    if model_family == "statistical":
+# BLOQUE 3. Carga del Modelo Oficial GraphSAGE ------------------------------
+## Objetivo: Recuperar la configuración oficial y los resultados del modelo
+# GraphSAGE seleccionado durante el Benchmark Científico para ejecutar el
+# entrenamiento definitivo del modelo oficial del proyecto.
+#### Producto:
+# - official_model_config
+# - benchmark_results
+# - official_model_result
+#### Responde:
+# ¿La configuración y los resultados oficiales del modelo GraphSAGE fueron
+# recuperados correctamente para iniciar el entrenamiento definitivo?
 
-        best_model_config = (
-            STATISTICAL_CONFIG
-        ) # Configuración oficial
+def load_official_model() -> dict:
+    """
+    Recupera y valida la configuración oficial y los resultados del modelo
+    GraphSAGE seleccionado durante el Benchmark Científico.
 
-    elif model_family == "machine_learning":
-        best_model_config = (
-            MACHINE_LEARNING_CONFIG[
-                model_name
-            ]
-        ) # Configuración oficial
+    Returns
+    -------
+    dict
+        Información oficial del modelo GraphSAGE.
+    """
 
-    elif model_family == "deep_learning":
-        best_model_config = (
-            DEEP_LEARNING_CONFIG[
-                model_name
-            ]
-        ) # Configuración oficial
+    # Validación de archivos
+    if not BEST_MODEL_CONFIG_FILE.exists():
+        raise FileNotFoundError(
+            f"No fue posible localizar {BEST_MODEL_CONFIG_FILE.name}."
+        )
 
-    elif model_family == "graph_neural_networks":
-        best_model_config = (
-            GNN_CONFIG[
-                model_name
-            ]
-        ) # Configuración oficial
+    if not BENCHMARK_RESULTS_FILE.exists():
+        raise FileNotFoundError(
+            f"No fue posible localizar {BENCHMARK_RESULTS_FILE.name}."
+        )
 
-    else:
+    # Recuperación de la configuración oficial
+    try:
+        with open(
+            BEST_MODEL_CONFIG_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
+            benchmark_model = json.load(file)
+
+    except Exception as error:
+        raise RuntimeError(
+            f"Error al cargar la configuración oficial del Benchmark: {error}"
+        )
+
+    # Validación de la configuración
+    required_keys = [
+        "model_code",
+        "model_name",
+        "family"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in benchmark_model
+    ]
+
+    if missing_keys:
         raise ValueError(
-            f"Familia de modelo no soportada: {model_family}"
+            f"La configuración del Benchmark está incompleta: {missing_keys}"
         )
 
-except Exception as error:
-    raise RuntimeError(
-        f"Error al reconstruir la configuración oficial del modelo: {error}"
-    )
-
-# Carga de los resultados del Benchmark -----------------------------------
-try:
-    benchmark_results = joblib.load(
-        BENCHMARK_RESULTS_FILE
-    ) # Resultados oficiales del Benchmark
-
-except Exception as error:
-    raise RuntimeError(
-        f"Error al cargar los resultados del Benchmark: {error}"
-    )
-
-# Validación de los resultados ---------------------------------------------
-if not benchmark_results:
-    raise ValueError(
-        "Los resultados del Benchmark están vacíos."
-    )
-
-# Recuperación del resultado oficial del modelo ganador --------------------
-try:
-    best_model_result = next(
-        result
-        for result in benchmark_results
-        if result["model_code"]
-        ==
-        best_model_config["model_code"]
-    ) # Resultado oficial del modelo ganador
-
-except StopIteration:
-    raise ValueError(
-        "No fue posible localizar el modelo ganador dentro de los resultados del Benchmark."
-    )
-
-# Validación del resultado recuperado --------------------------------------
-required_result_keys = [
-    "model_code",
-    "model_name",
-    "family",
-    "model"
-] # Parámetros obligatorios
-
-missing_result_keys = [
-    key
-    for key in required_result_keys
-    if key not in best_model_result
-] # Parámetros faltantes
-
-if missing_result_keys:
-    raise ValueError(
-        f"El resultado del modelo ganador está incompleto: {missing_result_keys}"
-    )
-
-print("-" * 80)
-
-# BLOQUE 4. Carga de Datos -------------------------------------------------
-## Objetivo: Cargar el dataset científico completo y el GraphData oficial
-# utilizados durante el entrenamiento definitivo del modelo ganador.
-### Entradas: - DATASET_FILE - GRAPH_DATA_FILE
-### Producto: - training_data
-### Responde: ¿Los datos oficiales del proyecto fueron cargados correctamente para iniciar el entrenamiento definitivo?
-
-# Validación de archivos ---------------------------------------------------
-required_files = [
-    DATASET_FILE,
-    GRAPH_DATA_FILE
-] # Archivos obligatorios
-
-missing_files = [
-    file
-    for file in required_files
-    if not file.exists()
-] # Archivos faltantes
-
-if missing_files:
-    raise FileNotFoundError(
-        f"No fue posible localizar los archivos oficiales: {missing_files}"
-    )
-
-# Carga del dataset científico ---------------------------------------------
-try:
-    dataset = pd.read_parquet(
-        DATASET_FILE
-    ) # Dataset científico oficial
-
-except Exception as error:
-    raise RuntimeError(
-        f"Error al cargar el dataset científico: {error}"
-    )
-
-# Carga del GraphData ------------------------------------------------------
-try:
-    graph_data = torch.load(
-        GRAPH_DATA_FILE,
-        weights_only = False
-    ) # Grafo oficial
-
-except Exception as error:
-    raise RuntimeError(
-        f"Error al cargar el GraphData: {error}"
-    )
-
-# Consolidación de los datos -----------------------------------------------
-training_data = {
-    "dataset": dataset,
-    "graph_data": graph_data
-} # Datos oficiales del entrenamiento
-
-# Validación del dataset ---------------------------------------------------
-if training_data["dataset"].empty:
-    raise ValueError(
-        "El dataset científico está vacío."
-    )
-
-# Validación del GraphData -------------------------------------------------
-if training_data["graph_data"] is None:
-    raise ValueError(
-        "El GraphData no fue cargado correctamente."
-    )
-
-if not hasattr(
-    training_data["graph_data"],
-    "num_node_features"
-):
-    raise ValueError(
-        "El GraphData no corresponde a un objeto válido de PyTorch Geometric."
-    )
-
-print("-" * 80)
-
-# BLOQUE 5. Preparación del Entrenamiento ----------------------------------
-## Objetivo: Preparar las entradas generales requeridas para el entrenamiento
-# definitivo del modelo ganador, de acuerdo con la familia identificada
-# durante el Benchmark Científico.
-#### Entradas: - best_model_config - training_data
-#### Producto: - training_inputs
-#### Responde: ¿Las entradas generales del entrenamiento fueron preparadas correctamente para el modelo ganador?
-
-# Recuperación de la configuración -----------------------------------------
-model_config = (
-    best_model_config
-) # Configuración oficial del modelo ganador
-
-model_family = (
-    model_config["family"]
-) # Familia del modelo ganador
-
-# Validación de la familia -------------------------------------------------
-supported_families = [
-    "statistical",
-    "machine_learning",
-    "deep_learning",
-    "graph_neural_networks"
-] # Familias soportadas
-
-if model_family not in supported_families:
-    raise ValueError(
-        f"Familia de modelo no soportada: {model_family}"
-    )
-
-# Construcción de las entradas generales -----------------------------------
-training_inputs = {
-    "family": model_family,
-    "model_config": best_model_config,
-    "dataset": training_data["dataset"],
-    "target_variable": DATASET_CONFIG["target_variable"],
-    "excluded_columns": DATASET_CONFIG["excluded_columns"]
-} # Entradas generales del entrenamiento
-
-# Incorporación de los datos ------------------------------------------------
-if model_family == "graph_neural_networks":
-    training_inputs["graph_data"] = (
-        training_data["graph_data"]
-    ) # Grafo oficial
-
-else:
-    training_inputs["dataset"] = (
-        training_data["dataset"]
-    ) # Dataset científico
-
-# Validación de la estructura ----------------------------------------------
-required_keys = [
-    "family",
-    "model_config"
-] # Parámetros obligatorios
-
-missing_keys = [
-    key
-    for key in required_keys
-    if key not in training_inputs
-] # Parámetros faltantes
-
-if missing_keys:
-    raise ValueError(
-        f"Faltan parámetros en training_inputs: {missing_keys}"
-    )
-
-# Validación de los datos --------------------------------------------------
-if model_family == "graph_neural_networks":
-    if training_inputs["graph_data"] is None:
+    # Validación del modelo oficial
+    if benchmark_model["family"] != "graph_neural_networks":
         raise ValueError(
-            "El GraphData oficial no fue cargado correctamente."
+            "El entrenamiento definitivo únicamente admite Graph Neural Networks."
         )
 
-else:
-    if training_inputs["dataset"].empty:
+    if benchmark_model["model_name"] != "graphsage":
         raise ValueError(
-            "El dataset científico está vacío."
+            "El modelo oficial del proyecto debe ser GraphSAGE."
         )
 
-# print(training_inputs.keys())
-# print(training_inputs["model_config"])
-
-print("-" * 80)
-
-# BLOQUE 6. Preparación de las Entradas de Entrenamiento -------------------
-## Objetivo: Construir las entradas requeridas para el entrenamiento definitivo
-# del modelo ganador a partir de los datos oficiales del proyecto.
-#### Entradas: - training_inputs
-#### Producto: - training_features
-#### Responde: ¿Las entradas del entrenamiento fueron preparadas correctamente para el modelo ganador?
-
-# Recuperación de información ----------------------------------------------
-model_family = (
-    training_inputs["family"]
-) # Familia del modelo ganador
-
-model_config = (
-    training_inputs["model_config"]
-) # Configuración oficial del modelo
-
-# Preparación para modelos tabulares ---------------------------------------
-if model_family in [
-    "statistical",
-    "machine_learning",
-    "deep_learning"
-]:
-
-    dataset = (
-        training_inputs["dataset"]
-    ) # Dataset científico
-
-    target_variable = (
-        training_inputs["target_variable"]
-    ) # Variable objetivo
-
-    excluded_columns = (
-        training_inputs["excluded_columns"]
-    ) # Columnas excluidas
-
-    feature_columns = (
-        dataset.drop(
-            columns = excluded_columns + [target_variable],
-            errors = "ignore"
+    if "graphsage" not in GNN_CONFIG:
+        raise KeyError(
+            "No se encontró la configuración oficial de GraphSAGE."
         )
-        .select_dtypes(
-            include = [
-                "number",
-                "bool"
-            ]
+
+    official_model_config = GNN_CONFIG["graphsage"]
+
+    # Recuperación de los resultados del Benchmark
+    try:
+        benchmark_results = joblib.load(
+            BENCHMARK_RESULTS_FILE
         )
-        .columns.tolist()
-    ) # Variables predictoras numéricas
 
-    x_train = dataset[
-        feature_columns
-    ] # Variables de entrada
+    except Exception as error:
+        raise RuntimeError(
+            f"Error al cargar los resultados del Benchmark: {error}"
+        )
 
-    y_train = dataset[
-        target_variable
-    ] # Variable objetivo
+    if not benchmark_results:
+        raise ValueError(
+            "Los resultados del Benchmark están vacíos."
+        )
 
+    # Recuperación del resultado oficial
+    try:
+        official_model_result = next(
+            result
+            for result in benchmark_results
+            if result["model_code"] == official_model_config["model_code"]
+        )
+
+    except StopIteration:
+        raise ValueError(
+            "No fue posible localizar los resultados oficiales de GraphSAGE."
+        )
+
+    # Validación del resultado
+    required_keys = [
+        "model_code",
+        "model_name",
+        "family",
+        "model"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in official_model_result
+    ]
+
+    if missing_keys:
+        raise ValueError(
+            f"El resultado oficial de GraphSAGE está incompleto: {missing_keys}"
+        )
+
+    benchmark_summary = {
+        "model_code": official_model_config["model_code"],
+        "model_name": official_model_config["model_name"],
+        "family": official_model_config["family"]
+    }
+
+    return {
+        "official_model_config": official_model_config,
+        "official_model_result": official_model_result,
+        "benchmark_results": benchmark_results,
+        "benchmark_summary": benchmark_summary
+    }
+
+# BLOQUE 4. Carga de los Datos Oficiales -----------------------------------
+## Objetivo: Recuperar y validar el Dataset Científico y la colección oficial
+# de GraphData que servirán como entradas para el entrenamiento definitivo
+# del modelo oficial GraphSAGE.
+#### Producto:
+# - training_data
+#### Responde:
+# ¿El Dataset Científico y la colección oficial de GraphData fueron
+# recuperados y validados correctamente para iniciar el entrenamiento
+# definitivo del modelo oficial GraphSAGE?
+
+def load_training_data() -> dict:
+    """
+    Recupera y valida el Dataset Científico y la colección oficial de
+    GraphData utilizados durante el entrenamiento definitivo.
+
+    Returns
+    -------
+    dict
+        Datos oficiales del entrenamiento.
+    """
+
+    # Validación de archivos
+    if not DATASET_FILE.exists():
+        raise FileNotFoundError(
+            f"No fue posible localizar el Dataset Científico: {DATASET_FILE}"
+        )
+
+    if not GRAPH_DATA_DIR.exists():
+        raise FileNotFoundError(
+            f"No fue posible localizar el directorio GraphData: {GRAPH_DATA_DIR}"
+        )
+
+    # Recuperación del Dataset Científico
+    try:
+        dataset = pd.read_parquet(DATASET_FILE)
+
+    except Exception as error:
+        raise RuntimeError(
+            f"Error al cargar el Dataset Científico: {error}"
+        )
+
+    # Recuperación de los GraphData
+    graph_files = sorted(
+        file
+        for file in GRAPH_DATA_DIR.glob("graph_data_*.pt")
+        if file.stem != "graph_data_collection"
+    )
+
+    if not graph_files:
+        raise FileNotFoundError(
+            "No se encontraron GraphData oficiales para el entrenamiento."
+        )
+
+    graphs = []
+
+    for graph_file in graph_files:
+
+        try:
+            graph = torch.load(
+                graph_file,
+                weights_only=False
+            )
+
+        except Exception as error:
+            raise RuntimeError(
+                f"Error al cargar {graph_file.name}: {error}"
+            )
+
+        graphs.append(graph)
+
+    # Construcción del producto
+    training_data = {
+        "dataset": dataset,
+        "graphs": graphs
+    }
+
+    # Validación del Dataset Científico
+    if training_data["dataset"].empty:
+        raise ValueError(
+            "El Dataset Científico está vacío."
+        )
+
+    # Validación de GraphData
+    if not training_data["graphs"]:
+        raise ValueError(
+            "La colección oficial de GraphData está vacía."
+        )
+
+    for index, graph in enumerate(
+        training_data["graphs"],
+        start=1
+    ):
+
+        if graph is None:
+            raise ValueError(
+                f"GraphData #{index} no fue cargado correctamente."
+            )
+
+        if not hasattr(graph, "num_node_features"):
+            raise TypeError(
+                f"GraphData #{index} no corresponde a un objeto válido de PyTorch Geometric."
+            )
+
+    return training_data
+
+# BLOQUE 5. Construcción de las Entradas del Entrenamiento -----------------
+## Objetivo: Construir y validar las entradas oficiales requeridas para el
+# entrenamiento definitivo del modelo oficial GraphSAGE.
+#### Producto:
+# - training_inputs
+#### Responde:
+# ¿Las entradas oficiales del entrenamiento fueron construidas y validadas
+# correctamente para iniciar el entrenamiento del modelo oficial GraphSAGE?
+
+def build_training_inputs(
+    official_model_config: dict,
+    training_data: dict
+) -> dict:
+    """
+    Construye y valida las entradas oficiales utilizadas durante el
+    entrenamiento definitivo del modelo GraphSAGE.
+
+    Parameters
+    ----------
+    official_model_config : dict
+        Configuración oficial del modelo GraphSAGE.
+
+    training_data : dict
+        Datos oficiales del entrenamiento.
+
+    Returns
+    -------
+    dict
+        Entradas oficiales del entrenamiento.
+    """
+
+    # Validación de entradas
+    if official_model_config is None:
+        raise ValueError(
+            "official_model_config no puede ser nulo."
+        )
+
+    if training_data is None:
+        raise ValueError(
+            "training_data no puede ser nulo."
+        )
+
+    # Recuperación de información
+    model_family = official_model_config["family"]
+    model_name = official_model_config["model_name"]
+
+    # Validación del modelo oficial
+    if model_family != "graph_neural_networks":
+        raise ValueError(
+            "El entrenamiento definitivo únicamente admite Graph Neural Networks."
+        )
+
+    if model_name != "graphsage":
+        raise ValueError(
+            "El modelo oficial del proyecto es GraphSAGE."
+        )
+
+    # Construcción del producto
+    training_inputs = {
+        "model_config": official_model_config,
+        "graphs": training_data["graphs"]
+    }
+
+    # Validación del producto
+    required_keys = [
+        "model_config",
+        "graphs"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in training_inputs
+    ]
+
+    if missing_keys:
+        raise ValueError(
+            f"Faltan parámetros en training_inputs: {missing_keys}"
+        )
+
+    if not training_inputs["graphs"]:
+        raise ValueError(
+            "La colección oficial de GraphData está vacía."
+        )
+
+    return training_inputs
+
+# BLOQUE 6. Preparación de las Entradas del Modelo -------------------------
+## Objetivo: Preparar y validar las entradas oficiales utilizadas por el
+# modelo GraphSAGE durante el entrenamiento definitivo.
+#### Producto:
+# - training_features
+#### Responde:
+# ¿Las entradas oficiales del modelo GraphSAGE fueron preparadas y
+# validadas correctamente para iniciar el entrenamiento?
+
+def build_training_features(
+    training_inputs: dict
+) -> dict:
+    """
+    Prepara y valida las entradas oficiales requeridas por el modelo
+    GraphSAGE durante el entrenamiento definitivo.
+
+    Parameters
+    ----------
+    training_inputs : dict
+        Entradas oficiales del entrenamiento.
+
+    Returns
+    -------
+    dict
+        Entradas oficiales del modelo.
+    """
+
+    # Validación de entrada
+    if training_inputs is None:
+        raise ValueError(
+            "training_inputs no puede ser nulo."
+        )
+
+    required_keys = [
+        "model_config",
+        "graphs"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in training_inputs
+    ]
+
+    if missing_keys:
+        raise ValueError(
+            f"Faltan parámetros en training_inputs: {missing_keys}"
+        )
+
+    graphs = training_inputs["graphs"]
+
+    if not graphs:
+        raise ValueError(
+            "La colección oficial de GraphData está vacía."
+        )
+
+    # Construcción del producto
     training_features = {
-        "family": model_family,
-        "model_config": model_config,
-        "feature_columns": feature_columns,
-        "x_train": x_train,
-        "y_train": y_train
-    } # Entradas oficiales del entrenamiento
+        "model_config": training_inputs["model_config"],
+        "graphs": graphs
+    }
 
-# Preparación para Graph Neural Networks -----------------------------------
-elif model_family == "graph_neural_networks":
-    training_features = {
-        "family": model_family,
-        "model_config": model_config,
-        "graph_data": training_inputs["graph_data"]
-    } # Entradas oficiales del entrenamiento
-
-else:
-    raise ValueError(
-        f"Familia de modelo no soportada: {model_family}"
-    )
-
-# Validación ---------------------------------------------------------------
-required_keys = [
-    "family",
-    "model_config"
-] # Parámetros obligatorios
-
-missing_keys = [
-    key
-    for key in required_keys
-    if key not in training_features
-] # Parámetros faltantes
-
-if missing_keys:
-    raise ValueError(
-        f"Faltan parámetros en training_features: {missing_keys}"
-    )
-
-# Validación de modelos tabulares ------------------------------------------
-if model_family in [
-    "statistical",
-    "machine_learning",
-    "deep_learning"
-]:
-
-    if training_features["x_train"].empty:
+    # Validación del producto
+    if not training_features["graphs"]:
         raise ValueError(
-            "La matriz de entrenamiento X está vacía."
+            "No existen GraphData para el entrenamiento."
         )
 
-    if training_features["y_train"].empty:
+    return training_features
+
+# BLOQUE 7. Entrenamiento del Modelo Oficial -------------------------------
+## Objetivo: Construir y entrenar el modelo oficial GraphSAGE utilizando la
+# colección oficial de GraphData del proyecto.
+#### Producto:
+# - training_result
+#### Responde:
+# ¿El modelo oficial GraphSAGE fue construido, entrenado y validado
+# correctamente utilizando los datos oficiales del proyecto?
+
+def train_official_model(
+    training_features: dict
+) -> dict:
+    """
+    Construye, entrena y valida el modelo oficial GraphSAGE.
+
+    Parameters
+    ----------
+    training_features : dict
+        Entradas oficiales del entrenamiento.
+
+    Returns
+    -------
+    dict
+        Resultado oficial del entrenamiento.
+    """
+
+    # Validación de entrada
+    if training_features is None:
         raise ValueError(
-            "La variable objetivo y está vacía."
+            "training_features no puede ser nulo."
         )
 
-# Validación de modelos GNN ------------------------------------------------
-else:
-    if training_features["graph_data"] is None:
+    required_keys = [
+        "model_config",
+        "graphs"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in training_features
+    ]
+
+    if missing_keys:
         raise ValueError(
-            "El GraphData oficial no fue preparado correctamente."
+            f"Faltan parámetros en training_features: {missing_keys}"
         )
 
-print("-" * 80)
+    # Recuperación de información
+    model_config = training_features["model_config"]
+    graphs = training_features["graphs"]
 
-# BLOQUE 7. Entrenamiento del Modelo ---------------------------------------
-## Objetivo: Ejecutar el entrenamiento definitivo del modelo ganador utilizando
-# las entradas oficiales preparadas durante el proceso de entrenamiento.
-#### Entradas: - training_features
-#### Producto: - training_result
-#### Responde: ¿El modelo ganador fue entrenado correctamente utilizando los datos oficiales del proyecto?
+    if not graphs:
+        raise ValueError(
+            "La colección oficial de GraphData está vacía."
+        )
 
-# Recuperación de información ----------------------------------------------
-model_family = (
-    training_features["family"]
-) # Familia del modelo ganador
+    # Validación del modelo oficial
+    required_config_keys = [
+        "model_code",
+        "model_name",
+        "family"
+    ]
 
-model_config = (
-    training_features["model_config"]
-) # Configuración oficial del modelo
+    missing_config_keys = [
+        key
+        for key in required_config_keys
+        if key not in model_config
+    ]
 
-required_config_keys = [
-    "model_code",
-    "model_name",
-    "family"
-] # Parámetros obligatorios
+    if missing_config_keys:
+        raise ValueError(
+            "La configuración oficial del modelo está incompleta: "
+            f"{missing_config_keys}"
+        )
 
-missing_config_keys = [
-    key
-    for key in required_config_keys
-    if key not in model_config
-] # Parámetros faltantes
+    if model_config["family"] != "graph_neural_networks":
+        raise ValueError(
+            "El entrenamiento definitivo únicamente admite Graph Neural Networks."
+        )
 
-if missing_config_keys:
-    raise ValueError(
-        f"La configuración oficial del modelo está incompleta: {missing_config_keys}"
-    )
+    if model_config["model_name"] != "graphsage":
+        raise ValueError(
+            "El modelo oficial del proyecto es GraphSAGE."
+        )
 
-# Entrenamiento ------------------------------------------------------------
-if model_family == "statistical":
-
-    training_result = train_linear_regression(
-        x_train = training_features["x_train"],
-        y_train = training_features["y_train"]
-    ) # Entrenar modelo estadístico
-
-elif model_family == "machine_learning":
-
-    training_result = train_machine_learning_model(
-        model_config = model_config,
-        x_train = training_features["x_train"],
-        y_train = training_features["y_train"]
-    ) # Entrenar modelo de Machine Learning
-
-elif model_family == "deep_learning":
-
-    training_result = train_mlp(
-        model_config = model_config,
-        x_train = training_features["x_train"],
-        y_train = training_features["y_train"]
-    ) # Entrenar modelo Deep Learning
-
-elif model_family == "graph_neural_networks":
-
+    # Construcción del modelo oficial
     model = build_gnn_model(
-        model_config = model_config,
-        input_channels = (
-            training_features["graph_data"].num_node_features
-        ),
-        output_channels = 1
-    ) # Construcción del modelo
+        model_config=model_config,
+        input_channels=graphs[0].num_node_features,
+        output_channels=1
+    )
 
+    # Construcción de los componentes de entrenamiento
     training_components = build_training_components(
-        model = model,
-        model_config = model_config
-    ) # Componentes de entrenamiento
+        model=model,
+        model_config=model_config
+    )
 
+    # Entrenamiento del modelo oficial
     training_result = train_gnn(
-        model = model,
-        graph_data = training_features["graph_data"],
-        criterion = training_components["criterion"],
-        optimizer = training_components["optimizer"],
-        model_config = model_config
-    ) # Entrenar arquitectura GNN
-
-else:
-
-    raise ValueError(
-        f"Familia de modelo no soportada: {model_family}"
+        model=model,
+        graphs=graphs,
+        criterion=training_components["criterion"],
+        optimizer=training_components["optimizer"],
+        model_config=model_config
     )
 
-# Validación ---------------------------------------------------------------
-if training_result is None:
+    # Validación del producto
+    if training_result is None:
+        raise RuntimeError(
+            "El entrenamiento definitivo no produjo resultados."
+        )
 
-    raise RuntimeError(
-        "El entrenamiento definitivo no produjo resultados."
-    )
+    required_result_keys = [
+        "model"
+    ]
 
-required_keys = [
-    "model"
-] # Parámetros obligatorios
+    missing_result_keys = [
+        key
+        for key in required_result_keys
+        if key not in training_result
+    ]
 
-missing_keys = [
-    key
-    for key in required_keys
-    if key not in training_result
-] # Parámetros faltantes
+    if missing_result_keys:
+        raise ValueError(
+            "El resultado del entrenamiento está incompleto: "
+            f"{missing_result_keys}"
+        )
 
-if missing_keys:
+    if training_result["model"] is None:
+        raise RuntimeError(
+            "El modelo entrenado es nulo."
+        )
 
-    raise ValueError(
-        f"El resultado del entrenamiento está incompleto: {missing_keys}"
-    )
-
-print("-" * 80)
+    return training_result
 
 # BLOQUE 8. Exportación del Modelo Oficial ---------------------------------
-## Objetivo: Exportar el modelo oficial entrenado y los metadatos generados
-# durante el entrenamiento definitivo para garantizar la reproducibilidad
-# del proyecto.
-#### Entradas: - training_inputs - training_result
-#### Producto: - export_result
-#### Responde: ¿El modelo oficial fue exportado correctamente para las siguientes etapas del proyecto?
+## Objetivo: Exportar el modelo oficial GraphSAGE entrenado y los metadatos
+# generados durante el entrenamiento definitivo para garantizar la
+# reproducibilidad del proyecto.
+#### Producto:
+# - export_result
+#### Responde:
+# ¿El modelo oficial GraphSAGE fue exportado correctamente para las
+# siguientes etapas del proyecto?
 
-# Recuperación de información ----------------------------------------------
-best_model = (
-    training_result["model"]
-) # Modelo oficial entrenado
+def export_official_model(
+    training_inputs: dict,
+    training_result: dict
+) -> dict:
+    """
+    Exporta el modelo oficial GraphSAGE entrenado y sus metadatos.
 
-model_config = (
-    training_inputs["model_config"]
-) # Configuración oficial del modelo
+    Parameters
+    ----------
+    training_inputs : dict
+        Entradas oficiales del entrenamiento.
 
-model_family = (
-    training_inputs["family"]
-) # Familia del modelo ganador
+    training_result : dict
+        Resultado oficial del entrenamiento.
 
-# Selección del formato de exportación -------------------------------------
-if model_family in [
-    "statistical",
-    "machine_learning"
-]:
-    model_file = (
-        BEST_MODEL_JOBLIB_FILE
-    ) # Modelo Scikit-Learn
+    Returns
+    -------
+    dict
+        Resultado oficial de la exportación.
+    """
 
-    export_format = (
-        "joblib"
-    ) # Formato de exportación
+    # Validación de entradas
+    if training_inputs is None:
+        raise ValueError(
+            "training_inputs no puede ser nulo."
+        )
 
-elif model_family in [
-    "deep_learning",
-    "graph_neural_networks"
-]:
-    model_file = (
-        BEST_MODEL_TORCH_FILE
-    ) # Modelo PyTorch
+    if training_result is None:
+        raise ValueError(
+            "training_result no puede ser nulo."
+        )
 
-    export_format = (
-        "torch"
-    ) # Formato de exportación
+    required_input_keys = [
+        "model_config"
+    ]
 
-else:
-    raise ValueError(
-        f"Familia de modelo no soportada: {model_family}"
-    )
+    missing_input_keys = [
+        key
+        for key in required_input_keys
+        if key not in training_inputs
+    ]
 
-# Exportación del modelo ---------------------------------------------------
-try:
-    if export_format == "joblib":
+    if missing_input_keys:
+        raise ValueError(
+            f"Faltan parámetros en training_inputs: {missing_input_keys}"
+        )
 
-        joblib.dump(
-            best_model,
-            model_file
-        ) # Exportar modelo Scikit-Learn
+    if "model" not in training_result:
+        raise ValueError(
+            "No se encontró el modelo entrenado."
+        )
 
-    else:
+    # Recuperación de información
+    trained_model = training_result["model"]
+    model_config = training_inputs["model_config"]
+
+    # Validación del modelo oficial
+    if model_config["family"] != "graph_neural_networks":
+        raise ValueError(
+            "La exportación únicamente admite Graph Neural Networks."
+        )
+
+    if model_config["model_name"] != "graphsage":
+        raise ValueError(
+            "El modelo oficial del proyecto es GraphSAGE."
+        )
+
+    if not hasattr(trained_model, "state_dict"):
+        raise TypeError(
+            "El modelo entrenado no corresponde a un objeto válido de PyTorch."
+        )
+
+    # Configuración de la exportación
+    model_file = BEST_MODEL_TORCH_FILE
+    export_format = "torch"
+
+    # Exportación del modelo
+    try:
+
         torch.save(
-            best_model,
+            {
+                "model_state_dict": trained_model.state_dict(),
+                "model_config": model_config
+            },
             model_file
-        ) # Exportar modelo PyTorch
+        )
 
-except Exception as error:
-    raise RuntimeError(
-        f"Error al exportar el modelo oficial: {error}"
-    )
+    except Exception as error:
+        raise RuntimeError(
+            f"Error al exportar el modelo oficial: {error}"
+        )
 
-# Construcción de los metadatos --------------------------------------------
-training_metadata = {
-    "model_code": model_config["model_code"],
-    "model_name": model_config["model_name"],
-    "family": model_family,
-    "training_name": TRAINING_CONFIG["training_name"],
-    "training_version": TRAINING_CONFIG["training_version"],
-    "training_time": training_result.get(
-        "training_time",
-        None
-    ),
-    "export_format": export_format
-} # Metadatos oficiales del entrenamiento
+    if not model_file.exists():
+        raise RuntimeError(
+            "No fue posible exportar el modelo oficial."
+        )
 
-# Exportación de los metadatos ---------------------------------------------
-try:
-    with open(
-        BEST_MODEL_METADATA_FILE,
-        "w",
-        encoding = "utf-8"
-    ) as file:
-        json.dump(
-            training_metadata,
-            file,
-            indent = 4,
-            ensure_ascii = False
-        ) # Exportar metadatos
+    # Construcción de los metadatos
+    training_metadata = {
+        "model_code": model_config["model_code"],
+        "model_name": model_config["model_name"],
+        "family": model_config["family"],
+        "training_name": TRAINING_CONFIG["training_name"],
+        "training_version": TRAINING_CONFIG["training_version"],
+        "training_time": training_result.get("training_time"),
+        "training_loss": training_result.get("loss"),
+        "epochs": model_config.get("epochs"),
+        "training_date": datetime.now().isoformat(),
+        "export_format": export_format
+    }
 
-except Exception as error:
-    raise RuntimeError(
-        f"Error al exportar los metadatos del entrenamiento: {error}"
-    )
+    # Exportación de metadatos
+    try:
 
-# Construcción del resultado oficial ---------------------------------------
-export_result = {
-    "status": "SUCCESS",
-    "model_code": model_config["model_code"],
-    "model_name": model_config["model_name"],
-    "family": model_family,
-    "model_file": str(
-        model_file
-    ),
-    "metadata_file": str(
-        BEST_MODEL_METADATA_FILE
-    ),
-    "export_format": export_format
-} # Resultado oficial de la exportación
+        with open(
+            BEST_MODEL_METADATA_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
 
-print("-" * 80)
+            json.dump(
+                training_metadata,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+    except Exception as error:
+        raise RuntimeError(
+            f"Error al exportar los metadatos: {error}"
+        )
+
+    if not BEST_MODEL_METADATA_FILE.exists():
+        raise RuntimeError(
+            "No fue posible exportar los metadatos del entrenamiento."
+        )
+
+    # Construcción del producto
+    export_result = {
+        "status": "SUCCESS",
+        "model_code": model_config["model_code"],
+        "model_name": model_config["model_name"],
+        "family": model_config["family"],
+        "model_file": str(model_file),
+        "metadata_file": str(BEST_MODEL_METADATA_FILE),
+        "export_format": export_format,
+        "training_time": training_result.get("training_time"),
+        "training_loss": training_result.get("loss")
+    }
+
+    return export_result
 
 # BLOQUE 9. Validación Final -----------------------------------------------
 ## Objetivo: Verificar la integridad del entrenamiento definitivo y de todos
 # los productos oficiales generados durante el proceso.
-#### Entradas: - training_inputs - training_result - export_result
-#### Producto: - validation_result
-#### Responde: ¿El entrenamiento definitivo fue ejecutado correctamente y todos los
+#### Producto:
+# - validation_result
+#### Responde:
+# ¿El entrenamiento definitivo fue ejecutado correctamente y todos los
 # productos oficiales fueron generados de forma íntegra?
 
-# Recuperación de información ----------------------------------------------
-model_config = (
-    training_inputs["model_config"]
-) # Configuración oficial del modelo
+def validate_training(
+    training_inputs: dict,
+    training_result: dict,
+    export_result: dict
+) -> dict:
+    """
+    Valida la integridad del entrenamiento definitivo y de todos los
+    productos oficiales generados durante el proceso.
 
-model_family = (
-    training_inputs["family"]
-) # Familia del modelo ganador
+    Parameters
+    ----------
+    training_inputs : dict
+        Entradas oficiales del entrenamiento.
 
-# Validación del entrenamiento ---------------------------------------------
-if training_result is None:
-    raise RuntimeError(
-        "El entrenamiento definitivo no generó resultados."
+    training_result : dict
+        Resultado oficial del entrenamiento.
+
+    export_result : dict
+        Resultado oficial de la exportación.
+
+    Returns
+    -------
+    dict
+        Resultado oficial de la validación.
+    """
+
+    # Validación de entradas
+    if training_inputs is None:
+        raise RuntimeError(
+            "No se encontraron las entradas oficiales del entrenamiento."
+        )
+
+    if training_result is None:
+        raise RuntimeError(
+            "El entrenamiento definitivo no generó resultados."
+        )
+
+    if export_result is None:
+        raise RuntimeError(
+            "La exportación del modelo no produjo resultados."
+        )
+
+    required_input_keys = [
+        "model_config"
+    ]
+
+    missing_input_keys = [
+        key
+        for key in required_input_keys
+        if key not in training_inputs
+    ]
+
+    if missing_input_keys:
+        raise ValueError(
+            f"Faltan parámetros en training_inputs: {missing_input_keys}"
+        )
+
+    # Recuperación de información
+    model_config = training_inputs["model_config"]
+
+    # Validación del modelo oficial
+    if model_config["family"] != "graph_neural_networks":
+        raise ValueError(
+            "La validación únicamente admite Graph Neural Networks."
+        )
+
+    if model_config["model_name"] != "graphsage":
+        raise ValueError(
+            "El modelo oficial del proyecto es GraphSAGE."
+        )
+
+    # Validación del entrenamiento
+    required_training_keys = [
+        "model"
+    ]
+
+    missing_training_keys = [
+        key
+        for key in required_training_keys
+        if key not in training_result
+    ]
+
+    if missing_training_keys:
+        raise ValueError(
+            "El resultado del entrenamiento está incompleto: "
+            f"{missing_training_keys}"
+        )
+
+    if training_result["model"] is None:
+        raise RuntimeError(
+            "El modelo entrenado es nulo."
+        )
+
+    # Validación de la exportación
+    required_export_keys = [
+        "status",
+        "model_file",
+        "metadata_file",
+        "export_format"
+    ]
+
+    missing_export_keys = [
+        key
+        for key in required_export_keys
+        if key not in export_result
+    ]
+
+    if missing_export_keys:
+        raise ValueError(
+            "El resultado de la exportación está incompleto: "
+            f"{missing_export_keys}"
+        )
+
+    if export_result["status"] != "SUCCESS":
+        raise RuntimeError(
+            "La exportación del modelo no finalizó correctamente."
+        )
+
+    # Validación de archivos
+    model_file = Path(export_result["model_file"])
+    metadata_file = Path(export_result["metadata_file"])
+
+    if not model_file.exists():
+        raise FileNotFoundError(
+            f"No se encontró el modelo exportado: {model_file.name}"
+        )
+
+    if not metadata_file.exists():
+        raise FileNotFoundError(
+            f"No se encontraron los metadatos: {metadata_file.name}"
+        )
+
+    if model_file.stat().st_size == 0:
+        raise RuntimeError(
+            "El archivo del modelo está vacío."
+        )
+
+    if metadata_file.stat().st_size == 0:
+        raise RuntimeError(
+            "El archivo de metadatos está vacío."
+        )
+
+    # Recuperación de metadatos
+    try:
+
+        with open(
+            metadata_file,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
+            metadata = json.load(file)
+
+    except Exception as error:
+        raise RuntimeError(
+            f"Error al leer los metadatos: {error}"
+        )
+
+    required_metadata_keys = [
+        "model_code",
+        "model_name",
+        "family",
+        "training_name",
+        "training_version",
+        "export_format"
+    ]
+
+    missing_metadata_keys = [
+        key
+        for key in required_metadata_keys
+        if key not in metadata
+    ]
+
+    if missing_metadata_keys:
+        raise ValueError(
+            "Los metadatos están incompletos: "
+            f"{missing_metadata_keys}"
+        )
+
+    # Consistencia científica
+    if metadata["model_code"] != model_config["model_code"]:
+        raise ValueError(
+            "El código del modelo no coincide con los metadatos."
+        )
+
+    if metadata["model_name"] != model_config["model_name"]:
+        raise ValueError(
+            "El nombre del modelo no coincide con los metadatos."
+        )
+
+    if metadata["family"] != model_config["family"]:
+        raise ValueError(
+            "La familia del modelo no coincide con los metadatos."
+        )
+
+    if metadata["training_name"] != TRAINING_CONFIG["training_name"]:
+        raise ValueError(
+            "El nombre del entrenamiento no coincide."
+        )
+
+    if metadata["training_version"] != TRAINING_CONFIG["training_version"]:
+        raise ValueError(
+            "La versión del entrenamiento no coincide."
+        )
+
+    if export_result["export_format"] != "torch":
+        raise ValueError(
+            "El formato oficial de exportación debe ser Torch."
+        )
+
+    if metadata["export_format"] != export_result["export_format"]:
+        raise ValueError(
+            "El formato de exportación no coincide con los metadatos."
+        )
+
+    # Construcción del producto
+    validation_result = {
+        "status": "SUCCESS",
+        "training_name": metadata["training_name"],
+        "training_version": metadata["training_version"],
+        "model_code": model_config["model_code"],
+        "model_name": model_config["model_name"],
+        "family": model_config["family"],
+        "model_file": str(model_file),
+        "metadata_file": str(metadata_file),
+        "training_time": metadata.get("training_time"),
+        "training_loss": metadata.get("training_loss"),
+        "validation_date": datetime.now().isoformat()
+    }
+
+    return validation_result
+
+# BLOQUE 10. Producto Oficial del Entrenamiento ----------------------------
+## Objetivo: Consolidar los productos oficiales generados durante el
+# entrenamiento definitivo y construir el producto oficial que será
+# consumido por la etapa de evaluación del pipeline científico.
+#### Producto:
+# - training_output
+#### Responde:
+# ¿Cuál es el producto oficial generado por el entrenamiento definitivo que
+# será utilizado por las siguientes etapas del pipeline científico?
+
+def build_training_output(
+    training_inputs: dict,
+    training_result: dict,
+    export_result: dict,
+    validation_result: dict
+) -> dict:
+    """
+    Consolida los productos oficiales generados durante el entrenamiento
+    definitivo y construye el artefacto oficial del módulo.
+
+    Parameters
+    ----------
+    training_inputs : dict
+    training_result : dict
+    export_result : dict
+    validation_result : dict
+
+    Returns
+    -------
+    dict
+        Resultado oficial del entrenamiento.
+    """
+
+    # Validación de entradas
+    if training_inputs is None:
+        raise ValueError(
+            "training_inputs no puede ser nulo."
+        )
+
+    if training_result is None:
+        raise ValueError(
+            "training_result no puede ser nulo."
+        )
+
+    if export_result is None:
+        raise ValueError(
+            "export_result no puede ser nulo."
+        )
+
+    if validation_result is None:
+        raise ValueError(
+            "validation_result no puede ser nulo."
+        )
+
+    # Recuperación de información
+    model_config = training_inputs["model_config"]
+
+    # Construcción de productos oficiales
+    generated_products = {
+        "official_model": export_result["model_file"],
+        "training_metadata": export_result["metadata_file"],
+        "benchmark_configuration": str(BEST_MODEL_CONFIG_FILE),
+        "benchmark_results": str(BENCHMARK_RESULTS_FILE)
+    }
+
+    # Validación de productos
+    for product_name, product_path in generated_products.items():
+
+        if not Path(product_path).exists():
+            raise FileNotFoundError(
+                f"No fue posible localizar el producto oficial: {product_name}"
+            )
+
+    # Construcción del resumen oficial
+    training_summary = {
+        "status": "SUCCESS",
+        "training_name": validation_result["training_name"],
+        "training_version": validation_result["training_version"],
+        "model_code": model_config["model_code"],
+        "model_name": model_config["model_name"],
+        "family": model_config["family"],
+        "training_time": training_result.get("training_time"),
+        "training_loss": training_result.get("loss"),
+        "generated_products": generated_products,
+        "validation_date": validation_result["validation_date"],
+        "generation_date": datetime.now().isoformat()
+    }
+
+    # Exportación del resumen
+    try:
+
+        with open(
+            TRAINING_SUMMARY_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                training_summary,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+    except Exception as error:
+        raise RuntimeError(
+            f"Error al exportar el resumen del entrenamiento: {error}"
+        )
+
+    if not TRAINING_SUMMARY_FILE.exists():
+        raise RuntimeError(
+            "No fue posible exportar el resumen oficial del entrenamiento."
+        )
+
+    # Incorporación del resumen a los productos oficiales
+    generated_products["training_summary"] = str(
+        TRAINING_SUMMARY_FILE
     )
 
-required_training_keys = [
-    "model"
-] # Parámetros obligatorios
+    # Construcción del producto oficial
+    training_output = {
+        "status": "SUCCESS",
+        "model": training_result["model"],
+        "model_config": model_config,
+        "model_file": export_result["model_file"],
+        "metadata_file": export_result["metadata_file"],
+        "summary_file": str(TRAINING_SUMMARY_FILE),
+        "generated_products": generated_products,
+        "validation": validation_result,
+        "summary": training_summary
+    }
 
-missing_training_keys = [
-    key
-    for key in required_training_keys
-    if key not in training_result
-] # Parámetros faltantes
+    return training_output
 
-if missing_training_keys:
-    raise ValueError(
-        f"El resultado del entrenamiento está incompleto: {missing_training_keys}"
-    )
+# BLOQUE 11. Reporte Final del Entrenamiento -------------------------------
+## Objetivo: Presentar el resumen ejecutivo del entrenamiento definitivo y
+# de los productos oficiales generados durante el proceso.
+#### Producto:
+# - Reporte de ejecución en consola.
+#### Responde:
+# ¿Cuál fue el resultado final del entrenamiento definitivo y qué
+# productos oficiales fueron generados?
 
-# Validación de la exportación ---------------------------------------------
-if export_result is None:
-    raise RuntimeError(
-        "La exportación del modelo no produjo resultados."
-    )
+def report_training_output(
+    training_output: dict
+) -> None:
+    """
+    Presenta el resumen ejecutivo del entrenamiento definitivo y de los
+    productos oficiales generados durante el proceso.
 
-required_export_keys = [
-    "status",
-    "model_file",
-    "metadata_file",
-    "export_format"
-] # Parámetros obligatorios
+    Parameters
+    ----------
+    training_output : dict
+        Producto oficial del entrenamiento.
 
-missing_export_keys = [
-    key
-    for key in required_export_keys
-    if key not in export_result
-] # Parámetros faltantes
+    Returns
+    -------
+    None
+    """
 
-if missing_export_keys:
-    raise ValueError(
-        f"El resultado de la exportación está incompleto: {missing_export_keys}"
-    )
+    # Validación de entrada
+    if training_output is None:
+        raise ValueError(
+            "training_output no puede ser nulo."
+        )
 
-# Validación de los archivos oficiales -------------------------------------
-model_file = Path(
-    export_result["model_file"]
-) # Archivo del modelo
+    required_keys = [
+        "status",
+        "model_config",
+        "model_file",
+        "metadata_file",
+        "summary_file",
+        "generated_products",
+        "validation",
+        "summary"
+    ]
 
-metadata_file = Path(
-    export_result["metadata_file"]
-) # Archivo de metadatos
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in training_output
+    ]
 
-if not model_file.exists():
-    raise FileNotFoundError(
-        f"No se encontró el modelo exportado: {model_file.name}"
-    )
+    if missing_keys:
+        raise ValueError(
+            "El producto oficial del entrenamiento está incompleto: "
+            f"{missing_keys}"
+        )
 
-if not metadata_file.exists():
-    raise FileNotFoundError(
-        f"No se encontraron los metadatos del entrenamiento: {metadata_file.name}"
-    )
+    # Recuperación de información
+    model_config = training_output["model_config"]
+    summary = training_output["summary"]
 
-# Validación de los metadatos ----------------------------------------------
-try:
-    with open(
-        metadata_file,
-        "r",
-        encoding = "utf-8"
-    ) as file:
-        metadata = json.load(
-            file
-        ) # Metadatos oficiales
+    # Reporte ejecutivo
+    print("\n" + "=" * 80)
+    print("REPORTE FINAL DEL ENTRENAMIENTO")
+    print("=" * 80)
 
-except Exception as error:
-    raise RuntimeError(
-        f"Error al leer los metadatos del entrenamiento: {error}"
-    )
+    print(f"Estado                 : {training_output['status']}")
+    print(f"Modelo Oficial         : {model_config['model_name']}")
+    print(f"Código                 : {model_config['model_code']}")
+    print(f"Familia                : {model_config['family']}")
+    print(f"Versión Entrenamiento  : {summary['training_version']}")
+    print(f"Tiempo Entrenamiento   : {summary.get('training_time')}")
+    print(f"Loss Final             : {summary.get('training_loss')}")
 
-required_metadata_keys = [
-    "model_code",
-    "model_name",
-    "family",
-    "training_name",
-    "training_version",
-    "export_format"
-] # Parámetros obligatorios
+    print("\nProductos Oficiales")
 
-missing_metadata_keys = [
-    key
-    for key in required_metadata_keys
-    if key not in metadata
-] # Parámetros faltantes
+    for product_name, product_path in training_output["generated_products"].items():
+        print(f"{product_name:<25}: {Path(product_path).name}")
 
-if missing_metadata_keys:
-    raise ValueError(
-        f"Los metadatos del entrenamiento están incompletos: {missing_metadata_keys}"
-    )
+    print("\nPróxima Etapa")
+    print("04_evaluation.py")
 
-# Construcción del resultado oficial ---------------------------------------
-validation_result = {
-    "status": "SUCCESS",
-    "training_name": metadata["training_name"],
-    "training_version": metadata["training_version"],
-    "model_code": model_config["model_code"],
-    "model_name": model_config["model_name"],
-    "family": model_family,
-    "model_file": str(
-        model_file
-    ),
-    "metadata_file": str(
-        metadata_file
-    ),
-    "validation_date": datetime.now().isoformat()
-} # Resultado oficial de la validación
-
-print("-" * 80)
+    print("=" * 80)

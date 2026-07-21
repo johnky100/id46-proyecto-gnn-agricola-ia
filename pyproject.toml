@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "avanzado_ia"
+version = "1.0.0"
+description = "Pipeline científico para Graph Neural Networks aplicado a soberanía alimentaria."
+readme = "README.md"
+requires-python = ">=3.13"
+
+[tool.setuptools]
+package-dir = {"" = "src/python"}
+
+[tool.setuptools.packages.find]
+where = ["src/python"]
+include = [
+    "config",
+    "graph",
+    "models",
+    "preprocessing",
+    "utils"
+]

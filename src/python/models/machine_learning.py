@@ -1,117 +1,156 @@
-# machine_learning.py
+# models-machine_learning.py
+
 # BLOQUE 1. Importaciones --------------------------------------------------
+
 # Funciones del sistema
-import time # Medición del tiempo de entrenamiento
-import warnings # Control de advertencias
+import time  # Medición del tiempo de entrenamiento
+
+# Tipado
+from typing import Any
 
 # Librerías científicas
-import numpy as np # Operaciones numéricas
+import numpy as np  # Operaciones numéricas
 
 # Scikit-Learn
-from sklearn.ensemble import RandomForestRegressor # Random Forest
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import (
     mean_absolute_error,
     mean_absolute_percentage_error,
     mean_squared_error,
     r2_score
-) # Métricas oficiales
+)
 
 # XGBoost
-from xgboost import XGBRegressor # Extreme Gradient Boosting
+from xgboost import XGBRegressor
 
 # LightGBM
-from lightgbm import LGBMRegressor # Light Gradient Boosting Machine
+from lightgbm import LGBMRegressor
 
 # CatBoost
-from catboost import CatBoostRegressor # CatBoost
+from catboost import CatBoostRegressor
 
 # Utilidades del proyecto
 from src.python.utils.results import (
     build_benchmark_result
-) # Construcción del resultado oficial del Benchmark
+)
 
-# Configuración oficial del proyecto
 from src.python.config.config_project import (
-    MODEL_CODES
-) # Configuración oficial del Benchmark
-
-warnings.filterwarnings(
-    "ignore"
-) # Ocultar advertencias no críticas
+    BENCHMARK_MODEL_CODES,
+    PROJECT_SEED
+)
 
 # BLOQUE 2. Configuración --------------------------------------------------
-## Objetivo: # Definir la configuración oficial de los modelos de Machine Learning
-# utilizados durante el Benchmark Científico.
-### Producto: - MACHINE_LEARNING_CONFIG
-### Responde: ¿Los modelos de Machine Learning disponen de una configuración oficial,
-# reproducible y consistente con el Benchmark Científico?
+## Objetivo: Definir la configuración oficial de los modelos de Machine
+## Learning utilizados durante el Benchmark Científico.
+##
+## Producto:
+## - MACHINE_LEARNING_CONFIG
+##
+## Responde:
+## ¿Los modelos de Machine Learning disponen de una configuración oficial,
+## reproducible y consistente con el Benchmark Científico?
+
 # Configuración oficial de los modelos -------------------------------------
 MACHINE_LEARNING_CONFIG = {
+
     "random_forest": {
-        "model_code": MODEL_CODES["ML01"],
+
+        # Identificación
+        "model_code": BENCHMARK_MODEL_CODES["ML01"],
         "model_name": "random_forest",
         "family": "machine_learning",
+
+        # Implementación
         "estimator": RandomForestRegressor,
+
+        # Hiperparámetros
         "n_estimators": 300,
         "max_depth": None,
         "min_samples_split": 2,
         "min_samples_leaf": 1,
-        "random_state": 42,
+        "random_state": PROJECT_SEED,
         "n_jobs": -1
     },
 
     "xgboost": {
-        "model_code": MODEL_CODES["ML02"],
+
+        # Identificación
+        "model_code": BENCHMARK_MODEL_CODES["ML02"],
         "model_name": "xgboost",
         "family": "machine_learning",
+
+        # Implementación
         "estimator": XGBRegressor,
+
+        # Hiperparámetros
         "n_estimators": 300,
         "learning_rate": 0.05,
         "max_depth": 6,
         "subsample": 0.8,
         "colsample_bytree": 0.8,
-        "random_state": 42,
+        "random_state": PROJECT_SEED,
         "verbosity": 0
     },
 
     "lightgbm": {
-        "model_code": MODEL_CODES["ML03"],
+
+        # Identificación
+        "model_code": BENCHMARK_MODEL_CODES["ML03"],
         "model_name": "lightgbm",
         "family": "machine_learning",
+
+        # Implementación
         "estimator": LGBMRegressor,
+
+        # Hiperparámetros
         "n_estimators": 300,
         "learning_rate": 0.05,
         "max_depth": -1,
-        "random_state": 42,
+        "random_state": PROJECT_SEED,
         "verbose": -1
     },
 
     "catboost": {
-        "model_code": MODEL_CODES["ML04"],
+
+        # Identificación
+        "model_code": BENCHMARK_MODEL_CODES["ML04"],
         "model_name": "catboost",
         "family": "machine_learning",
+
+        # Implementación
         "estimator": CatBoostRegressor,
+
+        # Hiperparámetros
         "iterations": 300,
         "learning_rate": 0.05,
         "depth": 6,
-        "random_seed": 42,
+        "random_seed": PROJECT_SEED,
         "verbose": False
     }
-} # Configuración oficial de Machine Learning
+
+}  # Configuración oficial de Machine Learning
 
 # BLOQUE 3. Entrenamiento del Modelo ---------------------------------------
 ## Objetivo: Construir y entrenar un modelo de Machine Learning utilizando la
-# configuración oficial definida para el Benchmark Científico.
-### Entradas: - model_config - y_train- y_train
-### Producto: - trained_model - training_time
-### Responde: ¿El modelo de Machine Learning fue construido y entrenado correctamente
-# sobre el conjunto de entrenamiento?
+## configuración oficial definida para el Benchmark Científico.
+##
+## Entradas:
+## - model_config
+## - x_train
+## - y_train
+##
+## Producto:
+## - training_result
+##
+## Responde:
+## ¿El modelo de Machine Learning fue construido y entrenado correctamente
+## sobre el conjunto de entrenamiento?
+
 def train_machine_learning_model(
-    model_config,
-    x_train,
-    y_train
-):
-    
+    model_config: dict,
+    x_train: np.ndarray,
+    y_train: np.ndarray
+) -> dict:
     """
     Construye y entrena un modelo oficial de Machine Learning.
 
@@ -120,10 +159,10 @@ def train_machine_learning_model(
     model_config : dict
         Configuración oficial del modelo.
 
-    x_train : ndarray
+    x_train : np.ndarray
         Variables predictoras del conjunto de entrenamiento.
 
-    y_train : ndarray
+    y_train : np.ndarray
         Variable objetivo del conjunto de entrenamiento.
 
     Returns
@@ -132,7 +171,28 @@ def train_machine_learning_model(
         Modelo entrenado y tiempo oficial de entrenamiento.
     """
 
-    estimator = model_config["estimator"] # Clase del estimador
+    if model_config is None:
+        raise ValueError(
+            "La configuración del modelo no puede ser nula."
+        )
+
+    if x_train is None or y_train is None:
+        raise ValueError(
+            "Los datos de entrenamiento no pueden ser nulos."
+        )
+
+    if len(x_train) == 0 or len(y_train) == 0:
+        raise ValueError(
+            "Los datos de entrenamiento están vacíos."
+        )
+
+    if len(x_train) != len(y_train):
+        raise ValueError(
+            "Las variables predictoras y la variable objetivo deben tener el mismo número de observaciones."
+        )
+
+    estimator = model_config["estimator"]  # Clase del estimador
+
     model_parameters = {
         key: value
         for key, value in model_config.items()
@@ -142,68 +202,68 @@ def train_machine_learning_model(
             "family",
             "estimator"
         ]
-    } # Parámetros del modelo
+    }  # Parámetros del modelo
+
+    model = estimator(
+        **model_parameters
+    )  # Modelo oficial
+
+    training_start = time.perf_counter()  # Inicio del entrenamiento
 
     try:
-        model = estimator(
-            **model_parameters
-        ) # Construcción del modelo
 
-    except Exception as error:
-        raise RuntimeError(
-            f"Error al construir el modelo "
-            f"{model_config['model_name']}: {error}"
-        )
-
-    training_start = time.time() # Inicio del entrenamiento
-
-    try:
         model.fit(
             x_train,
             y_train
-        ) # Entrenamiento del modelo
+        )  # Entrenamiento del modelo
 
     except Exception as error:
 
         raise RuntimeError(
             f"Error durante el entrenamiento del modelo "
             f"{model_config['model_name']}: {error}"
-        )
+        ) from error
 
     training_time = (
-        time.time() - training_start
-    ) # Tiempo de entrenamiento
+        time.perf_counter() - training_start
+    )  # Tiempo oficial de entrenamiento
 
-    training_result = {
-
+    return {
         "model": model,
-
-        "training_time": training_time
-
-    } # Resultado oficial del entrenamiento
-
-    return training_result
+        "training_time": training_time,
+        "loss": None
+    }  # Resultado oficial del entrenamiento
 
 # BLOQUE 4. Predicción -----------------------------------------------------
-## Objetivo: Generar las predicciones del modelo de Machine Learning entrenado sobre
-# el conjunto de prueba y registrar el tiempo oficial de inferencia.
-### Entradas: - model - x_test
-### Producto: - y_pred - inference_time
-### Responde: ¿El modelo de Machine Learning genera correctamente las predicciones
-# sobre el conjunto de prueba?
+## Objetivo: Generar las predicciones del modelo de Machine Learning
+## entrenado sobre el conjunto de prueba y registrar el tiempo oficial
+## de inferencia.
+##
+## Entradas:
+## - model
+## - x_test
+##
+## Producto:
+## - prediction_result
+##
+## Responde:
+## ¿El modelo de Machine Learning genera correctamente las predicciones
+## sobre el conjunto de prueba?
+
 def predict_machine_learning_model(
-    model,
-    x_test
-):
+    model: Any,
+    x_test: np.ndarray
+) -> dict:
     """
-    Genera las predicciones utilizando un modelo de Machine Learning.
+    Genera las predicciones utilizando un modelo oficial de
+    Machine Learning.
 
     Parameters
     ----------
-    model : object
+    model : Any
         Modelo previamente entrenado.
 
-    x_test : ndarray
+    x_test : np.ndarray
         Variables predictoras del conjunto de prueba.
 
     Returns
@@ -212,47 +272,74 @@ def predict_machine_learning_model(
         Predicciones y tiempo oficial de inferencia.
     """
 
-    inference_start = time.time() # Inicio de la inferencia
-
-    try:
-        y_pred = model.predict(
-            x_test
-        ) # Predicciones del modelo
-
-    except Exception as error:
-        raise RuntimeError(
-            f"Error durante la inferencia: {error}"
+    if model is None:
+        raise ValueError(
+            "El modelo entrenado no puede ser nulo."
         )
 
+    if x_test is None:
+        raise ValueError(
+            "El conjunto de prueba no puede ser nulo."
+        )
+
+    if len(x_test) == 0:
+        raise ValueError(
+            "El conjunto de prueba está vacío."
+        )
+
+    inference_start = time.perf_counter()  # Inicio de la inferencia
+
+    try:
+
+        y_pred = model.predict(
+            x_test
+        )  # Predicciones del modelo
+
+    except Exception as error:
+
+        raise RuntimeError(
+            f"Error durante la inferencia: {error}"
+        ) from error
+
     inference_time = (
-        time.time() - inference_start
-    ) # Tiempo oficial de inferencia
+        time.perf_counter() - inference_start
+    )  # Tiempo oficial de inferencia
 
     return {
         "y_pred": y_pred,
+        "y_true": None,
         "inference_time": inference_time
-    }
+    }  # Resultado oficial de la inferencia
 
 # BLOQUE 5. Evaluación del Modelo ------------------------------------------
-## Objetivo: Calcular las métricas oficiales de desempeño predictivo para un modelo
-# de Machine Learning utilizando el conjunto de prueba.
-### Entradas: - y_test - y_pred
-### Producto: - evaluation_result
-### Responde: ¿Cuál es el desempeño predictivo del modelo de Machine Learning sobre el conjunto de prueba?
+## Objetivo: Calcular las métricas oficiales de desempeño predictivo para
+## un modelo de Machine Learning utilizando el conjunto de prueba.
+##
+## Entradas:
+## - y_true
+## - y_pred
+##
+## Producto:
+## - evaluation_result
+##
+## Responde:
+## ¿Cuál es el desempeño predictivo del modelo de Machine Learning sobre
+## el conjunto de prueba?
+
 def evaluate_machine_learning_model(
-    y_true,
-    y_pred
-):
+    y_true: np.ndarray,
+    y_pred: np.ndarray
+) -> dict:
     """
     Calcula las métricas oficiales del Benchmark para un modelo de
     Machine Learning.
 
     Parameters
     ----------
-    y_test : ndarray
+    y_true : np.ndarray
         Valores observados.
 
-    y_pred : ndarray
+    y_pred : np.ndarray
         Valores predichos.
 
     Returns
@@ -261,58 +348,83 @@ def evaluate_machine_learning_model(
         Métricas oficiales de evaluación.
     """
 
+    if y_true is None or y_pred is None:
+        raise ValueError(
+            "Los datos de evaluación no pueden ser nulos."
+        )
+
+    if len(y_true) == 0 or len(y_pred) == 0:
+        raise ValueError(
+            "Los datos de evaluación están vacíos."
+        )
+
+    if len(y_true) != len(y_pred):
+        raise ValueError(
+            "Los valores observados y predichos deben tener el mismo número de observaciones."
+        )
+
     try:
+
         rmse = np.sqrt(
             mean_squared_error(
                 y_true,
                 y_pred
             )
-        ) # Error cuadrático medio
+        )  # Error cuadrático medio
 
         mae = mean_absolute_error(
             y_true,
             y_pred
-        ) # Error absoluto medio
+        )  # Error absoluto medio
 
         mape = mean_absolute_percentage_error(
             y_true,
             y_pred
-        ) # Error porcentual absoluto medio
+        )  # Error porcentual absoluto medio
 
         r2 = r2_score(
             y_true,
             y_pred
-        ) # Coeficiente de determinación
-
-        adjusted_r2 = np.nan # Se calculará posteriormente
+        )  # Coeficiente de determinación
 
     except Exception as error:
+
         raise RuntimeError(
             f"Error durante la evaluación del modelo: {error}"
-        )
+        ) from error
 
     return {
         "rmse": rmse,
         "mae": mae,
         "mape": mape,
-        "r2": r2,
-        "adjusted_r2": adjusted_r2
-    }
+        "r2": r2
+    }  # Resultado oficial de la evaluación
 
 # BLOQUE 6. Construcción del Resultado Oficial -----------------------------
-## Objetivo: Construir la estructura oficial de resultados de un modelo de Machine
-# Learning compatible con el Benchmark Científico.
-### Entradas: - model_config - training_result - prediction_result - evaluation_result
-### Producto: - benchmark_result
-### Responde: ¿Los resultados del modelo fueron consolidados correctamente para el Benchmark Científico?
+## Objetivo: Construir la estructura oficial de resultados de un modelo de
+## Machine Learning compatible con el Benchmark Científico.
+##
+## Entradas:
+## - model_config
+## - prediction_result
+## - evaluation_result
+## - training_result
+##
+## Producto:
+## - benchmark_result
+##
+## Responde:
+## ¿Los resultados del modelo fueron consolidados correctamente para el
+## Benchmark Científico?
+
 def build_machine_learning_results(
-    model_config,
-    prediction_result,
-    evaluation_result,
-    training_result = None
-):
+    model_config: dict,
+    prediction_result: dict,
+    evaluation_result: dict,
+    training_result: dict | None = None
+) -> dict:
     """
-    Construye el resultado oficial del Benchmark para el modelo de
+    Construye el resultado oficial del Benchmark para un modelo de
     Machine Learning.
 
     Parameters
@@ -321,13 +433,13 @@ def build_machine_learning_results(
         Configuración oficial del modelo.
 
     prediction_result : dict
-        Resultado de la predicción.
+        Resultado oficial de la inferencia.
 
     evaluation_result : dict
-        Resultado de la evaluación.
+        Resultado oficial de la evaluación.
 
     training_result : dict, optional
-        Resultado del entrenamiento.
+        Resultado oficial del entrenamiento.
 
     Returns
     -------
@@ -336,75 +448,112 @@ def build_machine_learning_results(
     """
 
     return build_benchmark_result(
-
-        model_config = model_config,
-
-        prediction_result = prediction_result,
-
-        evaluation_result = evaluation_result,
-
-        training_result = training_result
-
-    )
+        model_config=model_config,
+        prediction_result=prediction_result,
+        evaluation_result=evaluation_result,
+        training_result=training_result
+    )  # Resultado oficial del Benchmark
 
 # BLOQUE 7. Ejecución Completa del Modelo ----------------------------------
-## Objetivo:
-# Ejecutar de forma secuencial el flujo completo de un modelo de Machine
-# Learning, incluyendo entrenamiento, predicción, evaluación y
-# construcción del resultado oficial del Benchmark.
+## Objetivo: Ejecutar de forma secuencial el flujo completo de un modelo de
+## Machine Learning, incluyendo entrenamiento, predicción, evaluación y
+## construcción del resultado oficial del Benchmark.
 ##
-# Entradas:
-# - model_name
-# - x_train
-# - y_train
-# - x_test
-# - y_test
+## Entradas:
+## - model_name
+## - x_train
+## - y_train
+## - x_test
+## - y_test
 ##
-# Producto:
-# - benchmark_result
+## Producto:
+## - benchmark_result
 ##
-# Responde:
-# ¿El modelo de Machine Learning fue ejecutado correctamente bajo el
-# protocolo oficial del Benchmark Científico?
+## Responde:
+## ¿El modelo de Machine Learning fue ejecutado correctamente bajo el
+## protocolo oficial del Benchmark Científico?
+
 def run_machine_learning(
-    model_name,
-    x_train,
-    y_train,
-    x_test,
-    y_test
-):
+    model_name: str,
+    x_train: np.ndarray,
+    y_train: np.ndarray,
+    x_test: np.ndarray,
+    y_test: np.ndarray
+) -> dict:
     """
-    Ejecuta el flujo completo del modelo oficial de Machine Learning.
+    Ejecuta el flujo completo de un modelo oficial de Machine Learning.
+
+    Parameters
+    ----------
+    model_name : str
+        Nombre oficial del modelo de Machine Learning.
+
+    x_train : np.ndarray
+        Variables predictoras del conjunto de entrenamiento.
+
+    y_train : np.ndarray
+        Variable objetivo del conjunto de entrenamiento.
+
+    x_test : np.ndarray
+        Variables predictoras del conjunto de prueba.
+
+    y_test : np.ndarray
+        Variable objetivo del conjunto de prueba.
+
+    Returns
+    -------
+    dict
+        Resultado oficial del Benchmark.
     """
+
+    if model_name not in MACHINE_LEARNING_CONFIG:
+        raise ValueError(
+            f"Modelo de Machine Learning no soportado: {model_name}"
+        )
+
+    if any(
+        value is None
+        for value in (
+            x_train,
+            y_train,
+            x_test,
+            y_test
+        )
+    ):
+        raise ValueError(
+            "Los conjuntos de entrenamiento y prueba no pueden ser nulos."
+        )
 
     # Configuración oficial -------------------------------------------------
     model_config = MACHINE_LEARNING_CONFIG[
         model_name
-    ] # Configuración oficial del modelo
+    ]  # Configuración oficial del modelo
 
     # Entrenamiento ---------------------------------------------------------
     training_result = train_machine_learning_model(
-        model_config = model_config,
-        x_train = x_train,
-        y_train = y_train
-    ) # Entrenamiento oficial
+        model_config=model_config,
+        x_train=x_train,
+        y_train=y_train
+    )  # Resultado oficial del entrenamiento
 
     # Predicción ------------------------------------------------------------
     prediction_result = predict_machine_learning_model(
-        model = training_result["model"],
-        x_test = x_test
-    ) # Predicción oficial
+        model=training_result["model"],
+        x_test=x_test
+    )  # Resultado oficial de la inferencia
 
     # Evaluación ------------------------------------------------------------
     evaluation_result = evaluate_machine_learning_model(
-        y_true = y_test,
-        y_pred = prediction_result["y_pred"]
-    ) # Evaluación oficial
+        y_true=y_test,
+        y_pred=prediction_result["y_pred"]
+    )  # Resultado oficial de la evaluación
 
     # Resultado oficial -----------------------------------------------------
-    return build_machine_learning_results(
-        model_config = model_config,
-        prediction_result = prediction_result,
-        evaluation_result = evaluation_result,
-        training_result = training_result
+    benchmark_result = build_machine_learning_results(
+        model_config=model_config,
+        prediction_result=prediction_result,
+        evaluation_result=evaluation_result,
+        training_result=training_result
     )
+
+    return benchmark_result

@@ -1,145 +1,120 @@
-# R / RSTUDIO
+# ==========================================
+# DATASET Y RESULTADOS GENERADOS
+# ==========================================
 
-# History files
-.Rhistory
-.Rapp.history
+# Toda la carpeta de datos
+data/
 
-# Session data files
-.RData
-.RDataTmp
+# Si quieres conservar la estructura vacía
+!data/.gitkeep
 
-# User-specific files
-.Ruserdata
+# Modelos entrenados
+*.joblib
+*.pt
+*.pth
+*.onnx
 
-# RStudio project files
-.Rproj.user/
+# Grafos
+*.gpkg
+*.graphml
+*.npz
 
-# R Environment Variables
-.Renviron
+# Bases de datos espaciales
+*.sqlite
+*.gpkg
+*.gdb
 
-# OAuth2 token
-.httr-oauth
+# Datos científicos
+*.parquet
+*.feather
+*.rds
+*.RDS
 
-# RStudio Connect folder
-rsconnect/
-
-# Posit Assistant
-.positai
-
-# R PACKAGE / BUILD
-
-# Example code in package build process
-*-Ex.R
-
-# Output files from R CMD build
-/*.tar.gz
-
-# Output files from R CMD check
-/*.Rcheck/
-
-# pkgdown site
-docs/
-
-# Produced vignettes
-vignettes/*.html
-vignettes/*.pdf
-
-# Translation temp files
-po/*~
-
-# R MARKDOWN / KNITR
-
-# knitr and R markdown cache directories
-*_cache/
-/cache/
-
-# Temporary files created by R Markdown
-*.utf8.md
-*.knit.md
-
-# Rendered reports
-*.html
-*.pdf
-
-# DATA SCIENCE PROJECT
-
-# Raw and processed data
-data_raw/
-data_processed/
-
-# Model outputs and generated results
-outputs/
-
-# Large data files
+# Archivos tabulares grandes
 *.csv
 *.tsv
 *.xlsx
 *.xls
-*.parquet
-*.rds
-*.RDS
-*.feather
-*.geojson
+
+# =====================================================
+# R
+# =====================================================
+.Rhistory
+.RData
+.RDataTmp*
+.Rproj.user/
+
+# =====================================================
+# Python
+# =====================================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+
+# =====================================================
+# IDEs
+# =====================================================
+.vscode/
+.idea/
+
+# =====================================================
+# CatBoost
+# =====================================================
+catboost_info/
+
+# =====================================================
+# Datos
+# =====================================================
+data/
+outputs/
+src/python/outputs/
+
+# =====================================================
+# Reportes generados
+# =====================================================
+reports/graph_visualization/
+reports/evaluation/
+
+# =====================================================
+# Modelos
+# =====================================================
+*.joblib
+*.pt
+*.pth
+*.onnx
+
+# =====================================================
+# Grafos
+# =====================================================
+*.graphml
+*.gpkg
+*.npz
+
+# =====================================================
+# GIS
+# =====================================================
 *.shp
 *.dbf
 *.shx
 *.prj
 *.cpg
+*.geojson
 
-# =========================
-# TEMPORARY / SYSTEM FILES
-# =========================
+# =====================================================
+# Bases de datos científicas
+# =====================================================
+*.parquet
+*.feather
+*.rds
+*.RDS
 
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*.temp
-
-# Windows
+# =====================================================
+# Archivos temporales
+# =====================================================
 Thumbs.db
 Desktop.ini
-
-# macOS
 .DS_Store
-
-catboost_info/
-.RData
-.RDataTmp*
-.Rhistory
-.Rproj.user/
-.vscode/
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Entornos virtuales
-.venv/
-venv/
-env/
-
-# VS Code
-.vscode/
-
-# CatBoost
-catboost_info/
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Pytest
-.pytest_cache/
-
-# Mypy
-.mypy_cache/
-
-# Ruff
-.ruff_cache/
-
-*.pdf
-!recursos/*.pdf
-
-reports/evaluation/explainability_results.joblib
+*.log
+*.tmp
