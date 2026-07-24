@@ -11,8 +11,12 @@
 # ¿Qué dependencias requiere el protocolo de evaluación para reconstruir,
 # evaluar, interpretar y validar el modelo oficial del proyecto?
 
+print("-" * 80)
+print("Bloque 1. Importaciones.")
+
 # Funciones del sistema
 import json
+import pickle
 import time
 import warnings
 from datetime import datetime
@@ -25,7 +29,8 @@ import torch
 
 # Configuración del proyecto
 from src.python.config.config_project import (
-    PROJECT_SEED
+    PROJECT_SEED,
+    FEATURE_COLUMNS
 )
 
 # Rutas oficiales
@@ -33,8 +38,9 @@ from src.python.config.paths import (
     DATASET_FILE,
     GRAPH_DATA_DIR,
     EVALUATION_REPORTS_DIR,
-    BEST_MODEL_METADATA_FILE,
-    BEST_MODEL_TORCH_FILE
+    BEST_MODEL_TORCH_FILE,
+    BEST_MODEL_CONFIG_FILE,
+    BEST_MODEL_METADATA_FILE
 )
 
 # Utilidades
@@ -45,29 +51,38 @@ from src.python.utils.results import (
 # Modelos Graph Neural Networks
 from src.python.models.graph_neural_networks import (
     GNN_CONFIG,
+    build_gnn_model,
     evaluate_gnn,
     predict_gnn
 )
 
 # Explicabilidad
 from src.python.analysis.explainability import (
+    aggregate_feature_importance,
     analyze_target_correlation,
     audit_feature_importance,
     build_explainer,
+    build_explanation_targets,
     build_feature_ranking,
     build_scientific_summary,
     export_explainability_results,
-    generate_explainability,
+    extract_explanation_masks,
+    finalize_explainability,
     generate_explainability_plots,
+    generate_node_explanations,
+    initialize_explainability_context,
     initialize_global_explainability,
     select_explainability_method,
     validate_global_explainability
 )
 
+print("initialize_global_explainability =", initialize_global_explainability)
+
 # Configuración del entorno
 warnings.filterwarnings("ignore")
 
 print("-" * 80)
+print("Bloque 1. Importaciones completado.")
 
 # BLOQUE 2. Configuración --------------------------------------------------
 ## Objetivo: Definir la configuración oficial que gobernará la evaluación
@@ -196,10 +211,10 @@ def build_evaluation_configuration() -> dict:
 
     return evaluation_config
 
-
 EVALUATION_CONFIG = build_evaluation_configuration()
 
 print("-" * 80)
+print("Bloque 2. Configuración Finalizada.")
 
 # BLOQUE 3. Carga del Modelo Oficial ---------------------------------------
 ## Objetivo: Recuperar el modelo oficial GraphSAGE entrenado, sus metadatos
@@ -214,7 +229,8 @@ print("-" * 80)
 def load_official_model() -> dict:
     """
     Recupera y valida el modelo oficial GraphSAGE entrenado junto con
-    sus metadatos y configuración oficial.
+    su configuración oficial y sus metadatos exportados durante el
+    entrenamiento definitivo.
 
     Returns
     -------
@@ -222,18 +238,36 @@ def load_official_model() -> dict:
         Información oficial del modelo GraphSAGE.
     """
 
-    # Validación de archivos
-    if not BEST_MODEL_METADATA_FILE.exists():
-        raise FileNotFoundError(
-            f"No fue posible localizar {BEST_MODEL_METADATA_FILE.name}."
-        )
-
+    # Validación
     if not BEST_MODEL_TORCH_FILE.exists():
         raise FileNotFoundError(
             f"No fue posible localizar {BEST_MODEL_TORCH_FILE.name}."
         )
 
-    # Recuperación de metadatos
+    if not BEST_MODEL_CONFIG_FILE.exists():
+        raise FileNotFoundError(
+            f"No fue posible localizar {BEST_MODEL_CONFIG_FILE.name}."
+        )
+
+    if not BEST_MODEL_METADATA_FILE.exists():
+        raise FileNotFoundError(
+            f"No fue posible localizar {BEST_MODEL_METADATA_FILE.name}."
+        )
+
+    # Recuperación
+    try:
+        with open(
+            BEST_MODEL_CONFIG_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
+            model_config = json.load(file)
+
+    except Exception as error:
+        raise RuntimeError(
+            f"Error al cargar la configuración oficial: {error}"
+        )
+
     try:
         with open(
             BEST_MODEL_METADATA_FILE,
@@ -247,71 +281,44 @@ def load_official_model() -> dict:
             f"Error al cargar los metadatos del modelo oficial: {error}"
         )
 
-    # Validación de metadatos
-    required_metadata_keys = [
-        "model_code",
-        "model_name",
-        "family"
-    ]
-
-    missing_metadata_keys = [
-        key
-        for key in required_metadata_keys
-        if key not in model_metadata
-    ]
-
-    if missing_metadata_keys:
-        raise ValueError(
-            f"Los metadatos del modelo están incompletos: {missing_metadata_keys}"
-        )
-
-    # Validación del modelo oficial
-    if model_metadata["family"] != "graph_neural_networks":
-        raise ValueError(
-            "La evaluación científica únicamente admite Graph Neural Networks."
-        )
-
-    if model_metadata["model_name"] != "graphsage":
-        raise ValueError(
-            "El modelo oficial del proyecto debe ser GraphSAGE."
-        )
-
-    if "graphsage" not in GNN_CONFIG:
-        raise KeyError(
-            "No se encontró la configuración oficial de GraphSAGE."
-        )
-
-    # Recuperación de la configuración oficial
-    model_config = GNN_CONFIG["graphsage"]
-
-    # Recuperación del modelo entrenado
     try:
-        trained_model = torch.load(
+        checkpoint = torch.load(
             BEST_MODEL_TORCH_FILE,
             weights_only=False
         )
+
+        # Recuperación del modelo entrenado
+        input_channels = checkpoint["model_state_dict"][
+            "conv1.lin_l.weight"
+        ].shape[1]
+
+        trained_model = build_gnn_model(
+            model_config=model_config,
+            input_channels=input_channels,
+            output_channels=1
+        )
+
+        trained_model.load_state_dict(
+            checkpoint["model_state_dict"]
+        )
+
+        trained_model.eval()
 
     except Exception as error:
         raise RuntimeError(
             f"Error al cargar el modelo oficial: {error}"
         )
 
-    # Validación del modelo
-    if trained_model is None:
-        raise RuntimeError(
-            "No fue posible recuperar el modelo oficial."
-        )
-
-    if not hasattr(trained_model, "state_dict"):
-        raise TypeError(
-            "El modelo oficial no corresponde a un objeto válido de PyTorch."
-        )
-
-    # Validación de la configuración
+    # Validación
     required_config_keys = [
         "model_code",
         "model_name",
-        "family"
+        "family",
+        "hidden_channels",
+        "dropout",
+        "learning_rate",
+        "weight_decay",
+        "epochs"
     ]
 
     missing_config_keys = [
@@ -326,18 +333,72 @@ def load_official_model() -> dict:
             f"{missing_config_keys}"
         )
 
+    required_metadata_keys = [
+        "model_code",
+        "model_name",
+        "family",
+        "training_name",
+        "training_version",
+        "training_time",
+        "training_loss",
+        "loss_history",
+        "epochs",
+        "training_date",
+        "export_format"
+    ]
+
+    missing_metadata_keys = [
+        key
+        for key in required_metadata_keys
+        if key not in model_metadata
+    ]
+
+    if missing_metadata_keys:
+        raise ValueError(
+            "Los metadatos del modelo están incompletos: "
+            f"{missing_metadata_keys}"
+        )
+
+    if model_config["family"] != "graph_neural_networks":
+        raise ValueError(
+            "La evaluación científica únicamente admite Graph Neural Networks."
+        )
+
+    if model_config["model_name"] != "graphsage":
+        raise ValueError(
+            "El modelo oficial del proyecto debe ser GraphSAGE."
+        )
+
+    required_checkpoint_keys = [
+        "model_state_dict",
+        "model_config"
+    ]
+
+    missing_checkpoint_keys = [
+        key
+        for key in required_checkpoint_keys
+        if key not in checkpoint
+    ]
+
+    if missing_checkpoint_keys:
+        raise ValueError(
+            "El checkpoint del modelo está incompleto: "
+            f"{missing_checkpoint_keys}"
+        )
+
     official_model = {
+        "checkpoint": checkpoint,
         "trained_model": trained_model,
-        "model_metadata": model_metadata,
-        "model_config": model_config
+        "model_config": model_config,
+        "model_metadata": model_metadata
     }
 
     return official_model
 
-
 OFFICIAL_MODEL = load_official_model()
 
 print("-" * 80)
+print("Bloque 3. Carga del Modelo Oficial Finalizada.")
 
 # BLOQUE 4. Carga de los Datos ---------------------------------------------
 ## Objetivo: Recuperar el Dataset Científico Certificado y la colección
@@ -483,10 +544,10 @@ def load_evaluation_data() -> dict:
 
     return evaluation_data
 
-
 EVALUATION_DATA = load_evaluation_data()
 
 print("-" * 80)
+print("Bloque 4. Carga de los Datos Finalizada.")
 
 # BLOQUE 5. Generación de Predicciones -------------------------------------
 ## Objetivo: Generar las predicciones oficiales del modelo GraphSAGE
@@ -529,6 +590,7 @@ def generate_predictions(
         )
 
     required_model_keys = [
+        "checkpoint",
         "trained_model",
         "model_metadata",
         "model_config"
@@ -562,7 +624,14 @@ def generate_predictions(
         )
 
     # Recuperación
+    
     trained_model = official_model["trained_model"]
+
+    if not hasattr(trained_model, "eval"):
+        raise TypeError(
+            "El modelo oficial no corresponde a un módulo válido de PyTorch."
+        )
+
     graphs = evaluation_data["graphs"]
 
     # Inferencia
@@ -626,7 +695,6 @@ def generate_predictions(
             "inference_time",
             None
         )
-
     }
 
     # Validación
@@ -657,6 +725,7 @@ PREDICTION_RESULT = generate_predictions(
 )
 
 print("-" * 80)
+print("Bloque 5. Generación de Predicciones Finalizada.")
 
 # BLOQUE 6. Evaluación del Modelo ------------------------------------------
 ## Objetivo: Evaluar el desempeño predictivo del modelo oficial GraphSAGE
@@ -713,6 +782,27 @@ def evaluate_official_model(
     y_true = prediction_result["y_true"]
     y_pred = prediction_result["y_pred"]
 
+    # Validación
+    if y_true is None:
+        raise ValueError(
+            "y_true no puede ser nulo."
+        )
+
+    if y_pred is None:
+        raise ValueError(
+            "y_pred no puede ser nulo."
+        )
+
+    if len(y_true) == 0:
+        raise ValueError(
+            "y_true está vacío."
+        )
+
+    if len(y_pred) == 0:
+        raise ValueError(
+            "y_pred está vacío."
+        )
+
     # Evaluación
     try:
 
@@ -762,6 +852,7 @@ EVALUATION_RESULT = evaluate_official_model(
 )
 
 print("-" * 80)
+print("Bloque 6. Evaluación del Modelo Finalizado.")
 
 # BLOQUE 7. Construcción del Resultado Oficial -----------------------------
 ## Objetivo: Consolidar el resultado oficial de la evaluación científica
@@ -813,6 +904,7 @@ def build_evaluation_summary(
         )
 
     required_model_keys = [
+        "checkpoint",
         "trained_model",
         "model_metadata",
         "model_config"
@@ -831,10 +923,14 @@ def build_evaluation_summary(
 
     # Recuperación ---------------------------------------------------------
     model_config = official_model["model_config"]
+    model_metadata = official_model["model_metadata"]
 
     training_result = {
         "model": official_model["trained_model"],
-        "training_time": None
+        "training_time": model_metadata["training_time"],
+        "loss": model_metadata["training_loss"],
+        "loss_history": model_metadata["loss_history"],
+        "epochs": model_metadata["epochs"]
     }
 
     # Construcción ---------------------------------------------------------
@@ -846,6 +942,14 @@ def build_evaluation_summary(
             prediction_result=prediction_result,
             evaluation_result=evaluation_result
         )
+
+        if "loss" not in evaluation_summary:
+            raise ValueError(
+                "El resultado del Benchmark no contiene la métrica 'loss'."
+            )
+
+        evaluation_summary["training_loss"] = evaluation_summary.pop("loss")
+        evaluation_summary["epochs"] = model_metadata["epochs"]
 
     except Exception as error:
 
@@ -864,8 +968,9 @@ def build_evaluation_summary(
         "model_code",
         "model_name",
         "family",
-        "model",
         "training_time",
+        "training_loss",
+        "epochs",
         "inference_time",
         "rmse",
         "mae",
@@ -880,14 +985,11 @@ def build_evaluation_summary(
     ]
 
     if missing_summary_keys:
-
         raise ValueError(
-            "evaluation_summary está incompleto: "
-            f"{missing_summary_keys}"
+            f"El resumen oficial está incompleto: {missing_summary_keys}"
         )
 
     return evaluation_summary
-
 
 EVALUATION_SUMMARY = build_evaluation_summary(
     official_model=OFFICIAL_MODEL,
@@ -896,25 +998,41 @@ EVALUATION_SUMMARY = build_evaluation_summary(
 )
 
 print("-" * 80)
+print("Bloque 7. Construcción del Resultado Oficial Finalizado.")
 
 # BLOQUE 8. Explicabilidad Global ------------------------------------------
-## Objetivo: Ejecutar el proceso oficial de explicabilidad global del modelo
-# GraphSAGE mediante los componentes oficiales de inteligencia artificial
-# explicable (XAI) del proyecto.
+## Objetivo: Interpretar el comportamiento del modelo oficial GraphSAGE
+# mediante el proceso oficial de Inteligencia Artificial Explicable (XAI),
+# identificando la importancia global de las variables, generando
+# visualizaciones, resúmenes científicos y productos reproducibles para la
+# interpretación y validación del modelo.
 #### Producto:
 # - global_explainability
 #### Responde:
-# ¿La explicabilidad global del modelo oficial fue generada y validada
-# correctamente?
+# ¿El proceso oficial de explicabilidad global del modelo GraphSAGE fue
+# ejecutado, validado y documentado correctamente?
 
-def build_global_explainability(
+print("-" * 80)
+print("Bloque 8. Explicabilidad Global.")
+
+# BLOQUE 8.1. Validación de Entradas ---------------------------------------
+## Objetivo: Validar la estructura y consistencia de las entradas requeridas
+# para ejecutar el proceso oficial de explicabilidad global del modelo
+# GraphSAGE.
+#### Producto:
+# - Entradas validadas.
+#### Responde:
+# ¿Las entradas requeridas para la explicabilidad global son válidas?
+
+def validate_global_explainability_inputs(
     official_model: dict,
     evaluation_data: dict,
     prediction_result: dict,
     evaluation_config: dict
-) -> dict:
+) -> None:
     """
-    Ejecuta el flujo oficial de explicabilidad global del modelo GraphSAGE.
+    Valida las entradas requeridas para ejecutar el proceso oficial de
+    explicabilidad global.
 
     Parameters
     ----------
@@ -932,11 +1050,10 @@ def build_global_explainability(
 
     Returns
     -------
-    dict
-        Resultado oficial de la explicabilidad global.
+    None
     """
 
-    # Validación -----------------------------------------------------------
+    # Validación
     if not isinstance(official_model, dict):
         raise TypeError(
             "official_model debe ser un diccionario."
@@ -957,6 +1074,7 @@ def build_global_explainability(
             "evaluation_config debe ser un diccionario."
         )
 
+    # Validación
     required_model_keys = [
         "trained_model",
         "model_metadata",
@@ -971,9 +1089,11 @@ def build_global_explainability(
 
     if missing_model_keys:
         raise ValueError(
-            f"official_model está incompleto: {missing_model_keys}"
+            "official_model está incompleto: "
+            f"{missing_model_keys}"
         )
 
+    # Validación
     required_data_keys = [
         "dataset",
         "graphs"
@@ -987,9 +1107,11 @@ def build_global_explainability(
 
     if missing_data_keys:
         raise ValueError(
-            f"evaluation_data está incompleto: {missing_data_keys}"
+            "evaluation_data está incompleto: "
+            f"{missing_data_keys}"
         )
 
+    # Validación
     required_prediction_keys = [
         "y_true",
         "y_pred"
@@ -1007,160 +1129,655 @@ def build_global_explainability(
             f"{missing_prediction_keys}"
         )
 
-    # Recuperación ---------------------------------------------------------
-    trained_model = official_model["trained_model"]
+    # Validación
+    required_config_keys = [
+        "calculate_global_explainability",
+        "calculate_feature_importance",
+        "calculate_local_explainability",
+        "shap_batch_size"
+    ]
 
-    model_metadata = official_model["model_metadata"]
+    missing_config_keys = [
+        key
+        for key in required_config_keys
+        if key not in evaluation_config
+    ]
 
-    dataset = evaluation_data["dataset"]
-
-    graphs = evaluation_data["graphs"]
-
-    y_true = prediction_result["y_true"]
-
-    # Construcción ---------------------------------------------------------
-    try:
-
-        global_explainability = (
-            initialize_global_explainability(
-                model_metadata=model_metadata,
-                reports_dir=EVALUATION_REPORTS_DIR
-            )
+    if missing_config_keys:
+        raise ValueError(
+            "evaluation_config está incompleto: "
+            f"{missing_config_keys}"
         )
 
-        global_explainability["method"] = (
-            select_explainability_method(
-                global_explainability
-            )
-        )
+    return None
 
-        global_explainability["explainer"] = (
-            build_explainer(
-                global_explainability=global_explainability,
-                trained_model=trained_model,
-                x_data=dataset
-            )
-        )
+# BLOQUE 8.2. Recuperación de Datos ----------------------------------------
+## Objetivo: Recuperar la información oficial requerida para ejecutar el
+# proceso de explicabilidad global del modelo GraphSAGE.
+#### Producto:
+# - explainability_data
+#### Responde:
+# ¿Se recuperó correctamente la información requerida para ejecutar la
+# explicabilidad global?
 
-        global_explainability = (
-            generate_explainability(
-                global_explainability=global_explainability,
-                trained_model=trained_model,
-                x_data=dataset,
-                graph_data=graphs,
-                evaluation_config=evaluation_config
-            )
-        )
+def recover_global_explainability_data(
+    official_model: dict,
+    evaluation_data: dict,
+    prediction_result: dict
+) -> dict:
+    """
+    Recupera la información oficial requerida para ejecutar el proceso de
+    explicabilidad global.
 
-        global_explainability = (
-            build_feature_ranking(
-                global_explainability=global_explainability,
-                x_data=dataset
-            )
-        )
+    Parameters
+    ----------
+    official_model : dict
+        Modelo oficial recuperado.
 
-        global_explainability = (
-            generate_explainability_plots(
-                global_explainability
-            )
-        )
+    evaluation_data : dict
+        Datos oficiales de evaluación.
 
-        global_explainability = (
-            build_scientific_summary(
-                global_explainability
-            )
-        )
+    prediction_result : dict
+        Resultado oficial de la inferencia.
 
-        global_explainability = (
-            export_explainability_results(
-                global_explainability
-            )
-        )
+    Returns
+    -------
+    dict
+        Información oficial requerida para la explicabilidad global.
+    """
 
-        if not validate_global_explainability(
-            global_explainability
-        ):
-            raise RuntimeError(
-                "La validación de la explicabilidad falló."
-            )
+    # Recuperación
+    explainability_data = {
 
-        global_explainability = (
-            audit_feature_importance(
-                global_explainability
-            )
-        )
+        "trained_model":
+            official_model["trained_model"],
 
-        global_explainability = (
-            analyze_target_correlation(
-                global_explainability=global_explainability,
-                x_data=dataset,
-                y_data=y_true
-            )
-        )
+        "model_metadata":
+            official_model["model_metadata"],
 
-        global_explainability["status"] = "COMPLETED"
+        "model_config":
+            official_model["model_config"],
 
-    except Exception as error:
+        "dataset":
+            evaluation_data["dataset"],
 
-        raise RuntimeError(
-            f"Error durante la explicabilidad global: {error}"
-        )
+        "graphs":
+            evaluation_data["graphs"],
 
-    # Validación -----------------------------------------------------------
-    if not isinstance(
-        global_explainability,
-        dict
-    ):
-        raise RuntimeError(
-            "La explicabilidad global no tiene un formato válido."
-        )
+        "y_true":
+            prediction_result["y_true"],
 
-    required_explainability_keys = [
+        "y_pred":
+            prediction_result["y_pred"]
 
-        "method",
+    }
 
-        "explainer",
+    # Validación
+    missing_values = [
 
-        "feature_ranking",
-
-        "scientific_summary",
-
-        "status"
+        key
+        for key, value in explainability_data.items()
+        if value is None
 
     ]
 
-    missing_explainability_keys = [
+    if missing_values:
+
+        raise RuntimeError(
+            "No fue posible recuperar la siguiente información de "
+            f"explicabilidad: {missing_values}"
+        )
+
+    # Retorno
+    return explainability_data
+
+# BLOQUE 8.3. Ejecución de la Explicabilidad Global -------------------------
+## Objetivo: Ejecutar el flujo oficial de explicabilidad global del modelo
+# GraphSAGE utilizando los componentes oficiales del módulo de
+# explicabilidad.
+#### Producto:
+# - global_explainability
+#### Responde:
+# ¿El proceso oficial de explicabilidad global fue ejecutado correctamente?
+
+def execute_global_explainability(
+    explainability_data: dict,
+    evaluation_config: dict
+) -> dict:
+    """
+    Ejecuta el flujo oficial de explicabilidad global.
+
+    Parameters
+    ----------
+    explainability_data : dict
+        Información oficial para la explicabilidad.
+
+    evaluation_config : dict
+        Configuración oficial de evaluación.
+
+    Returns
+    -------
+    dict
+        Resultado oficial de la explicabilidad global.
+    """
+
+    # Validación
+    if not isinstance(explainability_data, dict):
+        raise TypeError(
+            "explainability_data debe ser un diccionario."
+        )
+
+    if not isinstance(evaluation_config, dict):
+        raise TypeError(
+            "evaluation_config debe ser un diccionario."
+        )
+
+    required_keys = [
+        "trained_model",
+        "model_metadata",
+        "dataset",
+        "graphs",
+        "y_true"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in explainability_data
+    ]
+
+    if missing_keys:
+        raise ValueError(
+            "explainability_data está incompleto: "
+            f"{missing_keys}"
+        )
+
+    # Recuperación
+    trained_model = explainability_data["trained_model"]
+    model_metadata = explainability_data["model_metadata"]
+    dataset = explainability_data["dataset"]
+    graphs = explainability_data["graphs"]
+    y_true = explainability_data["y_true"]
+    feature_names = FEATURE_COLUMNS.copy()
+
+    if len(feature_names) == 0:
+        raise RuntimeError(
+            "No existen variables para la explicabilidad."
+        )
+
+    # Construcción
+    global_explainability = (
+        initialize_global_explainability(
+            model_metadata=model_metadata,
+            reports_dir=EVALUATION_REPORTS_DIR
+        )
+    )
+
+    select_explainability_method(
+        global_explainability
+    )
+
+    global_explainability = (
+        build_explainer(
+            global_explainability=global_explainability,
+            trained_model=trained_model
+        )
+    )
+
+    global_explainability = (
+        initialize_explainability_context(
+            global_explainability
+        )
+    )
+
+    global_explainability = (
+        build_explanation_targets(
+            global_explainability=global_explainability,
+            graphs=graphs
+        )
+    )
+
+    global_explainability = (
+        generate_node_explanations(
+            global_explainability=global_explainability,
+            graphs=graphs
+        )
+    )
+
+    global_explainability = (
+        extract_explanation_masks(
+            global_explainability
+        )
+    )
+
+    global_explainability = (
+        aggregate_feature_importance(
+            global_explainability
+        )
+    )
+
+    global_explainability = (
+        finalize_explainability(
+            global_explainability
+        )
+    )
+
+    # -------------
+    print("-" * 80)
+    print("Número de variables :", len(feature_names))
+
+    feature_importance = (
+        global_explainability["feature_importance"]
+    )
+
+    print(
+        "Número de importancias:",
+        len(feature_importance)
+    )
+    print("-" * 80)
+    # ------------------
+
+    global_explainability = (
+        build_feature_ranking(
+            global_explainability=global_explainability,
+            feature_names=feature_names
+        )
+    )
+
+    global_explainability = (
+        generate_explainability_plots(
+            global_explainability
+        )
+    )
+
+    global_explainability = (
+        build_scientific_summary(
+            global_explainability
+        )
+    )
+
+    global_explainability = (
+        export_explainability_results(
+            global_explainability
+        )
+    )
+
+    validation_result = (
+        validate_global_explainability(
+            global_explainability
+        )
+    )
+
+    if not validation_result:
+        raise RuntimeError(
+            "La validación oficial de la explicabilidad falló."
+        )
+
+    global_explainability = (
+        audit_feature_importance(
+            global_explainability
+        )
+    )
+
+    global_explainability = (
+        analyze_target_correlation(
+            global_explainability=global_explainability,
+            feature_data=dataset,
+            target_data=y_true
+        )
+    )
+
+    if global_explainability is None:
+        raise RuntimeError(
+            "No fue posible construir la explicabilidad global."
+        )
+
+    if global_explainability.get("status") != "VALIDATED":
+        raise RuntimeError(
+            "La explicabilidad global no finalizó correctamente."
+        )
+
+    # Retorno
+    return global_explainability
+
+# BLOQUE 8.4. Validación del Resultado -------------------------------------
+## Objetivo: Validar la estructura del resultado oficial generado durante el
+# proceso de explicabilidad global.
+#### Producto:
+# - global_explainability validado.
+#### Responde:
+# ¿El resultado oficial de la explicabilidad global posee la estructura
+# requerida para continuar con la evaluación?
+
+def validate_global_explainability_output(
+    global_explainability: dict
+) -> None:
+    """
+    Valida la estructura del resultado oficial de la explicabilidad global.
+
+    Parameters
+    ----------
+    global_explainability : dict
+        Resultado oficial de la explicabilidad global.
+
+    Returns
+    -------
+    None
+    """
+
+    # Validación
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
+        )
+
+    # Validación
+    required_keys = [
+        "method",
+        "explainer",
+        "feature_importance",
+        "feature_ranking",
+        "scientific_summary",
+        "plots",
+        "exported_files",
+        "importance_audit",
+        "target_correlation",
+        "target_correlation_summary",
+        "status"
+    ]
+
+    missing_keys = [
 
         key
-        for key in required_explainability_keys
+        for key in required_keys
         if key not in global_explainability
 
     ]
 
-    if missing_explainability_keys:
-
-        raise ValueError(
+    if missing_keys:
+        raise RuntimeError(
             "global_explainability está incompleto: "
-            f"{missing_explainability_keys}"
+            f"{missing_keys}"
         )
 
-    if global_explainability["status"] != "COMPLETED":
+    if global_explainability["target_correlation_summary"] is None:
+        raise RuntimeError(
+            "target_correlation_summary no fue generado."
+        )
+
+    # Validación
+    if global_explainability["feature_ranking"].empty:
+        raise RuntimeError(
+            "feature_ranking está vacío."
+        )
+
+    if global_explainability["scientific_summary"] is None:
+
+        raise RuntimeError(
+            "scientific_summary no fue generado."
+        )
+
+    if global_explainability["importance_audit"] is None:
+
+        raise RuntimeError(
+            "importance_audit no fue generado."
+        )
+
+    if global_explainability["target_correlation"].empty:
+        raise RuntimeError(
+            "target_correlation está vacío."
+        )
+   
+    if global_explainability["status"] != "TARGET_CORRELATION_ANALYZED":
 
         raise RuntimeError(
             "La explicabilidad global no finalizó correctamente."
         )
 
+    if len(global_explainability["plots"]) == 0:
+        raise RuntimeError(
+            "plots está vacío."
+        )
+
+    if len(global_explainability["exported_files"]) == 0:
+        raise RuntimeError(
+            "exported_files está vacío."
+        )
+
+    # Retorno
+    return None
+
+# BLOQUE 8.5. Construcción de la Explicabilidad Global ----------------------
+## Objetivo: Orquestar el proceso oficial de explicabilidad global del modelo
+# GraphSAGE mediante la ejecución secuencial de los componentes oficiales.
+#### Producto:
+# - global_explainability
+#### Responde:
+# ¿La explicabilidad global del modelo oficial fue construida
+# correctamente?
+
+def build_global_explainability(
+    official_model: dict,
+    evaluation_data: dict,
+    prediction_result: dict,
+    evaluation_config: dict
+) -> dict:
+    """
+    Construye la explicabilidad global oficial del modelo GraphSAGE.
+
+    Parameters
+    ----------
+    official_model : dict
+        Modelo oficial recuperado.
+
+    evaluation_data : dict
+        Datos oficiales de evaluación.
+
+    prediction_result : dict
+        Resultado oficial de la inferencia.
+
+    evaluation_config : dict
+        Configuración oficial de evaluación.
+
+    Returns
+    -------
+    dict
+        Resultado oficial de la explicabilidad global.
+    """
+
+    # Validación
+    validate_global_explainability_inputs(
+        official_model=official_model,
+        evaluation_data=evaluation_data,
+        prediction_result=prediction_result,
+        evaluation_config=evaluation_config
+    )
+
+    # Recuperación
+    explainability_data = (
+        recover_global_explainability_data(
+            official_model=official_model,
+            evaluation_data=evaluation_data,
+            prediction_result=prediction_result
+        )
+    )
+
+    # Construcción
+    global_explainability = (
+        execute_global_explainability(
+            explainability_data=explainability_data,
+            evaluation_config=evaluation_config
+        )
+    )
+
+    # Validación
+    validate_global_explainability_output(
+        global_explainability=global_explainability
+    )
+
+    # Retorno
     return global_explainability
 
-
-GLOBAL_EXPLAINABILITY = build_global_explainability(
-    official_model=OFFICIAL_MODEL,
-    evaluation_data=EVALUATION_DATA,
-    prediction_result=PREDICTION_RESULT,
-    evaluation_config=EVALUATION_CONFIG
+GLOBAL_EXPLAINABILITY = (
+    build_global_explainability(
+        official_model=OFFICIAL_MODEL,
+        evaluation_data=EVALUATION_DATA,
+        prediction_result=PREDICTION_RESULT,
+        evaluation_config=EVALUATION_CONFIG
+    )
 )
 
+# BLOQUE 8.6. Exportación de la Explicabilidad Global -----------------------
+## Objetivo: Exportar el resultado oficial de la explicabilidad global para
+# su reutilización en los módulos científicos del proyecto.
+#### Producto:
+# - Archivo oficial de explicabilidad global.
+#### Responde:
+# ¿La explicabilidad global fue exportada correctamente?
+
+def export_global_explainability(
+    global_explainability: dict,
+    export_file: Path
+) -> dict:
+    """
+    Exporta el resultado oficial de la explicabilidad global.
+
+    Parameters
+    ----------
+    global_explainability : dict
+        Resultado oficial de la explicabilidad global.
+
+    export_file : Path
+        Ruta del archivo de exportación.
+
+    Returns
+    -------
+    dict
+        Resultado de la exportación.
+    """
+
+    # Validación
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
+        )
+
+    if not isinstance(export_file, Path):
+        raise TypeError(
+            "export_file debe ser un objeto Path."
+        )
+
+    # Construcción
+    export_file.parent.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    with open(
+        export_file,
+        "wb"
+    ) as file:
+
+        pickle.dump(
+            global_explainability,
+            file,
+            protocol=pickle.HIGHEST_PROTOCOL
+        )
+
+    # Validación
+    if not export_file.exists():
+        raise FileNotFoundError(
+            "No fue posible exportar la explicabilidad global."
+        )
+
+    export_result = {
+        "status": "EXPORTED",
+        "file": export_file,
+        "size_bytes": export_file.stat().st_size
+    }
+
+    # Retorno
+    return export_result
+
+# BLOQUE 8.7. Recuperación de la Explicabilidad Global ----------------------
+## Objetivo: Recuperar el resultado oficial de la explicabilidad global
+# previamente exportado para su reutilización en los módulos científicos.
+#### Producto:
+# - global_explainability
+#### Responde:
+# ¿La explicabilidad global fue recuperada correctamente?
+
+def recover_global_explainability(
+    export_file: Path
+) -> dict:
+    """
+    Recupera el resultado oficial de la explicabilidad global.
+
+    Parameters
+    ----------
+    export_file : Path
+        Ruta del archivo oficial de explicabilidad.
+
+    Returns
+    -------
+    dict
+        Resultado oficial de la explicabilidad global.
+    """
+
+    # Validación
+    if not isinstance(export_file, Path):
+        raise TypeError(
+            "export_file debe ser un objeto Path."
+        )
+
+    if not export_file.exists():
+        raise FileNotFoundError(
+            f"No existe el archivo:\n{export_file}"
+        )
+
+    # Recuperación
+    with open(
+        export_file,
+        "rb"
+    ) as file:
+
+        global_explainability = (
+            pickle.load(file)
+        )
+
+    # Validación
+    if not isinstance(
+        global_explainability,
+        dict
+    ):
+        raise TypeError(
+            "La explicabilidad recuperada debe ser un "
+            "diccionario."
+        )
+
+    required_keys = [
+        "feature_ranking",
+        "feature_importance",
+        "scientific_summary"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in global_explainability
+    ]
+
+    if missing_keys:
+        raise ValueError(
+            "La explicabilidad recuperada está incompleta: "
+            f"{missing_keys}"
+        )
+
+    # Retorno
+    return global_explainability
+
 print("-" * 80)
+print("Bloque 8. Explicabilidad Global Finalizada.")
 
 # BLOQUE 9. Construcción del Resultado Final -------------------------------
 ## Objetivo: Consolidar el resultado científico oficial del proceso de
@@ -1170,6 +1787,9 @@ print("-" * 80)
 # - evaluation_output
 #### Responde:
 # ¿El proceso completo de evaluación científica finalizó correctamente?
+
+print("-" * 80)
+print("Bloque 9. Construcción del Resultado Final.")
 
 def build_evaluation_output(
     official_model: dict,
@@ -1239,6 +1859,10 @@ def build_evaluation_output(
             "evaluation_config debe ser un diccionario."
         )
 
+    # ---------------------------------------------------------------------
+    # official_model
+    # ---------------------------------------------------------------------
+
     required_model_keys = [
         "trained_model",
         "model_metadata",
@@ -1256,12 +1880,18 @@ def build_evaluation_output(
             f"official_model está incompleto: {missing_model_keys}"
         )
 
+    # ---------------------------------------------------------------------
+    # evaluation_summary
+    # ---------------------------------------------------------------------
+
     required_summary_keys = [
         "model_code",
         "model_name",
         "family",
         "model",
         "training_time",
+        "training_loss",
+        "epochs",
         "inference_time",
         "rmse",
         "mae",
@@ -1281,11 +1911,17 @@ def build_evaluation_output(
             f"{missing_summary_keys}"
         )
 
+    # ---------------------------------------------------------------------
+    # global_explainability
+    # ---------------------------------------------------------------------
+
     required_explainability_keys = [
         "method",
         "feature_ranking",
         "scientific_summary",
-        "status"
+        "status",
+        "target_correlation",
+        "target_correlation_summary"
     ]
 
     missing_explainability_keys = [
@@ -1321,64 +1957,42 @@ def build_evaluation_output(
 
     status = (
         "SUCCESS"
-        if explainability_status == "COMPLETED"
+        if explainability_status == "TARGET_CORRELATION_ANALYZED"
         else "FAILED"
     )
 
     # Construcción ---------------------------------------------------------
     evaluation_output = {
-
         "status": status,
-
         "official_model": official_model,
-
         "prediction_result": prediction_result,
-
         "evaluation_result": evaluation_result,
-
         "evaluation_summary": evaluation_summary,
-
         "global_explainability": global_explainability,
 
         "summary": {
+            "model_code": evaluation_summary["model_code"],
+            "model_name": evaluation_summary["model_name"],
+            "family": evaluation_summary["family"],
 
-            "model_code":
-                evaluation_summary["model_code"],
+            # NUEVOS CAMPOS
+            "training_time": evaluation_summary["training_time"],
+            "training_loss": evaluation_summary["training_loss"],
+            "epochs": evaluation_summary["epochs"],
 
-            "model_name":
-                evaluation_summary["model_name"],
+            # Ya existentes
+            "inference_time": evaluation_summary["inference_time"],
+            "rmse": evaluation_summary["rmse"],
+            "mae": evaluation_summary["mae"],
+            "mape": evaluation_summary["mape"],
+            "r2": evaluation_summary["r2"],
 
-            "family":
-                evaluation_summary["family"],
-
-            "rmse":
-                evaluation_summary["rmse"],
-
-            "mae":
-                evaluation_summary["mae"],
-
-            "mape":
-                evaluation_summary["mape"],
-
-            "r2":
-                evaluation_summary["r2"],
-
-            "inference_time":
-                evaluation_summary["inference_time"],
-
-            "explainability_method":
-                explainability_method,
-
-            "top_10_variables":
-                feature_ranking[:10],
-
-            "explainability_status":
-                explainability_status
-
+            "explainability_method": explainability_method,
+            "top_10_variables": feature_ranking.head(10),
+            "explainability_status": explainability_status
         },
 
         "generated_products": {
-
             "reports_directory":
                 EVALUATION_REPORTS_DIR,
 
@@ -1391,7 +2005,6 @@ def build_evaluation_output(
         },
 
         "validation": {
-
             "prediction_completed":
                 prediction_result is not None,
 
@@ -1402,45 +2015,31 @@ def build_evaluation_output(
                 evaluation_summary is not None,
 
             "explainability_completed":
-                explainability_status == "COMPLETED"
+                explainability_status == "TARGET_CORRELATION_ANALYZED"
 
         },
 
         "metadata": {
-
             "model_metadata":
                 model_metadata,
 
             "evaluation_config":
                 evaluation_config
-
         }
-
     }
 
     # Validación -----------------------------------------------------------
     required_output_keys = [
-
         "status",
-
         "official_model",
-
         "prediction_result",
-
         "evaluation_result",
-
         "evaluation_summary",
-
         "global_explainability",
-
         "summary",
-
         "generated_products",
-
         "validation",
-
         "metadata"
-
     ]
 
     missing_output_keys = [
@@ -1477,6 +2076,7 @@ EVALUATION_OUTPUT = build_evaluation_output(
 )
 
 print("-" * 80)
+print("Bloque 9. Resultado Finalizado.")
 
 # BLOQUE 10. Reporte Ejecutivo ---------------------------------------------
 ## Objetivo: Presentar el resultado ejecutivo del proceso oficial de
@@ -1485,6 +2085,9 @@ print("-" * 80)
 # - Reporte Ejecutivo
 #### Responde:
 # ¿Cuáles fueron los resultados finales del proceso de evaluación científica?
+
+print("-" * 80)
+print("Bloque 10. Reporte Ejecutivo.")
 
 def report_evaluation_output(
     evaluation_output: dict
@@ -1540,9 +2143,9 @@ def report_evaluation_output(
     metadata = evaluation_output["metadata"]
 
     # Reporte --------------------------------------------------------------
-    print("=" * 80)
+    print("-" * 80)
     print("REPORTE EJECUTIVO DE LA EVALUACIÓN CIENTÍFICA")
-    print("=" * 80)
+    print("-" * 80)
 
     print(f"Estado                 : {evaluation_output['status']}")
     print(f"Modelo                 : {summary['model_name']}")
@@ -1551,11 +2154,17 @@ def report_evaluation_output(
     print("-" * 80)
 
     print("MÉTRICAS DE DESEMPEÑO")
-    print(f"RMSE                   : {summary['rmse']:.6f}")
-    print(f"MAE                    : {summary['mae']:.6f}")
-    print(f"MAPE                   : {summary['mape']:.6f}")
-    print(f"R²                     : {summary['r2']:.6f}")
-    print(f"Tiempo de inferencia   : {summary['inference_time']}")
+    print(f"Tiempo de entrenamiento : {summary['training_time']}")
+    print(f"Pérdida final           : {summary['training_loss']:.6f}")
+    print(f"Épocas                  : {summary['epochs']}")
+
+    print("-" * 80)
+
+    print(f"RMSE                    : {summary['rmse']:.6f}")
+    print(f"MAE                     : {summary['mae']:.6f}")
+    print(f"MAPE                    : {summary['mape']:.6f}")
+    print(f"R²                      : {summary['r2']:.6f}")
+    print(f"Tiempo de inferencia    : {summary['inference_time']}")
 
     print("-" * 80)
 
@@ -1565,11 +2174,17 @@ def report_evaluation_output(
 
     print("Top 10 variables:")
 
-    for index, variable in enumerate(
-        summary["top_10_variables"],
+    top_variables = summary["top_10_variables"]
+    for index, row in enumerate(
+        top_variables.itertuples(index=False),
         start=1
     ):
-        print(f"  {index:02d}. {variable}")
+
+        print(
+            f"{index:02d}. "
+            f"{row.variable} "
+            f"({row.importance:.6f})"
+        )
 
     print("-" * 80)
 
@@ -1583,20 +2198,41 @@ def report_evaluation_output(
     print("PRODUCTOS GENERADOS")
 
     for key, value in generated_products.items():
-        print(f"{key:<30}: {value}")
+
+        if key == "feature_ranking":
+
+            print(
+                f"{key:<30}: "
+                f"{len(value)} variables"
+            )
+
+        else:
+
+            print(
+                f"{key:<30}: {value}"
+            )
 
     print("-" * 80)
 
     print("METADATOS")
 
     for key, value in metadata.items():
-        print(f"{key:<30}: {value}")
 
-    print("=" * 80)
+        if isinstance(value, dict):
+            print(
+                f"{key:<30}: "
+                f"{len(value)} elementos"
+            )
+        else:
+            print(
+                f"{key:<30}: {value}"
+            )
 
+    print("-" * 80)
 
 report_evaluation_output(
     EVALUATION_OUTPUT
 )
 
 print("-" * 80)
+print("Bloque 10. Reporte Ejecutivo Finalizado.")

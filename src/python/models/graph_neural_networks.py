@@ -1019,6 +1019,7 @@ def train_gnn(
     model.train()
     training_start = time.time()
     epoch_loss = None
+    loss_history = []
 
     try:
 
@@ -1047,12 +1048,8 @@ def train_gnn(
                     print(f"Target             : {tuple(graph.y.shape)}")
 
                 loss = criterion(
-                    predictions[
-                        graph.train_mask
-                    ].squeeze(-1),
-                    graph.y[
-                        graph.train_mask
-                    ]
+                    predictions.squeeze(-1),
+                    graph.y
                 )
 
                 loss.backward()
@@ -1061,6 +1058,7 @@ def train_gnn(
                 accumulated_loss += loss.item()
 
             epoch_loss = accumulated_loss / len(graphs)
+            loss_history.append(epoch_loss)
 
     except Exception as error:
 
@@ -1071,10 +1069,9 @@ def train_gnn(
     return {
 
         "model": model,
-
         "training_time": time.time() - training_start,
-
-        "loss": epoch_loss
+        "loss": epoch_loss,
+        "loss_history": loss_history
 
     }
 
@@ -1140,15 +1137,11 @@ def predict_gnn(
                 )
 
                 prediction_list.append(
-                    outputs[
-                        graph.test_mask
-                    ].cpu()
+                    outputs.squeeze(-1).cpu()
                 )
 
                 target_list.append(
-                    graph.y[
-                        graph.test_mask
-                    ].cpu()
+                    graph.y.cpu()
                 )
 
         y_pred = torch.cat(

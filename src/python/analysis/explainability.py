@@ -43,6 +43,7 @@ import time
 from pathlib import Path
 from datetime import datetime
 from typing import Any
+from scipy.stats import spearmanr
 
 # Librerías científicas
 import matplotlib.pyplot as plt
@@ -71,6 +72,9 @@ from torch_geometric.explain.config import (
     ModelMode,
     ModelTaskLevel
 )
+
+print("-" * 80)
+print("Bloque 1. Importaciones.")
 
 # BLOQUE 2. Inicialización del Contexto de Explicabilidad ----------------------
 ## Objetivo: Construir la estructura oficial que almacenará toda la información
@@ -105,16 +109,15 @@ def initialize_global_explainability(
         Contexto oficial de la explicabilidad.
     """
 
-    # Validación de entradas -------------------------------------------------
-
-    if model_metadata is None:
-        raise RuntimeError(
-            "model_metadata no puede ser None."
+    # Validación -----------------------------------------------------------
+    if not isinstance(model_metadata, dict):
+        raise TypeError(
+            "model_metadata debe ser un diccionario."
         )
 
-    if reports_dir is None:
-        raise RuntimeError(
-            "reports_dir no puede ser None."
+    if not isinstance(reports_dir, Path):
+        raise TypeError(
+            "reports_dir debe ser un objeto Path."
         )
 
     required_metadata = [
@@ -135,8 +138,7 @@ def initialize_global_explainability(
             f"{missing_metadata}"
         )
 
-    # Directorio oficial -----------------------------------------------------
-
+    # Construcción ---------------------------------------------------------
     explainability_dir = (
         reports_dir /
         "explainability"
@@ -147,66 +149,49 @@ def initialize_global_explainability(
         exist_ok=True
     )
 
-    # Construcción del contexto oficial --------------------------------------
-
     global_explainability = {
 
-        # Información del modelo ---------------------------------------------
-
+        # Información del modelo
         "model_code": model_metadata["model_code"],
         "model_family": model_metadata["family"],
         "model_name": model_metadata["model_name"],
 
-        # Configuración -------------------------------------------------------
-
+        # Configuración
         "configuration": {
-
             "xai_library": None,
             "xai_version": None,
             "correlation_method": "spearman",
             "random_state": PROJECT_SEED
-
         },
 
-        # Información de ejecución -------------------------------------------
-
+        # Información de ejecución
         "created_at": datetime.now().isoformat(),
 
-        # Método de explicabilidad -------------------------------------------
-
+        # Método de explicabilidad
         "method": None,
         "explainer": None,
 
-        # Resultados ----------------------------------------------------------
-
+        # Resultados
         "feature_importance": None,
-        "shap_values": None,
         "feature_ranking": None,
-
         "top_5_variables": None,
         "top_10_variables": None,
         "top_20_variables": None,
-
         "scientific_summary": None,
         "target_correlation": None,
 
-        # Visualizaciones -----------------------------------------------------
-
+        # Visualizaciones
         "plots_dir": explainability_dir,
         "plots": {},
 
-        # Auditorías ----------------------------------------------------------
-
+        # Auditorías
         "importance_audit": None,
 
-        # Exportaciones -------------------------------------------------------
-
+        # Exportaciones
         "exported_files": {},
 
-        # Tiempos de ejecución -----------------------------------------------
-
+        # Tiempos de ejecución
         "execution_time": {
-
             "explainer_construction": 0.0,
             "explainability": 0.0,
             "feature_importance": 0.0,
@@ -218,51 +203,34 @@ def initialize_global_explainability(
             "importance_audit": 0.0,
             "target_correlation": 0.0,
             "total": 0.0
-
         },
 
-        # Estado del proceso -------------------------------------------------
-
+        # Estado
         "status": "INITIALIZED"
-
     }
 
-    # Validación de la estructura --------------------------------------------
-
+    # Validación -----------------------------------------------------------
     required_keys = [
-
         "model_code",
         "model_family",
         "model_name",
-
         "configuration",
         "created_at",
-
         "method",
         "explainer",
-
         "feature_importance",
-        "shap_values",
         "feature_ranking",
-
         "top_5_variables",
         "top_10_variables",
         "top_20_variables",
-
         "scientific_summary",
         "target_correlation",
-
         "plots_dir",
         "plots",
-
         "importance_audit",
-
         "exported_files",
-
         "execution_time",
-
         "status"
-
     ]
 
     missing_keys = [
@@ -276,8 +244,6 @@ def initialize_global_explainability(
             "La estructura oficial de la explicabilidad "
             f"está incompleta: {missing_keys}"
         )
-
-    # Validación de tipos ----------------------------------------------------
 
     if not isinstance(global_explainability["configuration"], dict):
         raise RuntimeError(
@@ -299,10 +265,11 @@ def initialize_global_explainability(
             "exported_files debe ser un diccionario."
         )
 
-    # Retorno ----------------------------------------------------------------
-
+    # Retorno --------------------------------------------------------------
     return global_explainability
 
+print("-" * 80)
+print("Bloque 2. Inicialización del Contexto de Explicabilidad Finalizado.")
 
 # BLOQUE 3. Selección del Método de Explicabilidad ----------------------------
 ## Objetivo: Seleccionar automáticamente el método oficial de explicabilidad
@@ -313,7 +280,6 @@ def initialize_global_explainability(
 #### Responde:
 # ¿Cuál es el método oficial de explicabilidad utilizado para interpretar
 # el comportamiento del modelo oficial GraphSAGE?
-
 def select_explainability_method(
     global_explainability: dict
 ) -> str:
@@ -333,10 +299,9 @@ def select_explainability_method(
     """
 
     # Validación -------------------------------------------------------------
-
-    if global_explainability is None:
-        raise RuntimeError(
-            "global_explainability no puede ser None."
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
         )
 
     required_keys = [
@@ -357,13 +322,16 @@ def select_explainability_method(
             f"{missing_keys}"
         )
 
-    # Recuperación de información -------------------------------------------
+    if not isinstance(global_explainability["configuration"], dict):
+        raise RuntimeError(
+            "configuration debe ser un diccionario."
+        )
 
+    # Recuperación -----------------------------------------------------------
     model_family = global_explainability["model_family"]
     model_name = global_explainability["model_name"].lower()
 
-    # Validación del modelo oficial -----------------------------------------
-
+    # Validación -------------------------------------------------------------
     if model_family != "graph_neural_networks":
         raise RuntimeError(
             "El módulo de explicabilidad únicamente admite "
@@ -375,11 +343,8 @@ def select_explainability_method(
             "El modelo oficial del proyecto es GraphSAGE."
         )
 
-    # Método oficial --------------------------------------------------------
-
+    # Construcción -----------------------------------------------------------
     method = "GNNExplainer"
-
-    # Actualización de la configuración ------------------------------------
 
     global_explainability["configuration"]["xai_library"] = (
         "torch_geometric.explain"
@@ -390,11 +355,9 @@ def select_explainability_method(
     )
 
     global_explainability["method"] = method
-
     global_explainability["status"] = "METHOD_SELECTED"
 
-    # Retorno ---------------------------------------------------------------
-
+    # Retorno ----------------------------------------------------------------
     return method
 
 # BLOQUE 4. Construcción del Explainer ---------------------------------------
@@ -416,7 +379,6 @@ def select_explainability_method(
 # ¿Se configuró correctamente el objeto oficial de explicabilidad que
 # permitirá interpretar las predicciones del modelo GraphSAGE durante
 # la etapa de evaluación?
-
 def build_explainer(
     global_explainability: dict,
     trained_model
@@ -439,16 +401,47 @@ def build_explainer(
         Contexto oficial de explicabilidad actualizado.
     """
 
-    # Configuración del modelo
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
+        )
+
+    required_keys = [
+        "configuration",
+        "method"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in global_explainability
+    ]
+
+    if missing_keys:
+        raise RuntimeError(
+            "La estructura de explicabilidad está incompleta: "
+            f"{missing_keys}"
+        )
+
+    if trained_model is None:
+        raise RuntimeError(
+            "trained_model no puede ser None."
+        )
+
+    if not isinstance(global_explainability["configuration"], dict):
+        raise RuntimeError(
+            "configuration debe ser un diccionario."
+        )
+
+    # Construcción -----------------------------------------------------------
     trained_model.eval()
 
-    # Construcción del Explainer
     explainer = Explainer(
         model=trained_model,
         algorithm=GNNExplainer(
             epochs=200
         ),
-
         explanation_type=ExplanationType.model,
         node_mask_type="attributes",
         edge_mask_type="object",
@@ -459,8 +452,7 @@ def build_explainer(
         )
     )
 
-    # Registro de la configuración científica
-    global_explainability["configuration"] = {
+    global_explainability["configuration"].update({
         "algorithm": "GNNExplainer",
         "epochs": 200,
         "explanation_type": "model",
@@ -469,22 +461,20 @@ def build_explainer(
         "task_level": "node",
         "mode": "regression",
         "return_type": "raw"
-    }
+    })
 
-    # Registro del Explainer
     global_explainability["explainer"] = explainer
     global_explainability["explainer_ready"] = True
     global_explainability["status"] = "EXPLAINER_BUILT"
 
-    # Retorno
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
 # BLOQUE 5. Recorrido de los GraphData ----------------------------------------
 #
 # Objetivo:
-# Identificar los nodos pertenecientes al conjunto test_mask que serán
-# explicados mediante GNNExplainer.
-#
+# Identificar todos los nodos de los grafos oficiales que serán
+# explicados mediante GNNExplainer.#
 # Entradas:
 # - global_explainability
 # - graphs
@@ -494,7 +484,6 @@ def build_explainer(
 #
 # Responde:
 # ¿Se identificaron correctamente los nodos que serán explicados?
-
 def build_explanation_targets(
     global_explainability: dict,
     graphs: list
@@ -517,13 +506,33 @@ def build_explanation_targets(
         Contexto oficial de explicabilidad actualizado.
     """
 
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
+        )
+
+    if not isinstance(graphs, list):
+        raise TypeError(
+            "graphs debe ser una lista."
+        )
+
+    if len(graphs) == 0:
+        raise RuntimeError(
+            "La colección de grafos está vacía."
+        )
+
+    # Construcción -----------------------------------------------------------
     explanation_targets = []
 
     for graph_index, graph in enumerate(graphs):
 
-        test_nodes = graph.test_mask.nonzero(as_tuple=True)[0].tolist()
+        if not hasattr(graph, "num_nodes"):
+            raise RuntimeError(
+                "El grafo no contiene el atributo num_nodes."
+            )
 
-        for node_index in test_nodes:
+        for node_index in range(graph.num_nodes):
 
             explanation_targets.append({
 
@@ -532,11 +541,23 @@ def build_explanation_targets(
 
             })
 
-    global_explainability["explanation_targets"] = explanation_targets
-    global_explainability["explained_graphs"] = len(graphs)
-    global_explainability["explained_nodes"] = len(explanation_targets)
-    global_explainability["status"] = "TARGETS_IDENTIFIED"
+    global_explainability["explanation_targets"] = (
+        explanation_targets
+    )
 
+    global_explainability["explained_graphs"] = (
+        len(graphs)
+    )
+
+    global_explainability["explained_nodes"] = (
+        len(explanation_targets)
+    )
+
+    global_explainability["status"] = (
+        "TARGETS_IDENTIFIED"
+    )
+
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
 # BLOQUE 5.1. Inicialización del Contexto de Explicabilidad -------------------
@@ -554,7 +575,6 @@ def build_explanation_targets(
 # Responde:
 # ¿Está preparado el contexto oficial para almacenar las explicaciones
 # individuales y los resultados agregados?
-
 def initialize_explainability_context(
     global_explainability: dict
 ) -> dict:
@@ -573,6 +593,31 @@ def initialize_explainability_context(
         Contexto oficial de explicabilidad inicializado.
     """
 
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
+        )
+
+    required_keys = [
+        "method",
+        "explainer",
+        "status"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in global_explainability
+    ]
+
+    if missing_keys:
+        raise RuntimeError(
+            "La estructura de explicabilidad está incompleta: "
+            f"{missing_keys}"
+        )
+
+    # Construcción -----------------------------------------------------------
     global_explainability["node_explanations"] = []
 
     global_explainability["feature_importance"] = None
@@ -585,76 +630,19 @@ def initialize_explainability_context(
 
     global_explainability["explained_graphs"] = 0
 
-    global_explainability["status"] = "EXPLAINABILITY_INITIALIZED"
+    global_explainability["status"] = (
+        "EXPLAINABILITY_INITIALIZED"
+    )
 
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
-# BLOQUE 5.2. Construcción de los Objetivos de Explicabilidad -----------------
-#
-# Objetivo:
-# Identificar los nodos pertenecientes al conjunto test_mask que serán
-# explicados mediante el Explainer oficial.
-#
-# Entradas:
-# - global_explainability
-# - graphs
-#
-# Producto:
-# - global_explainability actualizado
-#
-# Responde:
-# ¿Se identificaron correctamente los nodos que serán explicados?
-
-def build_explanation_targets(
-    global_explainability: dict,
-    graphs: list
-) -> dict:
-    """
-    Construye la lista oficial de nodos que serán utilizados durante el
-    proceso de explicabilidad.
-
-    Parameters
-    ----------
-    global_explainability : dict
-        Contexto oficial de la explicabilidad.
-
-    graphs : list
-        Colección oficial de GraphData.
-
-    Returns
-    -------
-    dict
-        Contexto oficial de explicabilidad actualizado.
-    """
-
-    explanation_targets = []
-
-    for graph_index, graph in enumerate(graphs):
-
-        test_nodes = graph.test_mask.nonzero(as_tuple=True)[0].tolist()
-
-        for node_index in test_nodes:
-
-            explanation_targets.append({
-
-                "graph_index": graph_index,
-                "node_index": node_index
-
-            })
-
-    global_explainability["explanation_targets"] = explanation_targets
-    global_explainability["explained_graphs"] = len(graphs)
-    global_explainability["explained_nodes"] = len(explanation_targets)
-    global_explainability["status"] = "TARGETS_IDENTIFIED"
-
-    return global_explainability
-
-# BLOQUE 5.3. Generación de las Explicaciones ---------------------------------
+# BLOQUE 5.2. Generación de las Explicaciones ---------------------------------
 #
 # Objetivo:
 # Generar las explicaciones individuales del modelo oficial GraphSAGE
-# utilizando el Explainer configurado para cada nodo perteneciente al
-# conjunto test_mask.
+# utilizando el Explainer configurado para todos los nodos
+# seleccionados para el análisis.
 #
 # Entradas:
 # - global_explainability
@@ -688,8 +676,42 @@ def generate_node_explanations(
         Contexto oficial de explicabilidad actualizado.
     """
 
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
+        )
+
+    if not isinstance(graphs, list):
+        raise TypeError(
+            "graphs debe ser una lista."
+        )
+
+    required_keys = [
+        "explainer",
+        "explanation_targets"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in global_explainability
+    ]
+
+    if missing_keys:
+        raise RuntimeError(
+            "La estructura de explicabilidad está incompleta: "
+            f"{missing_keys}"
+        )
+
     explainer = global_explainability["explainer"]
 
+    if explainer is None:
+        raise RuntimeError(
+            "El Explainer no ha sido inicializado."
+        )
+
+    # Construcción -----------------------------------------------------------
     node_explanations = []
 
     for target in global_explainability["explanation_targets"]:
@@ -697,30 +719,33 @@ def generate_node_explanations(
         graph = graphs[target["graph_index"]]
 
         explanation = explainer(
-
             x=graph.x,
-
             edge_index=graph.edge_index,
-
             index=target["node_index"]
-
         )
 
         node_explanations.append({
-
             "graph_index": target["graph_index"],
             "node_index": target["node_index"],
             "explanation": explanation
-
         })
 
-    global_explainability["node_explanations"] = node_explanations
+    global_explainability["node_explanations"] = (
+        node_explanations
+    )
 
-    global_explainability["status"] = "EXPLANATIONS_GENERATED"
+    global_explainability["explained_nodes"] = (
+        len(node_explanations)
+    )
 
+    global_explainability["status"] = (
+        "EXPLANATIONS_GENERATED"
+    )
+
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
-# BLOQUE 5.4. Validación y Extracción de Máscaras ------------------------------
+# BLOQUE 5.3. Validación y Extracción de Máscaras ------------------------------
 #
 # Objetivo:
 # Validar las explicaciones generadas por el Explainer oficial y extraer las
@@ -734,7 +759,6 @@ def generate_node_explanations(
 #
 # Responde:
 # ¿Las explicaciones son válidas y contienen las máscaras necesarias?
-
 def extract_explanation_masks(
     global_explainability: dict
 ) -> dict:
@@ -753,6 +777,29 @@ def extract_explanation_masks(
         Contexto oficial de explicabilidad actualizado.
     """
 
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
+        )
+
+    required_keys = [
+        "node_explanations"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in global_explainability
+    ]
+
+    if missing_keys:
+        raise RuntimeError(
+            "La estructura de explicabilidad está incompleta: "
+            f"{missing_keys}"
+        )
+
+    # Construcción -----------------------------------------------------------
     validated_explanations = []
 
     for item in global_explainability["node_explanations"]:
@@ -761,9 +808,17 @@ def extract_explanation_masks(
 
         explanation.validate()
 
-        node_mask = getattr(explanation, "node_mask", None)
+        node_mask = getattr(
+            explanation,
+            "node_mask",
+            None
+        )
 
-        edge_mask = getattr(explanation, "edge_mask", None)
+        edge_mask = getattr(
+            explanation,
+            "edge_mask",
+            None
+        )
 
         validated_explanations.append({
 
@@ -774,13 +829,18 @@ def extract_explanation_masks(
 
         })
 
-    global_explainability["validated_explanations"] = validated_explanations
+    global_explainability["validated_explanations"] = (
+        validated_explanations
+    )
 
-    global_explainability["status"] = "MASKS_EXTRACTED"
+    global_explainability["status"] = (
+        "MASKS_EXTRACTED"
+    )
 
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
-# BLOQUE 5.5. Agregación de la Importancia de Variables ------------------------
+# BLOQUE 5.4. Agregación de la Importancia de Variables ------------------------
 #
 # Objetivo:
 # Calcular la importancia global de las variables a partir de las máscaras
@@ -794,7 +854,6 @@ def extract_explanation_masks(
 #
 # Responde:
 # ¿Cuál es la importancia global de cada variable del modelo?
-
 def aggregate_feature_importance(
     global_explainability: dict
 ) -> dict:
@@ -813,52 +872,130 @@ def aggregate_feature_importance(
         Contexto oficial de explicabilidad actualizado.
     """
 
-    import numpy as np
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
+        )
 
+    required_keys = [
+        "validated_explanations"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in global_explainability
+    ]
+
+    if missing_keys:
+        raise RuntimeError(
+            "La estructura de explicabilidad está incompleta: "
+            f"{missing_keys}"
+        )
+
+    # Construcción -----------------------------------------------------------
     feature_masks = []
 
     for item in global_explainability["validated_explanations"]:
 
         node_mask = item["node_mask"]
 
-        if node_mask is None:
+        if node_mask is not None:
 
+            print("-" * 80)
+            print(
+                "Nodo:",
+                item["node_index"]
+            )
+
+            print(
+                "Shape:",
+                tuple(node_mask.shape)
+            )
+
+            print(
+                "ndim:",
+                node_mask.ndim
+            )
+            print("-" * 80)
+
+        if node_mask is None:
             continue
 
         if node_mask.ndim == 1:
 
-            feature_masks.append(node_mask.cpu().numpy())
+            feature_masks.append(
+                node_mask.cpu().numpy()
+            )
 
         elif node_mask.ndim == 2:
 
             feature_masks.append(
-                node_mask.mean(dim=0).cpu().numpy()
+                node_mask.mean(
+                    dim=0
+                ).cpu().numpy()
             )
 
         else:
 
-            raise ValueError(
-                f"Dimensión no soportada para node_mask: {node_mask.shape}"
+            raise RuntimeError(
+                "Dimensión no soportada para node_mask: "
+                f"{tuple(node_mask.shape)}"
             )
 
-    feature_masks = np.asarray(feature_masks)
+    if len(feature_masks) == 0:
+        raise RuntimeError(
+            "No fue posible calcular la importancia de "
+            "variables porque no existen máscaras válidas."
+        )
 
-    feature_importance = feature_masks.mean(axis=0)
+    feature_masks = np.asarray(
+        feature_masks
+    )
 
-    feature_importance_std = feature_masks.std(axis=0)
+    print("-" * 80)
+    print("DEBUG aggregate_feature_importance")
+    print("feature_masks.shape:", feature_masks.shape)
+    print("-" * 80)
+
+    feature_importance = feature_masks.mean(
+        axis=0
+    )
+
+    feature_importance_std = feature_masks.std(
+        axis=0
+    )
+
+    print("-" * 80)
+    print("feature_importance.shape:", feature_importance.shape)
+    print("feature_importance_std.shape:", feature_importance_std.shape)
+    print("-" * 80)
 
     feature_ranking = np.argsort(
         feature_importance
     )[::-1]
 
-    global_explainability["feature_importance"] = feature_importance
-    global_explainability["feature_importance_std"] = feature_importance_std
-    global_explainability["feature_ranking"] = feature_ranking.tolist()
-    global_explainability["status"] = "FEATURE_IMPORTANCE_COMPUTED"
+    global_explainability["feature_importance"] = (
+        feature_importance
+    )
 
+    global_explainability["feature_importance_std"] = (
+        feature_importance_std
+    )
+
+    global_explainability["feature_ranking"] = (
+        feature_ranking.tolist()
+    )
+
+    global_explainability["status"] = (
+        "FEATURE_IMPORTANCE_COMPUTED"
+    )
+
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
-# BLOQUE 5.6. Consolidación del Contexto de Explicabilidad ---------------------
+# BLOQUE 5.5. Consolidación del Contexto de Explicabilidad ---------------------
 #
 # Objetivo:
 # Consolidar los resultados del proceso de explicabilidad y actualizar el
@@ -872,13 +1009,12 @@ def aggregate_feature_importance(
 #
 # Responde:
 # ¿El contexto de explicabilidad quedó listo para ser utilizado?
-
 def finalize_explainability(
     global_explainability: dict
 ) -> dict:
     """
-    Consolida el contexto oficial de explicabilidad y registra la información
-    final del proceso.
+    Consolida el contexto oficial de explicabilidad y registra la
+    información final del proceso.
 
     Parameters
     ----------
@@ -891,18 +1027,37 @@ def finalize_explainability(
         Contexto oficial de explicabilidad actualizado.
     """
 
-    global_explainability["method"] = "GNNExplainer"
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
+        )
 
-    global_explainability["model_name"] = "GraphSAGE"
+    required_keys = [
+        "method",
+        "explainer",
+        "feature_importance",
+        "feature_ranking"
+    ]
 
-    global_explainability["explanation_type"] = "model"
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in global_explainability
+    ]
 
-    global_explainability["node_mask_type"] = "attributes"
+    if missing_keys:
+        raise RuntimeError(
+            "La estructura de explicabilidad está incompleta: "
+            f"{missing_keys}"
+        )
 
-    global_explainability["edge_mask_type"] = "object"
+    # Construcción -----------------------------------------------------------
+    global_explainability["status"] = (
+        "EXPLAINABILITY_COMPLETED"
+    )
 
-    global_explainability["status"] = "EXPLAINABILITY_COMPLETED"
-
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
 # BLOQUE 6. Construcción del Ranking de Variables ------------------------------
@@ -922,7 +1077,6 @@ def finalize_explainability(
 # Responde:
 # ¿Cuáles son las variables con mayor influencia sobre el comportamiento del
 # modelo oficial?
-
 def build_feature_ranking(
     global_explainability: dict,
     feature_names: list
@@ -944,36 +1098,31 @@ def build_feature_ranking(
         Contexto oficial actualizado.
     """
 
-    if global_explainability is None:
-        raise RuntimeError(
-            "global_explainability no puede ser None."
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
         )
 
-    feature_importance = global_explainability.get(
-        "feature_importance"
-    )
-
-    if feature_importance is None:
-        raise RuntimeError(
-            "No existe información de importancia de variables."
-        )
-
-    feature_importance_std = global_explainability.get(
+    required_keys = [
+        "feature_importance",
         "feature_importance_std"
-    )
+    ]
 
-    if feature_importance_std is None:
-        raise RuntimeError(
-            "No existe la desviación estándar de la importancia."
-        )
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in global_explainability
+    ]
 
-    if feature_names is None:
+    if missing_keys:
         raise RuntimeError(
-            "feature_names no puede ser None."
+            "La estructura de explicabilidad está incompleta: "
+            f"{missing_keys}"
         )
 
     if not isinstance(feature_names, list):
-        raise RuntimeError(
+        raise TypeError(
             "feature_names debe ser una lista."
         )
 
@@ -982,11 +1131,55 @@ def build_feature_ranking(
             "feature_names está vacío."
         )
 
-    if len(feature_names) != len(feature_importance):
+    # Recuperación -----------------------------------------------------------
+    feature_importance = (
+        global_explainability["feature_importance"]
+    )
+
+    feature_importance_std = (
+        global_explainability["feature_importance_std"]
+    )
+
+    print("-" * 80)
+    print("DEBUG build_feature_ranking")
+
+    print("feature_names:", len(feature_names))
+    print("feature_importance:", len(feature_importance))
+    print("feature_importance_std:", len(feature_importance_std))
+
+    print("type(feature_importance):", type(feature_importance))
+
+    if hasattr(feature_importance, "shape"):
+        print("shape(feature_importance):", feature_importance.shape)
+
+    if hasattr(feature_importance_std, "shape"):
+        print("shape(feature_importance_std):", feature_importance_std.shape)
+
+    print("-" * 80)
+
+    if feature_importance is None:
         raise RuntimeError(
-            "El número de variables no coincide con la importancia calculada."
+            "No existe información de importancia de variables."
         )
 
+    if feature_importance_std is None:
+        raise RuntimeError(
+            "No existe la desviación estándar de la importancia."
+        )
+
+    print("-" * 80)
+    print("Número de feature_names:", len(feature_names))
+    print("Número de feature_importance:", len(feature_importance))
+    print("Número de feature_importance_std:", len(feature_importance_std))
+    print("-" * 80)
+
+    if len(feature_names) != len(feature_importance):
+        raise RuntimeError(
+            "El número de variables no coincide con la "
+            "importancia calculada."
+        )
+
+    # Construcción -----------------------------------------------------------
     feature_ranking = pd.DataFrame({
 
         "variable": feature_names,
@@ -1012,24 +1205,31 @@ def build_feature_ranking(
             "No fue posible construir el ranking oficial."
         )
 
-    top_5_variables = feature_ranking.head(5).copy()
+    global_explainability["feature_ranking"] = (
+        feature_ranking
+    )
 
-    top_10_variables = feature_ranking.head(10).copy()
+    global_explainability["top_5_variables"] = (
+        feature_ranking.head(5).copy()
+    )
 
-    top_20_variables = feature_ranking.head(20).copy()
+    global_explainability["top_10_variables"] = (
+        feature_ranking.head(10).copy()
+    )
 
-    global_explainability["feature_ranking"] = feature_ranking
+    global_explainability["top_20_variables"] = (
+        feature_ranking.head(20).copy()
+    )
 
-    global_explainability["top_5_variables"] = top_5_variables
+    global_explainability["n_features"] = (
+        len(feature_ranking)
+    )
 
-    global_explainability["top_10_variables"] = top_10_variables
+    global_explainability["status"] = (
+        "FEATURE_RANKING_BUILT"
+    )
 
-    global_explainability["top_20_variables"] = top_20_variables
-
-    global_explainability["n_features"] = len(feature_ranking)
-
-    global_explainability["status"] = "FEATURE_RANKING_BUILT"
-
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
 # BLOQUE 7. Generación de Visualizaciones de Explicabilidad --------------------
@@ -1047,7 +1247,6 @@ def build_feature_ranking(
 #
 # Responde:
 # ¿Se generaron correctamente las visualizaciones oficiales del modelo?
-
 def generate_explainability_plots(
     global_explainability: dict
 ) -> dict:
@@ -1065,9 +1264,10 @@ def generate_explainability_plots(
         Contexto oficial actualizado.
     """
 
-    if global_explainability is None:
-        raise RuntimeError(
-            "global_explainability no puede ser None."
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
         )
 
     required_keys = [
@@ -1087,6 +1287,7 @@ def generate_explainability_plots(
             f"{missing_keys}"
         )
 
+    # Recuperación -----------------------------------------------------------
     feature_ranking = global_explainability[
         "feature_ranking"
     ]
@@ -1094,6 +1295,11 @@ def generate_explainability_plots(
     plots_dir = global_explainability[
         "plots_dir"
     ]
+
+    if not isinstance(plots_dir, Path):
+        raise RuntimeError(
+            "plots_dir debe ser un objeto Path."
+        )
 
     if feature_ranking.empty:
         raise RuntimeError(
@@ -1105,6 +1311,7 @@ def generate_explainability_plots(
             "No existe la columna 'std' en el ranking."
         )
 
+    # Construcción -----------------------------------------------------------
     plots = {}
 
     top20 = feature_ranking.head(20)
@@ -1112,13 +1319,9 @@ def generate_explainability_plots(
     plt.figure(figsize=(12, 8))
 
     plt.barh(
-
         top20["variable"],
-
         top20["importance"],
-
         xerr=top20["std"]
-
     )
 
     plt.gca().invert_yaxis()
@@ -1153,13 +1356,9 @@ def generate_explainability_plots(
     plt.figure(figsize=(10, 6))
 
     plt.bar(
-
         top10["variable"],
-
         top10["importance"],
-
         yerr=top10["std"]
-
     )
 
     plt.xticks(
@@ -1195,15 +1394,10 @@ def generate_explainability_plots(
     plt.figure(figsize=(12, 6))
 
     plt.errorbar(
-
         x=top20["variable"],
-
         y=top20["importance"],
-
         yerr=top20["std"],
-
         fmt="o"
-
     )
 
     plt.xticks(
@@ -1236,7 +1430,7 @@ def generate_explainability_plots(
 
     plots["uncertainty"] = uncertainty_path
 
-    if len(plots) == 0:
+    if not plots:
         raise RuntimeError(
             "No fue posible generar las visualizaciones."
         )
@@ -1247,6 +1441,7 @@ def generate_explainability_plots(
         "PLOTS_GENERATED"
     )
 
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
 # BLOQUE 8. Construcción del Resumen Científico -------------------------------
@@ -1264,7 +1459,6 @@ def generate_explainability_plots(
 #
 # Responde:
 # ¿Cuál es la interpretación científica oficial del modelo?
-
 def build_scientific_summary(
     global_explainability: dict
 ) -> dict:
@@ -1282,52 +1476,33 @@ def build_scientific_summary(
         Contexto oficial actualizado.
     """
 
-    if global_explainability is None:
-        raise RuntimeError(
-            "global_explainability no puede ser None."
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
         )
 
     required_keys = [
-
         "model_code",
         "model_name",
         "model_family",
         "method",
         "feature_ranking"
-
     ]
 
     missing_keys = [
-
         key
         for key in required_keys
         if key not in global_explainability
-
     ]
 
     if missing_keys:
-
         raise RuntimeError(
             "La estructura oficial de explicabilidad está incompleta: "
             f"{missing_keys}"
         )
 
-    feature_ranking = global_explainability[
-        "feature_ranking"
-    ]
-
-    if feature_ranking is None:
-
-        raise RuntimeError(
-            "No existe ranking de variables."
-        )
-
-    if feature_ranking.empty:
-
-        raise RuntimeError(
-            "El ranking de variables está vacío."
-        )
-
+    # Recuperación -----------------------------------------------------------
     model_code = global_explainability[
         "model_code"
     ]
@@ -1344,6 +1519,21 @@ def build_scientific_summary(
         "method"
     ]
 
+    feature_ranking = global_explainability[
+        "feature_ranking"
+    ]
+
+    if feature_ranking is None:
+        raise RuntimeError(
+            "No existe ranking de variables."
+        )
+
+    if feature_ranking.empty:
+        raise RuntimeError(
+            "El ranking de variables está vacío."
+        )
+
+    # Construcción -----------------------------------------------------------
     top_variables = feature_ranking.head(5)
 
     summary = []
@@ -1415,7 +1605,6 @@ def build_scientific_summary(
     scientific_summary = "\n".join(summary)
 
     if not scientific_summary.strip():
-
         raise RuntimeError(
             "No fue posible construir el resumen científico."
         )
@@ -1428,6 +1617,7 @@ def build_scientific_summary(
         "status"
     ] = "SCIENTIFIC_SUMMARY_BUILT"
 
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
 # BLOQUE 9. Exportación de los Resultados de Explicabilidad -------------------
@@ -1446,7 +1636,6 @@ def build_scientific_summary(
 # Responde:
 # ¿Fueron exportados correctamente los resultados oficiales del proceso de
 # explicabilidad?
-
 def export_explainability_results(
     global_explainability: dict
 ) -> dict:
@@ -1464,13 +1653,13 @@ def export_explainability_results(
         Contexto oficial actualizado.
     """
 
-    if global_explainability is None:
-        raise RuntimeError(
-            "global_explainability no puede ser None."
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
         )
 
     required_keys = [
-
         "model_code",
         "model_name",
         "model_family",
@@ -1485,30 +1674,22 @@ def export_explainability_results(
         "top_20_variables",
         "scientific_summary",
         "execution_time"
-
     ]
 
     missing_keys = [
-
         key
         for key in required_keys
         if key not in global_explainability
-
     ]
 
     if missing_keys:
-
         raise RuntimeError(
             "La estructura oficial está incompleta: "
             f"{missing_keys}"
         )
 
+    # Recuperación -----------------------------------------------------------
     export_dir = global_explainability["plots_dir"]
-
-    export_dir.mkdir(
-        parents=True,
-        exist_ok=True
-    )
 
     feature_ranking = global_explainability[
         "feature_ranking"
@@ -1522,6 +1703,27 @@ def export_explainability_results(
         "plots"
     ]
 
+    if not isinstance(export_dir, Path):
+        raise RuntimeError(
+            "plots_dir debe ser un objeto Path."
+        )
+
+    if feature_ranking.empty:
+        raise RuntimeError(
+            "El ranking de variables está vacío."
+        )
+
+    if not scientific_summary.strip():
+        raise RuntimeError(
+            "El resumen científico está vacío."
+        )
+
+    # Construcción -----------------------------------------------------------
+    export_dir.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
     exported_files = {}
 
     csv_file = (
@@ -1530,13 +1732,9 @@ def export_explainability_results(
     )
 
     feature_ranking.to_csv(
-
         csv_file,
-
         index=False,
-
         encoding="utf-8"
-
     )
 
     exported_files[
@@ -1549,11 +1747,8 @@ def export_explainability_results(
     )
 
     feature_ranking.to_excel(
-
         excel_file,
-
         index=False
-
     )
 
     exported_files[
@@ -1566,13 +1761,9 @@ def export_explainability_results(
     )
 
     with open(
-
         summary_file,
-
         "w",
-
         encoding="utf-8"
-
     ) as file:
 
         file.write(
@@ -1651,31 +1842,23 @@ def export_explainability_results(
     }
 
     with open(
-
         json_file,
-
         "w",
-
         encoding="utf-8"
-
     ) as file:
 
         json.dump(
-
             json_content,
-
             file,
-
             indent=4,
-
             ensure_ascii=False
-
         )
 
     exported_files[
         "explainability_json"
     ] = json_file
 
+    # Validación -------------------------------------------------------------
     for exported_file in exported_files.values():
 
         if not Path(exported_file).exists():
@@ -1700,6 +1883,7 @@ def export_explainability_results(
         "status"
     ] = "RESULTS_EXPORTED"
 
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
 # BLOQUE 10. Validación de la Explicabilidad ----------------------------------
@@ -1717,7 +1901,6 @@ def export_explainability_results(
 #
 # Responde:
 # ¿El proceso oficial de explicabilidad fue completado correctamente?
-
 def validate_global_explainability(
     global_explainability: dict
 ) -> bool:
@@ -1735,14 +1918,13 @@ def validate_global_explainability(
         True si la validación fue exitosa.
     """
 
-    if global_explainability is None:
-
-        raise RuntimeError(
-            "global_explainability no puede ser None."
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
         )
 
     required_keys = [
-
         "model_code",
         "model_name",
         "model_family",
@@ -1762,76 +1944,70 @@ def validate_global_explainability(
         "execution_time",
         "exported_files",
         "status"
-
     ]
 
     missing_keys = [
-
         key
-
         for key in required_keys
-
         if key not in global_explainability
-
     ]
 
     if missing_keys:
-
         raise RuntimeError(
-
             "La estructura oficial de explicabilidad está incompleta: "
             f"{missing_keys}"
-
         )
 
-    if global_explainability["status"] != "RESULTS_EXPORTED":
-
-        raise RuntimeError(
-            "La exportación oficial no fue completada."
-        )
-
+    # Recuperación -----------------------------------------------------------
     feature_ranking = global_explainability[
         "feature_ranking"
     ]
-
-    if feature_ranking.empty:
-
-        raise RuntimeError(
-            "El ranking de variables está vacío."
-        )
-
-    for key in [
-
-        "top_5_variables",
-
-        "top_10_variables",
-
-        "top_20_variables"
-
-    ]:
-
-        if global_explainability[key].empty:
-
-            raise RuntimeError(
-                f"{key} está vacío."
-            )
 
     scientific_summary = global_explainability[
         "scientific_summary"
     ]
 
-    if not scientific_summary.strip():
-
-        raise RuntimeError(
-            "El resumen científico está vacío."
-        )
-
     plots = global_explainability[
         "plots"
     ]
 
-    if len(plots) == 0:
+    exported_files = global_explainability[
+        "exported_files"
+    ]
 
+    # Validación -------------------------------------------------------------
+    if global_explainability["status"] != "RESULTS_EXPORTED":
+        raise RuntimeError(
+            "La exportación oficial no fue completada."
+        )
+
+    if feature_ranking.empty:
+        raise RuntimeError(
+            "El ranking de variables está vacío."
+        )
+
+    for key in [
+        "top_5_variables",
+        "top_10_variables",
+        "top_20_variables"
+    ]:
+
+        if global_explainability[key].empty:
+            raise RuntimeError(
+                f"{key} está vacío."
+            )
+
+    if not scientific_summary.strip():
+        raise RuntimeError(
+            "El resumen científico está vacío."
+        )
+
+    if not isinstance(plots, dict):
+        raise TypeError(
+            "plots debe ser un diccionario."
+        )
+
+    if not plots:
         raise RuntimeError(
             "No existen figuras generadas."
         )
@@ -1839,20 +2015,17 @@ def validate_global_explainability(
     for plot_name, plot_file in plots.items():
 
         if not Path(plot_file).exists():
-
             raise RuntimeError(
-
                 f"La figura '{plot_name}' no existe: "
                 f"{plot_file}"
-
             )
 
-    exported_files = global_explainability[
-        "exported_files"
-    ]
+    if not isinstance(exported_files, dict):
+        raise TypeError(
+            "exported_files debe ser un diccionario."
+        )
 
-    if len(exported_files) == 0:
-
+    if not exported_files:
         raise RuntimeError(
             "No existen archivos exportados."
         )
@@ -1860,18 +2033,16 @@ def validate_global_explainability(
     for file_name, exported_file in exported_files.items():
 
         if not Path(exported_file).exists():
-
             raise RuntimeError(
-
                 f"El archivo '{file_name}' no existe: "
                 f"{exported_file}"
-
             )
 
     global_explainability[
         "status"
     ] = "VALIDATED"
 
+    # Retorno ----------------------------------------------------------------
     return True
 
 # BLOQUE 11. Auditoría de la Importancia de Variables -------------------------
@@ -1889,7 +2060,6 @@ def validate_global_explainability(
 #
 # Responde:
 # ¿La importancia de variables cumple los criterios mínimos de calidad?
-
 def audit_feature_importance(
     global_explainability: dict
 ) -> dict:
@@ -1908,78 +2078,59 @@ def audit_feature_importance(
         Contexto actualizado con la auditoría.
     """
 
-    if global_explainability is None:
-
-        raise RuntimeError(
-            "global_explainability no puede ser None."
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
         )
 
     required_keys = [
-
         "feature_ranking",
-
         "feature_importance",
-
         "feature_importance_std"
-
     ]
 
     missing_keys = [
-
         key
-
         for key in required_keys
-
         if key not in global_explainability
-
     ]
 
     if missing_keys:
-
         raise RuntimeError(
-
             "La estructura oficial está incompleta: "
             f"{missing_keys}"
-
         )
 
+    # Recuperación -----------------------------------------------------------
     feature_ranking = global_explainability[
         "feature_ranking"
     ]
 
+    # Validación -------------------------------------------------------------
     if feature_ranking.empty:
-
         raise RuntimeError(
             "El ranking de variables está vacío."
         )
 
     required_columns = [
-
         "importance",
-
         "std"
-
     ]
 
     missing_columns = [
-
         column
-
         for column in required_columns
-
         if column not in feature_ranking.columns
-
     ]
 
     if missing_columns:
-
         raise RuntimeError(
-
             "Faltan columnas en feature_ranking: "
             f"{missing_columns}"
-
         )
 
+    # Construcción -----------------------------------------------------------
     importance = feature_ranking["importance"]
 
     uncertainty = feature_ranking["std"]
@@ -2055,6 +2206,7 @@ def audit_feature_importance(
         "status"
     ] = "IMPORTANCE_AUDITED"
 
+    # Retorno ----------------------------------------------------------------
     return global_explainability
 
 # BLOQUE 12. Análisis de Consistencia entre Explicabilidad y Correlación -------
@@ -2076,7 +2228,6 @@ def audit_feature_importance(
 # Responde:
 # ¿Existe consistencia entre la importancia estimada por el modelo y la
 # asociación estadística con la variable objetivo?
-
 def analyze_target_correlation(
     global_explainability: dict,
     feature_data: pd.DataFrame,
@@ -2104,14 +2255,15 @@ def analyze_target_correlation(
         Contexto oficial actualizado.
     """
 
-    if global_explainability is None:
-        raise RuntimeError(
-            "global_explainability no puede ser None."
+    # Validación -------------------------------------------------------------
+    if not isinstance(global_explainability, dict):
+        raise TypeError(
+            "global_explainability debe ser un diccionario."
         )
 
-    if feature_data is None:
-        raise RuntimeError(
-            "feature_data no puede ser None."
+    if not isinstance(feature_data, pd.DataFrame):
+        raise TypeError(
+            "feature_data debe ser un DataFrame."
         )
 
     if target_data is None:
@@ -2119,25 +2271,34 @@ def analyze_target_correlation(
             "target_data no puede ser None."
         )
 
-    if not isinstance(feature_data, pd.DataFrame):
+    required_keys = [
+        "feature_ranking"
+    ]
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in global_explainability
+    ]
+
+    if missing_keys:
         raise RuntimeError(
-            "feature_data debe ser un DataFrame."
+            "La estructura oficial está incompleta: "
+            f"{missing_keys}"
         )
 
-    if "feature_ranking" not in global_explainability:
-        raise RuntimeError(
-            "No existe el ranking oficial."
-        )
-
+    # Recuperación -----------------------------------------------------------
     feature_ranking = global_explainability[
         "feature_ranking"
     ]
 
+    # Validación -------------------------------------------------------------
     if feature_ranking.empty:
         raise RuntimeError(
             "El ranking de variables está vacío."
         )
 
+    # Construcción -----------------------------------------------------------
     correlations = []
 
     target_series = pd.Series(target_data)
@@ -2148,6 +2309,9 @@ def analyze_target_correlation(
             target_series,
             method="spearman"
         )
+
+        if pd.isna(rho):
+            rho = 0.0
 
         correlations.append({
 
@@ -2233,6 +2397,12 @@ def analyze_target_correlation(
 
     )
 
+    if pd.isna(rho_global):
+        rho_global = 0.0
+
+    if pd.isna(p_value):
+        p_value = 1.0
+
     consistency_summary = {
 
         "high_consistency":
@@ -2277,4 +2447,5 @@ def analyze_target_correlation(
         "status"
     ] = "TARGET_CORRELATION_ANALYZED"
 
+    # Retorno ----------------------------------------------------------------
     return global_explainability
