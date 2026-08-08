@@ -1,110 +1,152 @@
 # graph-04_evaluation.py
 
-# BLOQUE 1. Importaciones --------------------------------------------------
-## Objetivo: Importar las dependencias necesarias para ejecutar la evaluación
-# científica del modelo oficial GraphSAGE utilizando el Dataset Científico,
-# la colección oficial de GraphData y los componentes de explicabilidad
-# del proyecto.
-### Producto:
-# - Librerías cargadas correctamente.
-### Responde:
-# ¿Qué dependencias requiere el protocolo de evaluación para reconstruir,
-# evaluar, interpretar y validar el modelo oficial del proyecto?
+# ==============================================================================
+# BLOQUE 1. IMPORTACIONES
+# ==============================================================================
+## Objetivo:
+# Importar las dependencias necesarias para ejecutar la evaluación científica
+# del Modelo Oficial GraphSAGE utilizando el Dataset Científico Certificado,
+# la colección oficial de GraphData y los componentes oficiales de
+# explicabilidad del proyecto.
+#
+## Producto:
+# - Dependencias científicas cargadas correctamente.
+# - Entorno de evaluación configurado.
+#
+## Responde:
+# ¿El protocolo científico dispone de todas las dependencias necesarias para
+# reconstruir, evaluar, interpretar y validar el Modelo Oficial del proyecto?
+# ==============================================================================
 
 print("-" * 80)
 print("Bloque 1. Importaciones.")
 
-# Funciones del sistema
+# ------------------------------------------------------------------------------
+# 1. Librerías estándar de Python
+# ------------------------------------------------------------------------------
+
 import json
 import pickle
-import time
 import warnings
-from datetime import datetime
+import joblib
 from pathlib import Path
 
-# Librerías científicas
+# ------------------------------------------------------------------------------
+# 2. Librerías científicas
+# ------------------------------------------------------------------------------
+
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn as nn
 
-# Configuración del proyecto
+# ------------------------------------------------------------------------------
+# 3. Configuración oficial del proyecto
+# ------------------------------------------------------------------------------
+
 from src.python.config.config_project import (
     PROJECT_SEED,
-    FEATURE_COLUMNS
+    FEATURE_COLUMNS,
 )
 
-# Rutas oficiales
+# ------------------------------------------------------------------------------
+# 4. Rutas oficiales del proyecto
+# ------------------------------------------------------------------------------
+
 from src.python.config.paths import (
     DATASET_FILE,
-    GRAPH_DATA_DIR,
+    BENCHMARK_DATA_FILE,
     EVALUATION_REPORTS_DIR,
-    BEST_MODEL_TORCH_FILE,
-    BEST_MODEL_CONFIG_FILE,
-    BEST_MODEL_METADATA_FILE
+    OFFICIAL_MODEL_TORCH_FILE,
+    OFFICIAL_MODEL_CONFIG_FILE,
+    OFFICIAL_MODEL_METADATA_FILE,
 )
 
-# Utilidades
+# ------------------------------------------------------------------------------
+# 5. Utilidades oficiales
+# ------------------------------------------------------------------------------
+
 from src.python.utils.results import (
-    build_benchmark_result
+    build_benchmark_result,
 )
 
-# Modelos Graph Neural Networks
+# ------------------------------------------------------------------------------
+# 6. Modelos Graph Neural Networks
+# ------------------------------------------------------------------------------
+
 from src.python.models.graph_neural_networks import (
-    GNN_CONFIG,
     build_gnn_model,
     evaluate_gnn,
-    predict_gnn
+    predict_gnn,
 )
 
-# Explicabilidad
+# ------------------------------------------------------------------------------
+# 7. Componentes oficiales de Explicabilidad
+# ------------------------------------------------------------------------------
+
 from src.python.analysis.explainability import (
-    aggregate_feature_importance,
-    analyze_target_correlation,
-    audit_feature_importance,
+    initialize_global_explainability,
+    initialize_explainability_context,
+
+    select_explainability_method,
     build_explainer,
     build_explanation_targets,
-    build_feature_ranking,
-    build_scientific_summary,
-    export_explainability_results,
-    extract_explanation_masks,
-    finalize_explainability,
-    generate_explainability_plots,
+
     generate_node_explanations,
-    initialize_explainability_context,
-    initialize_global_explainability,
-    select_explainability_method,
-    validate_global_explainability
+    extract_explanation_masks,
+    aggregate_feature_importance,
+
+    build_feature_ranking,
+    generate_explainability_plots,
+    build_scientific_summary,
+
+    export_explainability_results,
+
+    validate_global_explainability,
+
+    finalize_explainability,
+
+    audit_feature_importance,
+    analyze_target_correlation,
 )
 
-print("initialize_global_explainability =", initialize_global_explainability)
+# ------------------------------------------------------------------------------
+# 8. Configuración del entorno
+# ------------------------------------------------------------------------------
 
-# Configuración del entorno
 warnings.filterwarnings("ignore")
 
 print("-" * 80)
 print("Bloque 1. Importaciones completado.")
 
-# BLOQUE 2. Configuración --------------------------------------------------
-## Objetivo: Definir la configuración oficial que gobernará la evaluación
-# científica del modelo oficial GraphSAGE, garantizando la reproducibilidad,
-# consistencia e integridad del protocolo experimental.
-### Producto:
+# ==============================================================================
+# BLOQUE 2. CONFIGURACIÓN DE LA EVALUACIÓN CIENTÍFICA
+# ==============================================================================
+## Objetivo:
+# Construir y validar la configuración oficial que gobernará el protocolo de
+# evaluación científica del Modelo Oficial GraphSAGE, garantizando la
+# reproducibilidad, consistencia e integridad del proceso experimental.
+#
+## Producto:
 # - EVALUATION_CONFIG
-### Responde:
-# ¿La evaluación científica dispone de una configuración oficial,
-# reproducible y consistente para validar el modelo oficial del proyecto?
+#
+## Responde:
+# ¿La evaluación científica dispone de una configuración oficial, validada y
+# reproducible para ejecutar el protocolo de evaluación del Modelo Oficial?
+# ==============================================================================
+
+# BLOQUE 2.1. Construcción de la Configuración -------------------------------
 
 def build_evaluation_configuration() -> dict:
     """
-    Construye y valida la configuración oficial de la evaluación científica.
+    Construye la configuración oficial de la evaluación científica.
 
     Returns
     -------
     dict
-        Configuración oficial de la evaluación.
+        Configuración oficial de la evaluación científica.
     """
 
-    # Construcción de la configuración
     evaluation_config = {
         "evaluation_name": "scientific_evaluation",
         "evaluation_version": "1.0",
@@ -123,10 +165,73 @@ def build_evaluation_configuration() -> dict:
         "save_shap_values": True,
         "save_validation_results": True,
         "save_evaluation_report": True,
-        "random_state": PROJECT_SEED
+        "random_state": PROJECT_SEED,
     }
 
-    # Validación de la estructura
+    required_products = [
+        "evaluation_name",
+        "evaluation_version",
+        "prediction_source",
+        "calculate_metrics",
+        "calculate_residuals",
+        "calculate_global_explainability",
+        "calculate_local_explainability",
+        "calculate_feature_importance",
+        "shap_batch_size",
+        "show_progress",
+        "export_gnn_embeddings",
+        "save_evaluation_results",
+        "save_evaluation_summary",
+        "save_feature_importance",
+        "save_shap_values",
+        "save_validation_results",
+        "save_evaluation_report",
+        "random_state",
+    ]
+
+    missing_products = [
+        product
+        for product in required_products
+        if product not in evaluation_config
+    ]
+
+    if missing_products:
+        raise RuntimeError(
+            "EvaluationConfiguration está incompleto: "
+            f"{missing_products}"
+        )
+
+    return evaluation_config
+
+# BLOQUE 2.2. Validación de la Estructura ------------------------------------
+
+def validate_evaluation_configuration_structure(
+    evaluation_config: dict
+) -> None:
+    """
+    Valida la estructura de la configuración oficial de la evaluación
+    científica.
+
+    Parameters
+    ----------
+    evaluation_config : dict
+        Configuración oficial de la evaluación científica.
+
+    Returns
+    -------
+    None
+    """
+
+    if evaluation_config is None:
+        raise ValueError(
+            "La configuración de la evaluación no puede ser nula."
+        )
+
+    if not isinstance(evaluation_config, dict):
+        raise TypeError(
+            "evaluation_config debe ser un diccionario."
+        )
+
     required_keys = [
         "evaluation_name",
         "evaluation_version",
@@ -145,7 +250,7 @@ def build_evaluation_configuration() -> dict:
         "save_shap_values",
         "save_validation_results",
         "save_evaluation_report",
-        "random_state"
+        "random_state",
     ]
 
     missing_keys = [
@@ -160,21 +265,62 @@ def build_evaluation_configuration() -> dict:
             f"{missing_keys}"
         )
 
-    # Validación de tipos
-    if not isinstance(evaluation_config["evaluation_name"], str):
-        raise TypeError("evaluation_name debe ser una cadena.")
+    for key in required_keys:
 
-    if not isinstance(evaluation_config["evaluation_version"], str):
-        raise TypeError("evaluation_version debe ser una cadena.")
+        if evaluation_config[key] is None:
+            raise ValueError(
+                f"'{key}' es inválido."
+            )
 
-    if not isinstance(evaluation_config["prediction_source"], str):
-        raise TypeError("prediction_source debe ser una cadena.")
+    return None
 
-    if not isinstance(evaluation_config["shap_batch_size"], int):
-        raise TypeError("shap_batch_size debe ser un entero.")
+# BLOQUE 2.3. Validación de Tipos --------------------------------------------
 
-    if not isinstance(evaluation_config["random_state"], int):
-        raise TypeError("random_state debe ser un entero.")
+def validate_evaluation_configuration_types(
+    evaluation_config: dict
+) -> None:
+    """
+    Valida los tipos de datos de la configuración oficial de la evaluación
+    científica.
+
+    Parameters
+    ----------
+    evaluation_config : dict
+        Configuración oficial de la evaluación científica.
+
+    Returns
+    -------
+    None
+    """
+
+    if evaluation_config is None:
+        raise ValueError(
+            "La configuración de la evaluación no puede ser nula."
+        )
+
+    if not isinstance(evaluation_config, dict):
+        raise TypeError(
+            "evaluation_config debe ser un diccionario."
+        )
+
+    expected_types = {
+        "evaluation_name": str,
+        "evaluation_version": str,
+        "prediction_source": str,
+        "shap_batch_size": int,
+        "random_state": int,
+    }
+
+    for key, expected_type in expected_types.items():
+
+        if not isinstance(
+            evaluation_config[key],
+            expected_type
+        ):
+            raise TypeError(
+                f"{key} debe ser de tipo "
+                f"{expected_type.__name__}."
+            )
 
     boolean_keys = [
         "calculate_metrics",
@@ -189,106 +335,476 @@ def build_evaluation_configuration() -> dict:
         "save_feature_importance",
         "save_shap_values",
         "save_validation_results",
-        "save_evaluation_report"
+        "save_evaluation_report",
     ]
 
     for key in boolean_keys:
-        if not isinstance(evaluation_config[key], bool):
-            raise TypeError(f"{key} debe ser un valor booleano.")
 
-    # Validación del contenido
+        if not isinstance(
+            evaluation_config[key],
+            bool
+        ):
+            raise TypeError(
+                f"{key} debe ser un valor booleano."
+            )
+
+    return None
+
+# BLOQUE 2.4. Validación del Contenido ---------------------------------------
+
+def validate_evaluation_configuration_values(
+    evaluation_config: dict
+) -> None:
+    """
+    Valida el contenido de la configuración oficial de la evaluación
+    científica.
+
+    Parameters
+    ----------
+    evaluation_config : dict
+        Configuración oficial de la evaluación científica.
+
+    Returns
+    -------
+    None
+    """
+
+    if evaluation_config is None:
+        raise ValueError(
+            "La configuración de la evaluación no puede ser nula."
+        )
+
+    if not isinstance(evaluation_config, dict):
+        raise TypeError(
+            "evaluation_config debe ser un diccionario."
+        )
+
+    validate_evaluation_configuration_structure(
+        evaluation_config
+    )
+
+    validate_evaluation_configuration_types(
+        evaluation_config
+    )
+
     if not evaluation_config["evaluation_name"].strip():
-        raise ValueError("evaluation_name está vacío.")
+        raise ValueError(
+            "evaluation_name está vacío."
+        )
 
     if not evaluation_config["evaluation_version"].strip():
-        raise ValueError("evaluation_version está vacío.")
+        raise ValueError(
+            "evaluation_version está vacío."
+        )
 
     if not evaluation_config["prediction_source"].strip():
-        raise ValueError("prediction_source está vacío.")
+        raise ValueError(
+            "prediction_source está vacío."
+        )
+
+    if evaluation_config["prediction_source"] != "official_model":
+        raise ValueError(
+            "prediction_source debe ser 'official_model'."
+        )
 
     if evaluation_config["shap_batch_size"] <= 0:
-        raise ValueError("shap_batch_size debe ser mayor que cero.")
+        raise ValueError(
+            "shap_batch_size debe ser mayor que cero."
+        )
 
-    return evaluation_config
+    if evaluation_config["random_state"] < 0:
+        raise ValueError(
+            "random_state debe ser mayor o igual a cero."
+        )
 
-EVALUATION_CONFIG = build_evaluation_configuration()
+    return None
 
-print("-" * 80)
-print("Bloque 2. Configuración Finalizada.")
+# BLOQUE 2.5. Construcción de la Configuración Oficial ------------------------
 
-# BLOQUE 3. Carga del Modelo Oficial ---------------------------------------
-## Objetivo: Recuperar el modelo oficial GraphSAGE entrenado, sus metadatos
-# y la configuración oficial utilizada durante el entrenamiento definitivo
-# para iniciar la evaluación científica del proyecto.
-#### Producto:
-# - official_model
-#### Responde:
-# ¿El modelo oficial GraphSAGE fue recuperado correctamente para iniciar
-# la evaluación científica?
-
-def load_official_model() -> dict:
+def get_evaluation_configuration() -> dict:
     """
-    Recupera y valida el modelo oficial GraphSAGE entrenado junto con
-    su configuración oficial y sus metadatos exportados durante el
-    entrenamiento definitivo.
+    Construye y valida la configuración oficial de la evaluación científica.
 
     Returns
     -------
     dict
-        Información oficial del modelo GraphSAGE.
+        Configuración oficial de la evaluación científica validada.
     """
 
-    # Validación
-    if not BEST_MODEL_TORCH_FILE.exists():
-        raise FileNotFoundError(
-            f"No fue posible localizar {BEST_MODEL_TORCH_FILE.name}."
-        )
-
-    if not BEST_MODEL_CONFIG_FILE.exists():
-        raise FileNotFoundError(
-            f"No fue posible localizar {BEST_MODEL_CONFIG_FILE.name}."
-        )
-
-    if not BEST_MODEL_METADATA_FILE.exists():
-        raise FileNotFoundError(
-            f"No fue posible localizar {BEST_MODEL_METADATA_FILE.name}."
-        )
-
-    # Recuperación
     try:
-        with open(
-            BEST_MODEL_CONFIG_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-            model_config = json.load(file)
+
+        # Construcción
+        evaluation_config = build_evaluation_configuration()
+
+        # Validación de la estructura
+        validate_evaluation_configuration_structure(
+            evaluation_config=evaluation_config
+        )
+
+        # Validación de los tipos de datos
+        validate_evaluation_configuration_types(
+            evaluation_config=evaluation_config
+        )
+
+        # Validación del contenido
+        validate_evaluation_configuration_values(
+            evaluation_config=evaluation_config
+        )
+
+        required_products = [
+            "evaluation_name",
+            "evaluation_version",
+            "prediction_source",
+            "calculate_metrics",
+            "calculate_residuals",
+            "calculate_global_explainability",
+            "calculate_local_explainability",
+            "calculate_feature_importance",
+            "shap_batch_size",
+            "show_progress",
+            "export_gnn_embeddings",
+            "save_evaluation_results",
+            "save_evaluation_summary",
+            "save_feature_importance",
+            "save_shap_values",
+            "save_validation_results",
+            "save_evaluation_report",
+            "random_state",
+        ]
+
+        missing_products = [
+            product
+            for product in required_products
+            if product not in evaluation_config
+        ]
+
+        if missing_products:
+            raise RuntimeError(
+                "EvaluationConfiguration está incompleto: "
+                f"{missing_products}"
+            )
+
+        return evaluation_config
 
     except Exception as error:
+
         raise RuntimeError(
-            f"Error al cargar la configuración oficial: {error}"
-        )
+            "No fue posible construir la configuración oficial de la evaluación."
+        ) from error
+
+# ------------------------------------------------------------------------------
+# Construcción del producto oficial
+# ------------------------------------------------------------------------------
+
+EVALUATION_CONFIG = get_evaluation_configuration()
+
+print("-" * 80)
+print("Configuración Oficial de la Evaluación Científica")
+print("-" * 80)
+
+print(
+    f"Evaluación                : "
+    f"{EVALUATION_CONFIG['evaluation_name']}"
+)
+
+print(
+    f"Versión                   : "
+    f"{EVALUATION_CONFIG['evaluation_version']}"
+)
+
+print(
+    f"Fuente de predicción      : "
+    f"{EVALUATION_CONFIG['prediction_source']}"
+)
+
+print(
+    f"Explicabilidad Global     : "
+    f"{EVALUATION_CONFIG['calculate_global_explainability']}"
+)
+
+print(
+    f"Explicabilidad Local      : "
+    f"{EVALUATION_CONFIG['calculate_local_explainability']}"
+)
+
+print(
+    f"Importancia de Variables  : "
+    f"{EVALUATION_CONFIG['calculate_feature_importance']}"
+)
+
+print(
+    f"Semilla Científica        : "
+    f"{EVALUATION_CONFIG['random_state']}"
+)
+
+print("-" * 80)
+print("Bloque 2. Configuración oficial construida correctamente.")
+
+# BLOQUE 3. Carga del Modelo Oficial ----------------------------------------
+## Objetivo: Recuperar el modelo oficial GraphSAGE entrenado y sus recursos
+# científicos para iniciar la evaluación científica del proyecto.
+#
+## Producto:
+# - official_model
+#
+## Responde:
+# ¿El modelo oficial GraphSAGE fue recuperado correctamente para iniciar la
+# evaluación científica?
+
+# BLOQUE 3.1. Validación de Archivos -----------------------------------------
+
+def validate_official_model_files() -> None:
+    """
+    Valida la existencia de los archivos oficiales del modelo GraphSAGE.
+
+    Returns
+    -------
+    None
+    """
+
+    required_files = {
+        "OFFICIAL_MODEL_TORCH_FILE": OFFICIAL_MODEL_TORCH_FILE,
+        "OFFICIAL_MODEL_CONFIG_FILE": OFFICIAL_MODEL_CONFIG_FILE,
+        "OFFICIAL_MODEL_METADATA_FILE": OFFICIAL_MODEL_METADATA_FILE,
+    }
+
+    for product, file_path in required_files.items():
+
+        if file_path is None:
+            raise ValueError(
+                f"{product} no puede ser nulo."
+            )
+
+        if not file_path.exists():
+            raise FileNotFoundError(
+                f"No fue posible localizar {file_path.name}."
+            )
+
+    return None
+
+# BLOQUE 3.2. Recuperación de la Configuración Oficial -----------------------
+
+def load_official_model_configuration() -> dict:
+    """
+    Recupera la configuración oficial del modelo GraphSAGE.
+
+    Returns
+    -------
+    dict
+        Configuración oficial completa del modelo.
+    """
 
     try:
+
         with open(
-            BEST_MODEL_METADATA_FILE,
+            OFFICIAL_MODEL_CONFIG_FILE,
             "r",
             encoding="utf-8"
         ) as file:
+
+            configuration = json.load(file)
+
+        if not isinstance(configuration, dict):
+            raise TypeError(
+                "La configuración oficial debe ser un diccionario."
+            )
+
+        required_keys = [
+            "model_code",
+            "model_name",
+            "family",
+            "model_config"
+        ]
+
+        missing_keys = [
+            key
+            for key in required_keys
+            if key not in configuration
+        ]
+
+        if missing_keys:
+            raise ValueError(
+                "La configuración oficial está incompleta: "
+                f"{missing_keys}"
+            )
+
+        for key in required_keys:
+
+            if configuration[key] is None:
+                raise ValueError(
+                    f"'{key}' es inválido."
+                )
+
+        if not isinstance(
+            configuration["model_config"],
+            dict
+        ):
+            raise TypeError(
+                "model_config debe ser un diccionario."
+            )
+
+        model_config = configuration["model_config"].copy()
+
+        model_config["model_code"] = configuration["model_code"]
+        model_config["model_name"] = configuration["model_name"]
+        model_config["family"] = configuration["family"]
+
+        required_products = [
+            "model_code",
+            "model_name",
+            "family",
+        ]
+
+        missing_products = [
+            product
+            for product in required_products
+            if product not in model_config
+        ]
+
+        if missing_products:
+            raise RuntimeError(
+                "ModelConfiguration está incompleto: "
+                f"{missing_products}"
+            )
+
+        return model_config
+
+    except Exception as error:
+
+        raise RuntimeError(
+            "No fue posible recuperar la configuración oficial del modelo."
+        ) from error
+
+# BLOQUE 3.3. Recuperación de los Metadatos Oficiales ------------------------
+
+def load_official_model_metadata() -> dict:
+    """
+    Recupera los metadatos oficiales del modelo GraphSAGE.
+
+    Returns
+    -------
+    dict
+        Metadatos oficiales del modelo.
+    """
+
+    validate_official_model_files()
+
+    try:
+
+        with open(
+            OFFICIAL_MODEL_METADATA_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
             model_metadata = json.load(file)
 
+        if not isinstance(model_metadata, dict):
+            raise TypeError(
+                "Los metadatos oficiales deben ser un diccionario."
+            )
+
+        required_products = [
+            "model_code",
+            "model_name",
+            "family",
+        ]
+
+        missing_products = [
+            product
+            for product in required_products
+            if product not in model_metadata
+        ]
+
+        if missing_products:
+            raise ValueError(
+                "ModelMetadata está incompleto: "
+                f"{missing_products}"
+            )
+
+        for product in required_products:
+
+            if model_metadata[product] is None:
+                raise ValueError(
+                    f"'{product}' es inválido."
+                )
+
+        return model_metadata
+
     except Exception as error:
+
         raise RuntimeError(
-            f"Error al cargar los metadatos del modelo oficial: {error}"
+            "No fue posible recuperar los metadatos oficiales del modelo."
+        ) from error
+    
+# BLOQUE 3.4. Recuperación del Modelo Oficial -------------------------------
+
+def load_trained_official_model(
+    model_config: dict
+) -> tuple[dict, torch.nn.Module]:
+    """
+    Recupera el modelo oficial GraphSAGE entrenado.
+
+    Parameters
+    ----------
+    model_config : dict
+        Configuración oficial del modelo.
+
+    Returns
+    -------
+    tuple[dict, torch.nn.Module]
+        Checkpoint oficial y modelo GraphSAGE entrenado.
+    """
+
+    if model_config is None:
+        raise ValueError(
+            "La configuración del modelo no puede ser nula."
         )
 
+    if not isinstance(model_config, dict):
+        raise TypeError(
+            "model_config debe ser un diccionario."
+        )
+
+    validate_official_model_files()
+
     try:
+
         checkpoint = torch.load(
-            BEST_MODEL_TORCH_FILE,
+            OFFICIAL_MODEL_TORCH_FILE,
             weights_only=False
         )
 
-        # Recuperación del modelo entrenado
-        input_channels = checkpoint["model_state_dict"][
+        if not isinstance(checkpoint, dict):
+            raise TypeError(
+                "El checkpoint debe ser un diccionario."
+            )
+
+        required_products = [
+            "model_state_dict",
+        ]
+
+        missing_products = [
+            product
+            for product in required_products
+            if product not in checkpoint
+        ]
+
+        if missing_products:
+            raise ValueError(
+                "Checkpoint incompleto: "
+                f"{missing_products}"
+            )
+
+        state_dict = checkpoint["model_state_dict"]
+
+        if "conv1.lin_l.weight" not in state_dict:
+            raise ValueError(
+                "No fue posible localizar "
+                "'conv1.lin_l.weight' en el checkpoint."
+            )
+
+        input_channels = state_dict[
             "conv1.lin_l.weight"
         ].shape[1]
 
@@ -298,18 +814,56 @@ def load_official_model() -> dict:
             output_channels=1
         )
 
+        if not isinstance(
+            trained_model,
+            nn.Module
+        ):
+            raise TypeError(
+                "El modelo construido no corresponde a nn.Module."
+            )
+
         trained_model.load_state_dict(
-            checkpoint["model_state_dict"]
+            state_dict
         )
 
         trained_model.eval()
 
+        return checkpoint, trained_model
+
     except Exception as error:
+
         raise RuntimeError(
-            f"Error al cargar el modelo oficial: {error}"
+            "No fue posible recuperar el modelo oficial GraphSAGE."
+        ) from error
+    
+# BLOQUE 3.5. Validación de la Configuración Oficial -------------------------
+
+def validate_official_model_configuration(
+    model_config: dict
+) -> None:
+    """
+    Valida la configuración oficial del modelo GraphSAGE.
+
+    Parameters
+    ----------
+    model_config : dict
+        Configuración oficial del modelo.
+
+    Returns
+    -------
+    None
+    """
+
+    if model_config is None:
+        raise ValueError(
+            "La configuración del modelo no puede ser nula."
         )
 
-    # Validación
+    if not isinstance(model_config, dict):
+        raise TypeError(
+            "model_config debe ser un diccionario."
+        )
+
     required_config_keys = [
         "model_code",
         "model_name",
@@ -318,7 +872,7 @@ def load_official_model() -> dict:
         "dropout",
         "learning_rate",
         "weight_decay",
-        "epochs"
+        "epochs",
     ]
 
     missing_config_keys = [
@@ -333,16 +887,107 @@ def load_official_model() -> dict:
             f"{missing_config_keys}"
         )
 
+    for key in required_config_keys:
+
+        if model_config[key] is None:
+            raise ValueError(
+                f"'{key}' es inválido."
+            )
+
+    if not isinstance(model_config["model_code"], str):
+        raise TypeError(
+            "model_code debe ser una cadena."
+        )
+
+    if not isinstance(model_config["model_name"], str):
+        raise TypeError(
+            "model_name debe ser una cadena."
+        )
+
+    if not isinstance(model_config["family"], str):
+        raise TypeError(
+            "family debe ser una cadena."
+        )
+
+    if not model_config["model_code"].strip():
+        raise ValueError(
+            "model_code está vacío."
+        )
+
+    if not model_config["model_name"].strip():
+        raise ValueError(
+            "model_name está vacío."
+        )
+
+    if not model_config["family"].strip():
+        raise ValueError(
+            "family está vacía."
+        )
+
+    if model_config["hidden_channels"] <= 0:
+        raise ValueError(
+            "hidden_channels debe ser mayor que cero."
+        )
+
+    if not 0 <= model_config["dropout"] <= 1:
+        raise ValueError(
+            "dropout debe estar entre 0 y 1."
+        )
+
+    if model_config["learning_rate"] <= 0:
+        raise ValueError(
+            "learning_rate debe ser mayor que cero."
+        )
+
+    if model_config["weight_decay"] < 0:
+        raise ValueError(
+            "weight_decay no puede ser negativo."
+        )
+
+    if model_config["epochs"] <= 0:
+        raise ValueError(
+            "epochs debe ser mayor que cero."
+        )
+
+    return None
+
+# BLOQUE 3.6. Validación de los Metadatos Oficiales --------------------------
+
+def validate_official_model_metadata(
+    model_metadata: dict
+) -> None:
+    """
+    Valida los metadatos oficiales del modelo GraphSAGE.
+
+    Parameters
+    ----------
+    model_metadata : dict
+        Metadatos oficiales del modelo.
+
+    Returns
+    -------
+    None
+    """
+
+    if model_metadata is None:
+        raise ValueError(
+            "Los metadatos del modelo no pueden ser nulos."
+        )
+
+    if not isinstance(model_metadata, dict):
+        raise TypeError(
+            "model_metadata debe ser un diccionario."
+        )
+
     required_metadata_keys = [
         "model_code",
         "model_name",
         "family",
-        "training_name",
-        "training_version",
+        "model_config",
+        "graphs",
         "training_time",
         "training_loss",
         "loss_history",
-        "epochs",
         "training_date",
         "export_format"
     ]
@@ -355,16 +1000,166 @@ def load_official_model() -> dict:
 
     if missing_metadata_keys:
         raise ValueError(
-            "Los metadatos del modelo están incompletos: "
+            "Los metadatos del modelo oficial están incompletos: "
             f"{missing_metadata_keys}"
         )
+
+    for key in required_metadata_keys:
+
+        if model_metadata[key] is None:
+            raise ValueError(
+                f"'{key}' es inválido."
+            )
+
+    if not isinstance(model_metadata["model_code"], str):
+        raise TypeError(
+            "model_code debe ser una cadena."
+        )
+
+    if not isinstance(model_metadata["model_name"], str):
+        raise TypeError(
+            "model_name debe ser una cadena."
+        )
+
+    if not isinstance(model_metadata["family"], str):
+        raise TypeError(
+            "family debe ser una cadena."
+        )
+
+    if not isinstance(model_metadata["model_config"], dict):
+        raise TypeError(
+            "model_config debe ser un diccionario."
+        )
+
+    if not isinstance(model_metadata["graphs"], int):
+        raise TypeError(
+            "graphs debe ser un entero."
+        )
+
+    if not isinstance(model_metadata["training_time"], (int, float)):
+        raise TypeError(
+            "training_time debe ser numérico."
+        )
+
+    if not isinstance(model_metadata["training_loss"], (int, float)):
+        raise TypeError(
+            "training_loss debe ser numérico."
+        )
+
+    if not isinstance(model_metadata["loss_history"], list):
+        raise TypeError(
+            "loss_history debe ser una lista."
+        )
+
+    if not isinstance(model_metadata["training_date"], str):
+        raise TypeError(
+            "training_date debe ser una cadena."
+        )
+
+    if not isinstance(model_metadata["export_format"], str):
+        raise TypeError(
+            "export_format debe ser una cadena."
+        )
+
+    if not model_metadata["model_code"].strip():
+        raise ValueError(
+            "model_code está vacío."
+        )
+
+    if not model_metadata["model_name"].strip():
+        raise ValueError(
+            "model_name está vacío."
+        )
+
+    if not model_metadata["family"].strip():
+        raise ValueError(
+            "family está vacía."
+        )
+
+    if model_metadata["graphs"] <= 0:
+        raise ValueError(
+            "graphs debe ser mayor que cero."
+        )
+
+    if model_metadata["training_time"] < 0:
+        raise ValueError(
+            "training_time no puede ser negativo."
+        )
+
+    if model_metadata["training_loss"] < 0:
+        raise ValueError(
+            "training_loss no puede ser negativo."
+        )
+
+    if len(model_metadata["loss_history"]) == 0:
+        raise ValueError(
+            "loss_history está vacío."
+        )
+
+    if not model_metadata["training_date"].strip():
+        raise ValueError(
+            "training_date está vacío."
+        )
+
+    if not model_metadata["export_format"].strip():
+        raise ValueError(
+            "export_format está vacío."
+        )
+
+    return None
+
+# BLOQUE 3.7. Validación del Modelo Oficial ---------------------------------
+
+def validate_official_model(
+    checkpoint: dict,
+    model_config: dict
+) -> None:
+    """
+    Valida el modelo oficial GraphSAGE recuperado.
+
+    Parameters
+    ----------
+    checkpoint : dict
+        Checkpoint oficial del modelo.
+
+    model_config : dict
+        Configuración oficial del modelo.
+
+    Returns
+    -------
+    None
+    """
+
+    if checkpoint is None:
+        raise ValueError(
+            "El checkpoint no puede ser nulo."
+        )
+
+    if not isinstance(checkpoint, dict):
+        raise TypeError(
+            "checkpoint debe ser un diccionario."
+        )
+
+    if model_config is None:
+        raise ValueError(
+            "La configuración del modelo no puede ser nula."
+        )
+
+    if not isinstance(model_config, dict):
+        raise TypeError(
+            "model_config debe ser un diccionario."
+        )
+
+    validate_official_model_configuration(
+        model_config=model_config
+    )
 
     if model_config["family"] != "graph_neural_networks":
         raise ValueError(
             "La evaluación científica únicamente admite Graph Neural Networks."
         )
 
-    if model_config["model_name"] != "graphsage":
+    if model_config["model_name"].lower() != "graphsage":
         raise ValueError(
             "El modelo oficial del proyecto debe ser GraphSAGE."
         )
@@ -386,16 +1181,116 @@ def load_official_model() -> dict:
             f"{missing_checkpoint_keys}"
         )
 
-    official_model = {
-        "checkpoint": checkpoint,
-        "trained_model": trained_model,
-        "model_config": model_config,
-        "model_metadata": model_metadata
-    }
+    for key in required_checkpoint_keys:
 
-    return official_model
+        if checkpoint[key] is None:
+            raise ValueError(
+                f"'{key}' es inválido."
+            )
 
-OFFICIAL_MODEL = load_official_model()
+    if not isinstance(
+        checkpoint["model_state_dict"],
+        dict
+    ):
+        raise TypeError(
+            "model_state_dict debe ser un diccionario."
+        )
+
+    if not isinstance(
+        checkpoint["model_config"],
+        dict
+    ):
+        raise TypeError(
+            "model_config del checkpoint debe ser un diccionario."
+        )
+
+    return None
+
+# BLOQUE 3.8. Construcción del Modelo Oficial -------------------------------
+
+def get_official_model() -> dict:
+    """
+    Construye el modelo oficial GraphSAGE para la evaluación científica.
+
+    Returns
+    -------
+    dict
+        Modelo oficial GraphSAGE.
+    """
+
+    try:
+
+        # Validación de archivos
+        validate_official_model_files()
+
+        # Recuperación de productos
+        model_config = load_official_model_configuration()
+
+        model_metadata = load_official_model_metadata()
+
+        checkpoint, trained_model = load_trained_official_model(
+            model_config=model_config
+        )
+
+        # Validación de productos
+        validate_official_model_configuration(
+            model_config=model_config
+        )
+
+        validate_official_model_metadata(
+            model_metadata=model_metadata
+        )
+
+        validate_official_model(
+            checkpoint=checkpoint,
+            model_config=model_config
+        )
+
+        # Construcción del producto oficial
+        official_model = {
+            "checkpoint": checkpoint,
+            "trained_model": trained_model,
+            "model_config": model_config,
+            "model_metadata": model_metadata
+        }
+
+        required_products = [
+            "checkpoint",
+            "trained_model",
+            "model_config",
+            "model_metadata",
+        ]
+
+        missing_products = [
+            product
+            for product in required_products
+            if product not in official_model
+        ]
+
+        if missing_products:
+            raise RuntimeError(
+                "OfficialModel está incompleto: "
+                f"{missing_products}"
+            )
+
+        if not isinstance(
+            official_model["trained_model"],
+            nn.Module
+        ):
+            raise TypeError(
+                "trained_model debe ser una instancia de nn.Module."
+            )
+
+        return official_model
+
+    except Exception as error:
+
+        raise RuntimeError(
+            "No fue posible construir el Modelo Oficial."
+        ) from error
+
+
+OFFICIAL_MODEL = get_official_model()
 
 print("-" * 80)
 print("Bloque 3. Carga del Modelo Oficial Finalizada.")
@@ -409,11 +1304,10 @@ print("Bloque 3. Carga del Modelo Oficial Finalizada.")
 #### Responde:
 # ¿Los datos oficiales del proyecto fueron recuperados correctamente para
 # iniciar la evaluación científica?
-
 def load_evaluation_data() -> dict:
     """
-    Recupera y valida el Dataset Científico Certificado y la colección
-    oficial de GraphData utilizados durante la evaluación científica.
+    Recupera y valida la colección oficial BenchmarkData utilizada durante
+    la evaluación científica del Modelo Oficial.
 
     Returns
     -------
@@ -421,81 +1315,92 @@ def load_evaluation_data() -> dict:
         Datos oficiales de evaluación.
     """
 
+    # --------------------------------------------------------------------------
     # Validación de rutas
-    if not DATASET_FILE.exists():
+    # --------------------------------------------------------------------------
+
+    if not BENCHMARK_DATA_FILE.exists():
         raise FileNotFoundError(
-            f"No fue posible localizar {DATASET_FILE.name}."
+            f"No fue posible localizar '{BENCHMARK_DATA_FILE.name}'."
         )
 
-    if not GRAPH_DATA_DIR.exists():
-        raise FileNotFoundError(
-            f"No fue posible localizar el directorio de GraphData."
-        )
+    # --------------------------------------------------------------------------
+    # Recuperación de BenchmarkData
+    # --------------------------------------------------------------------------
 
-    # Recuperación del Dataset Científico
     try:
 
-        dataset = pd.read_parquet(
-            DATASET_FILE
+        benchmark_data = joblib.load(
+            BENCHMARK_DATA_FILE
         )
 
     except Exception as error:
 
         raise RuntimeError(
-            f"Error al cargar el Dataset Científico: {error}"
+            f"Error al recuperar BenchmarkData: {error}"
         )
 
-    # Validación del Dataset
-    if dataset.empty:
+    # --------------------------------------------------------------------------
+    # Validación de BenchmarkData
+    # --------------------------------------------------------------------------
 
-        raise ValueError(
-            "El Dataset Científico está vacío."
+    if not isinstance(
+        benchmark_data,
+        dict
+    ):
+        raise TypeError(
+            "BenchmarkData debe ser un diccionario."
         )
 
-    # Recuperación de GraphData
-    graph_files = sorted(
-        GRAPH_DATA_DIR.glob(
-            "graph_data_*.pt"
-        )
-    )
-
-    graph_files = [
-        graph_file
-        for graph_file in graph_files
-        if graph_file.stem != "graph_data_collection"
+    required_benchmark = [
+        "graphs",
+        "x_test",
+        "y_test",
+        "test_index",
     ]
 
-    if len(graph_files) == 0:
+    missing_benchmark = [
+        key
+        for key in required_benchmark
+        if key not in benchmark_data
+    ]
 
-        raise FileNotFoundError(
-            "No se encontraron GraphData oficiales."
+    if missing_benchmark:
+
+        raise ValueError(
+            "BenchmarkData está incompleto: "
+            f"{missing_benchmark}"
         )
 
-    graphs = []
+    graphs = benchmark_data["graphs"]
 
-    for graph_file in graph_files:
+    dataset = pd.DataFrame(
+        benchmark_data["x_test"],
+        columns=FEATURE_COLUMNS
+    )
 
-        try:
+    if dataset.empty:
+        raise ValueError(
+            "El DataFrame de variables predictoras está vacío."
+        )
 
-            graph = torch.load(
-                graph_file,
-                weights_only=False
-            )
+    if not isinstance(
+        graphs,
+        list
+    ):
+        raise TypeError(
+            "'graphs' debe ser una lista."
+        )
 
-        except Exception as error:
-
-            raise RuntimeError(
-                f"Error al cargar '{graph_file.name}': {error}"
-            )
-
-        graphs.append(graph)
-
-    # Validación de la colección
     if len(graphs) == 0:
 
         raise ValueError(
             "La colección oficial de GraphData está vacía."
         )
+
+    # --------------------------------------------------------------------------
+    # Validación de la colección GraphData
+    # --------------------------------------------------------------------------
 
     for index, graph in enumerate(
         graphs,
@@ -518,16 +1423,34 @@ def load_evaluation_data() -> dict:
                 "de PyTorch Geometric."
             )
 
+    # --------------------------------------------------------------------------
     # Construcción del producto oficial
+    # --------------------------------------------------------------------------
+    dataset = pd.DataFrame(
+        benchmark_data["x_test"],
+        columns=FEATURE_COLUMNS
+    )
+
+    if dataset.empty:
+        raise ValueError(
+            "El DataFrame de variables predictoras está vacío."
+        )
+
+
     evaluation_data = {
         "dataset": dataset,
-        "graphs": graphs
+        "benchmark_data": benchmark_data,
+        "graphs": graphs,
     }
 
+    # --------------------------------------------------------------------------
     # Validación del producto
+    # --------------------------------------------------------------------------
+
     required_keys = [
+        "benchmark_data",
         "dataset",
-        "graphs"
+        "graphs",
     ]
 
     missing_keys = [
@@ -539,8 +1462,13 @@ def load_evaluation_data() -> dict:
     if missing_keys:
 
         raise ValueError(
-            f"El producto evaluation_data está incompleto: {missing_keys}"
+            "El producto evaluation_data está incompleto: "
+            f"{missing_keys}"
         )
+
+    # --------------------------------------------------------------------------
+    # Retorno
+    # --------------------------------------------------------------------------
 
     return evaluation_data
 
@@ -563,12 +1491,13 @@ def generate_predictions(
     evaluation_data: dict
 ) -> dict:
     """
-    Genera y valida las predicciones oficiales del modelo GraphSAGE.
+    Genera y valida las predicciones oficiales del Modelo Oficial.
 
     Parameters
     ----------
     official_model : dict
         Modelo oficial recuperado.
+
     evaluation_data : dict
         Datos oficiales de evaluación.
 
@@ -578,13 +1507,22 @@ def generate_predictions(
         Resultado oficial de la inferencia.
     """
 
+    # --------------------------------------------------------------------------
     # Validación
-    if not isinstance(official_model, dict):
+    # --------------------------------------------------------------------------
+
+    if not isinstance(
+        official_model,
+        dict
+    ):
         raise TypeError(
             "official_model debe ser un diccionario."
         )
 
-    if not isinstance(evaluation_data, dict):
+    if not isinstance(
+        evaluation_data,
+        dict
+    ):
         raise TypeError(
             "evaluation_data debe ser un diccionario."
         )
@@ -593,7 +1531,7 @@ def generate_predictions(
         "checkpoint",
         "trained_model",
         "model_metadata",
-        "model_config"
+        "model_config",
     ]
 
     missing_model_keys = [
@@ -604,12 +1542,13 @@ def generate_predictions(
 
     if missing_model_keys:
         raise ValueError(
-            f"official_model está incompleto: {missing_model_keys}"
+            "official_model está incompleto: "
+            f"{missing_model_keys}"
         )
 
     required_data_keys = [
-        "dataset",
-        "graphs"
+        "benchmark_data",
+        "graphs",
     ]
 
     missing_data_keys = [
@@ -620,21 +1559,46 @@ def generate_predictions(
 
     if missing_data_keys:
         raise ValueError(
-            f"evaluation_data está incompleto: {missing_data_keys}"
+            "evaluation_data está incompleto: "
+            f"{missing_data_keys}"
         )
 
+    # --------------------------------------------------------------------------
     # Recuperación
-    
-    trained_model = official_model["trained_model"]
+    # --------------------------------------------------------------------------
 
-    if not hasattr(trained_model, "eval"):
+    trained_model = official_model[
+        "trained_model"
+    ]
+
+    if not hasattr(
+        trained_model,
+        "eval"
+    ):
         raise TypeError(
             "El modelo oficial no corresponde a un módulo válido de PyTorch."
         )
 
-    graphs = evaluation_data["graphs"]
+    benchmark_data = evaluation_data[
+        "benchmark_data"
+    ]
 
+    graphs = evaluation_data[
+        "graphs"
+    ]
+
+    y_true = benchmark_data[
+        "y_test"
+    ]
+
+    test_index = benchmark_data[
+        "test_index"
+    ]
+
+    # --------------------------------------------------------------------------
     # Inferencia
+    # --------------------------------------------------------------------------
+
     try:
 
         prediction_output = predict_gnn(
@@ -648,15 +1612,18 @@ def generate_predictions(
             f"Error durante la generación de predicciones: {error}"
         )
 
+    # --------------------------------------------------------------------------
     # Validación
+    # --------------------------------------------------------------------------
+
     if prediction_output is None:
         raise RuntimeError(
             "La función oficial de predicción no devolvió resultados."
         )
 
     required_prediction_keys = [
-        "y_true",
-        "y_pred"
+        "y_pred",
+        "inference_time",
     ]
 
     missing_prediction_keys = [
@@ -671,37 +1638,55 @@ def generate_predictions(
             f"{missing_prediction_keys}"
         )
 
-    y_true = np.asarray(
-        prediction_output["y_true"]
-    )
-
     y_pred = np.asarray(
         prediction_output["y_pred"]
+    )[test_index]
+
+    y_true = np.asarray(
+        y_true
     )
+
+    print("\n" + "=" * 80)
+    print("AUDITORÍA DE PREDICCIÓN")
+    print("=" * 80)
+
+    print(f"y_true.shape : {tuple(y_true.shape)}")
+    print(f"y_pred.shape : {tuple(y_pred.shape)}")
+
+    print(f"len(y_true)  : {len(y_true)}")
+    print(f"len(y_pred)  : {len(y_pred)}")
+    print(type(y_true))
+    print(type(y_pred))
 
     if y_true.shape != y_pred.shape:
         raise ValueError(
             "Las dimensiones de y_true y y_pred no coinciden."
         )
 
+    # --------------------------------------------------------------------------
     # Construcción
+    # --------------------------------------------------------------------------
+
     prediction_result = {
 
         "y_true": y_true,
 
         "y_pred": y_pred,
 
-        "inference_time": prediction_output.get(
-            "inference_time",
-            None
-        )
+        "inference_time": prediction_output[
+            "inference_time"
+        ],
+
     }
 
+    # --------------------------------------------------------------------------
     # Validación
+    # --------------------------------------------------------------------------
+
     required_result_keys = [
         "y_true",
         "y_pred",
-        "inference_time"
+        "inference_time",
     ]
 
     missing_result_keys = [
@@ -1014,6 +1999,23 @@ print("Bloque 7. Construcción del Resultado Oficial Finalizado.")
 
 print("-" * 80)
 print("Bloque 8. Explicabilidad Global.")
+
+print("-" * 80)
+print("AUDITORÍA BLOQUE 8")
+
+print("OFFICIAL_MODEL")
+print(OFFICIAL_MODEL.keys())
+
+print("EVALUATION_DATA")
+print(EVALUATION_DATA.keys())
+
+print("PREDICTION_RESULT")
+print(PREDICTION_RESULT.keys())
+
+print("EVALUATION_CONFIG")
+print(EVALUATION_CONFIG.keys())
+
+print("-" * 80)
 
 # BLOQUE 8.1. Validación de Entradas ---------------------------------------
 ## Objetivo: Validar la estructura y consistencia de las entradas requeridas
@@ -1864,6 +2866,9 @@ def build_evaluation_output(
     # ---------------------------------------------------------------------
 
     required_model_keys = [
+        "model_name",
+        "model_code",
+        "family",
         "trained_model",
         "model_metadata",
         "model_config"

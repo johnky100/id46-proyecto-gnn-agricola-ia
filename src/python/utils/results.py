@@ -1,4 +1,4 @@
-# utils-results.py
+# results.py
 
 # BLOQUE 1. Construcción del Resultado del Benchmark -------------------------
 ## Objetivo: Construir la estructura oficial de resultados utilizada por el
@@ -200,7 +200,6 @@ def save_benchmark_result(
 # BLOQUE 2A. Construcción del Resultado Exportable ----------------------------
 ## Objetivo: Generar una versión serializable del Benchmark para exportación
 ## en formatos CSV, Parquet y JSON.
-
 def build_exportable_benchmark_result(
     benchmark_result: dict
 ) -> dict:
@@ -269,7 +268,23 @@ def build_exportable_benchmark_result(
                 estimator,
                 "__name__",
                 str(estimator)
-    )
+            )
+
+        # Eliminar información duplicada
+        model_config.pop(
+            "model_code",
+            None
+        )
+
+        model_config.pop(
+            "model_name",
+            None
+        )
+
+        model_config.pop(
+            "family",
+            None
+        )
 
         export_result[
             "model_config"

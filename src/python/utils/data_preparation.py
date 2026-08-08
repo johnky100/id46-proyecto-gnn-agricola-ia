@@ -1,4 +1,4 @@
-# utils-data_preparation.py
+# data_preparation.py
 
 # BLOQUE 1. Importaciones -----------------------------------------------------
 ## Objetivo: Importar las dependencias necesarias para la carga, validación y
@@ -8,10 +8,11 @@ import warnings # Emisión de advertencias durante la validación
 import pandas as pd # Manipulación del Dataset Científico
 
 from config.config_project import (
-    N_OBS_PANEL,
+    N_PANEL_OBSERVATIONS,
     PANEL_ID_COLUMN,
     STRUCTURAL_COLUMNS,
-    TARGET_VARIABLE
+    TARGET_VARIABLE,
+    FEATURE_COLUMNS
 )
 
 from config.paths import DATASET_FILE # Ruta oficial del Dataset Científico
@@ -87,11 +88,11 @@ def validate_dataset(
             f"Faltan las siguientes columnas obligatorias: {missing}."
         )  # Validar estructura del Dataset Científico
 
-    if len(dataset) != N_OBS_PANEL:
+    if len(dataset) != N_PANEL_OBSERVATIONS:
 
         warnings.warn(
             (
-                f"Se esperaban {N_OBS_PANEL:,} observaciones y "
+                f"Se esperaban {N_PANEL_OBSERVATIONS:,} observaciones y "
                 f"se encontraron {len(dataset):,}."
             ),
             UserWarning
@@ -187,12 +188,7 @@ def prepare_tabular_features(
         )
 
     # Construcción ----------------------------------------------------------
-    feature_columns = [
-        column
-        for column in dataset.columns
-        if column not in excluded_columns
-        and column != target_variable
-    ]
+    feature_columns = FEATURE_COLUMNS # Variables predictoras oficiales del Dataset Científico
 
     if len(feature_columns) == 0:
         raise ValueError(
@@ -201,11 +197,11 @@ def prepare_tabular_features(
 
     x_data = dataset[
         feature_columns
-    ].copy()
+    ].copy() # Variables predictoras oficiales
 
     y_true = dataset[
         target_variable
-    ].copy()
+    ].copy() # Variable objetivo
 
     # Construcción del resultado -------------------------------------------
     tabular_features = {

@@ -2,37 +2,11 @@
 
 # BLOQUE 0. Importación de dependencias
 #------------------------------------------------------------------------------
-# Objetivo
-#------------------------------------------------------------------------------
-# Importar las librerías, clases y funciones requeridas para la validación,
-# preparación y transformación de la colección GraphData utilizada por el
-# pipeline GeoAI.
-#
-#------------------------------------------------------------------------------
-# Dependencias
-#------------------------------------------------------------------------------
-# • NumPy
-#       Operaciones numéricas y manipulación de arreglos.
-#
-# • PyTorch
-#       Construcción y transformación de tensores.
-#
-# • Scikit-learn
-#       Particionamiento del conjunto de datos y escalado de variables.
-#
-# • PyTorch Geometric
-#       Representación de grafos mediante objetos GraphData.
-#
-#------------------------------------------------------------------------------
-# Producto
-#------------------------------------------------------------------------------
-# Espacio de trabajo configurado con todas las dependencias necesarias para
+# Objetivo: Importar las librerías, clases y funciones requeridas para la validación, preparación y
+# transformación de la colección GraphData utilizada por el pipeline GeoAI.
+# Producto: Espacio de trabajo configurado con todas las dependencias necesarias para
 # ejecutar los bloques del módulo graph_pipeline.py.
-#
-#------------------------------------------------------------------------------
-# Pregunta científica
-#------------------------------------------------------------------------------
-# ¿El entorno de ejecución dispone de todas las dependencias necesarias para
+# Pregunta científica: ¿El entorno de ejecución dispone de todas las dependencias necesarias para
 # garantizar el funcionamiento reproducible del pipeline GeoAI?
 #------------------------------------------------------------------------------
 import numpy as np
@@ -45,24 +19,16 @@ from torch_geometric.data import Data
 
 # BLOQUE 1. validate_graph_collection
 #------------------------------------------------------------------------------
-# Objetivo
-#------------------------------------------------------------------------------
-# Verificar que la colección oficial de objetos GraphData cumple los criterios
+# Objetivo: Verificar que la colección oficial de objetos GraphData cumple los criterios
 # estructurales, dimensionales y científicos requeridos antes de ser utilizada
 # por cualquier etapa del pipeline GeoAI.
-#
 # Este bloque constituye el primer control de calidad del proyecto y garantiza
 # la integridad de los datos para las etapas de Benchmark, Entrenamiento,
 # Evaluación, Forecasting y Plataforma GeoAI.
-#------------------------------------------------------------------------------
 # Producto. validation_report : dict
-#------------------------------------------------------------------------------
-# Pregunta científica
-#------------------------------------------------------------------------------
-# ¿La colección oficial GraphData representa correctamente el sistema
-# espacio-temporal y cumple los criterios metodológicos necesarios para ser
-# utilizada durante el Benchmark, Entrenamiento, Evaluación, Forecasting y
-# la Plataforma GeoAI?
+# Pregunta científica: ¿La colección oficial GraphData representa correctamente el sistema
+# espacio-temporal y cumple los criterios metodológicos necesarios para ser utilizada durante 
+# el Benchmark, Entrenamiento, Evaluación, Forecasting y la Plataforma GeoAI?
 #------------------------------------------------------------------------------
 
 def validate_graph_collection(
@@ -130,15 +96,10 @@ def validate_graph_collection(
 
 # BLOQUE 2. _validate_graph_collection
 #------------------------------------------------------------------------------
-# Objetivo
-#------------------------------------------------------------------------------
-# Verificar que la colección GraphData exista, tenga el tipo de dato esperado
-# y contenga al menos un objeto GraphData antes de iniciar las validaciones
-# individuales de cada grafo.
-#
-# Este bloque constituye la primera validación estructural del pipeline y evita
-# errores derivados de colecciones vacías, tipos incorrectos o entradas
-# inválidas.
+# Objetivo: Verificar que la colección GraphData exista, tenga el tipo de dato esperado y contenga 
+# al menos un objeto GraphData antes de iniciar las validaciones individuales de cada grafo.
+# Este bloque constituye la primera validación estructural del pipeline y evita errores derivados
+# de colecciones vacías, tipos incorrectos o entradas inválidas.
 #
 #------------------------------------------------------------------------------
 # Entradas

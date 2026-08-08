@@ -1,4 +1,4 @@
-# models-statistical.py
+# statistical.py
 # BLOQUE 1. Importaciones --------------------------------------------------
 # Funciones del sistema
 import time

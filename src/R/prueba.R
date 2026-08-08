@@ -69,6 +69,51 @@ panel_isam_v1_unido <- read_parquet(
   "data/processed/panel_maestro_gnn/isam/panel_isam_v1.parquet"
 ) # Leer panel ISAM unificado
 
+panel_isam_v1_unido <- read_parquet(
+  "data/processed/panel_maestro_gnn/isam/panel_isam_v1.parquet"
+) # Leer panel ISAM unificado
+
+library(here)
+library(arrow)
+
+dataset_gnn_certificado <- read_parquet(
+  here(
+    "data",
+    "processed",
+    "r",
+    "master",
+    "dataset_gnn_certificado.parquet"
+  )
+) # Leer Dataset Científico Certificado
+
+
+library(here)
+library(arrow)
+library(writexl)
+
+dataset_gnn_certificado <- read_parquet(
+  here(
+    "data",
+    "processed",
+    "r",
+    "master",
+    "dataset_gnn_certificado.parquet"
+  )
+) # Leer Dataset Científico Certificado
+
+library(writexl) # Cargar paquete writexl
+write_xlsx(
+  dataset_gnn_certificado,
+  here(
+    "data",
+    "processed",
+    "r",
+    "master",
+    "dataset_gnn_certificado.xlsx"
+  )
+) # Exportar Dataset Científico Certificado a Excel
+
+
 # ------------------- Bloque 3. Lista de Bases -------------------
 bases <- list(
   CHIRPS = chirps_modelado,

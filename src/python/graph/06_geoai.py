@@ -1,4 +1,4 @@
-# 06_geoai.py
+# graph-06_geoai.py
 
 # BLOQUE 1. Importaciones --------------------------------------------------
 ## Objetivo: Importar las dependencias necesarias para construir la Plataforma Inteligente GeoAI utilizando el modelo oficial, los resultados del forecasting espacio-temporal, la infraestructura geográfica, los componentes de visualización, los sistemas de reporte científico y el asistente inteligente del proyecto.
