@@ -46,7 +46,7 @@ from src.python.config.config_project import (
 DEEP_LEARNING_CONFIG = {
 
     # Identificación
-    "model_code": BENCHMARK_MODEL_CODES["DL01"],
+    "model_code": "DL01",
     "model_name": "mlp",
     "family": "deep_learning",
 

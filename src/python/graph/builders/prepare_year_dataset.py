@@ -1,6 +1,5 @@
 # prepare_year_dataset.py
 
-# =============================================================================
 # PREPARE_YEAR_DATASET.PY
 # Objetivo: Preparar el Dataset Científico correspondiente a un año específico,
 # validando su integridad espacial y organizándolo para la construcción del
@@ -11,11 +10,8 @@
 # Producto: Dataset Científico Anual validado, ordenado e indexado mediante node_idx.
 # Pregunta científica: ¿El Dataset Científico Anual posee la estructura
 # requerida para construir el GraphData oficial?
-# =============================================================================
 
-# =============================================================================
 # 1. IMPORTACIÓN DE DEPENDENCIAS
-# =============================================================================
 
 import pandas as pd
 import geopandas as gpd
@@ -27,9 +23,8 @@ from src.python.config.config_project import (
     NODE_INDEX_COLUMN,
 )
 
-# =============================================================================
 # 2. BUILDER OFICIAL DEL DATASET CIENTÍFICO ANUAL
-# =============================================================================
+
 def prepare_year_dataset(
     dataset: pd.DataFrame,
     current_year: int,

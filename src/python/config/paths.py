@@ -13,19 +13,11 @@ ROOT_DIR = (
 
 PROJECT_NAME = ROOT_DIR.name # Nombre del directorio raíz del proyecto
 
-# -----------------------------------------------------------------------------
 # BLOQUE 2. Directorios del Proyecto
-# -----------------------------------------------------------------------------
-# Objetivo:
-# Definir la estructura oficial de directorios utilizada por la plataforma
-# GeoAI, incluyendo la infraestructura del proyecto, los datos científicos,
-# los productos del pipeline y los recursos compartidos.
-# -----------------------------------------------------------------------------
+# Objetivo: Definir la estructura oficial de directorios utilizada por la plataforma GeoAI, incluyendo la infraestructura
+# del proyecto, los datos científicos, los productos del pipeline y los recursos compartidos.
 
-# -----------------------------------------------------------------------------
 # 2.1 Infraestructura del Proyecto
-# -----------------------------------------------------------------------------
-
 DATA_DIR = (
     ROOT_DIR
     / "data"
@@ -73,10 +65,7 @@ TESTS_DIR = (
     / "tests"
 ) # Pruebas del proyecto
 
-# -----------------------------------------------------------------------------
 # 2.2 Datos del Proyecto
-# -----------------------------------------------------------------------------
-
 RAW_DIR = (
     DATA_DIR
     / "raw"
@@ -92,10 +81,7 @@ PROCESSED_DIR = (
     / "processed"
 ) # Datos procesados
 
-# -----------------------------------------------------------------------------
 # 2.3 Pipeline Científico
-# -----------------------------------------------------------------------------
-
 OUTPUTS_DIR = (
     ROOT_DIR
     / "src"
@@ -103,10 +89,12 @@ OUTPUTS_DIR = (
     / "outputs"
 ) # Productos oficiales del pipeline
 
-# -----------------------------------------------------------------------------
-# 2.3.1 Recursos Compartidos
-# -----------------------------------------------------------------------------
+ANALYSIS_DIR = OUTPUTS_DIR / "analysis" # Directorio oficial para los resultados del análisis de grafos
+SPATIAL_OUTPUT_PATH = (
+    ANALYSIS_DIR / "municipality_spatial_analysis.parquet"
+) # Definir ruta oficial de salida del análisis espacial
 
+# 2.3.1 Recursos Compartidos
 METADATA_DIR = (
     OUTPUTS_DIR
     / "metadata"
@@ -132,24 +120,21 @@ MODELS_DIR = (
     / "models"
 ) # Modelos entrenados
 
-# -----------------------------------------------------------------------------
 # 2.3.2 Módulos Científicos
-# -----------------------------------------------------------------------------
-
 GRAPH_DATA_DIR = (
     OUTPUTS_DIR
     / "graph_data"
 ) # Módulo 01_build_graph
 
-BENCHMARK_DIR = (
-    OUTPUTS_DIR
-    / "benchmark"
-) # Módulo 02_benchmark
-
 TRAINING_DIR = (
     OUTPUTS_DIR
     / "training"
 ) # Módulo 03_train_model
+
+TRAINING_CHECKPOINT_FILE = (
+    TRAINING_DIR
+    / "graphsage_model.pt"
+) # Checkpoint binario oficial del Modelo GraphSAGE
 
 EVALUATION_DIR = (
     OUTPUTS_DIR
@@ -161,14 +146,9 @@ FORECASTING_DIR = (
     / "forecasting"
 ) # Módulo 05_forecasting
 
-# -----------------------------------------------------------------------------
 # BLOQUE 3. Ingeniería de Datos (R)
-# -----------------------------------------------------------------------------
-# Objetivo:
-# Definir los directorios oficiales utilizados por el pipeline de Ingeniería
-# de Datos en R para la construcción, validación y certificación del Dataset
-# Científico.
-# -----------------------------------------------------------------------------
+# Objetivo: Definir los directorios oficiales utilizados por el pipeline de Ingeniería de Datos en R para la
+# construcción, validación y certificación del Dataset Científico.
 
 R_DIR = (
     PROCESSED_DIR
@@ -210,28 +190,17 @@ R_LOGS_DIR = (
     / "logs"
 ) # Registros de ejecución del pipeline
 
-# -----------------------------------------------------------------------------
 # BLOQUE 4. Plataforma GeoAI
-# -----------------------------------------------------------------------------
-# Objetivo:
-# Definir la estructura oficial de almacenamiento utilizada por la Plataforma
-# GeoAI para la gestión de productos científicos, servicios inteligentes,
-# visualizaciones y componentes de despliegue del sistema.
-# -----------------------------------------------------------------------------
+# Objetivo: Definir la estructura oficial de almacenamiento utilizada por la Plataforma GeoAI para la gestión de 
+# productos científicos, servicios inteligentes, visualizaciones y componentes de despliegue del sistema.
 
-# -----------------------------------------------------------------------------
 # 4.1 Directorio Principal de la Plataforma GeoAI
-# -----------------------------------------------------------------------------
-
 GEOAI_DIR = (
     OUTPUTS_DIR
     / "geoai"
 ) # Directorio principal de la Plataforma GeoAI
 
-# -----------------------------------------------------------------------------
 # 4.2 Artefactos Científicos
-# -----------------------------------------------------------------------------
-
 GEOAI_DATA_DIR = (
     GEOAI_DIR
     / "data"
@@ -242,10 +211,7 @@ GEOAI_REPORTS_DIR = (
     / "reports"
 ) # Reportes científicos generados por la plataforma
 
-# -----------------------------------------------------------------------------
 # 4.3 Servicios de la Plataforma
-# -----------------------------------------------------------------------------
-
 GEOAI_DASHBOARD_DIR = (
     GEOAI_DIR
     / "dashboard"
@@ -266,83 +232,55 @@ GEOAI_EXPORT_DIR = (
     / "export"
 ) # Exportaciones de la Plataforma GeoAI
 
-# -----------------------------------------------------------------------------
 # 4.4 Configuración
-# -----------------------------------------------------------------------------
-
 GEOAI_CONFIG_DIR = (
     GEOAI_DIR
     / "config"
 ) # Configuración oficial de la plataforma
 
-# -----------------------------------------------------------------------------
 # 4.5 Metadatos
-# -----------------------------------------------------------------------------
-
 GEOAI_METADATA_DIR = (
     GEOAI_DIR
     / "metadata"
 ) # Metadatos de la Plataforma GeoAI
 
-# -----------------------------------------------------------------------------
 # 4.6 Contratos
-# -----------------------------------------------------------------------------
-
 GEOAI_CONTRACTS_DIR = (
     GEOAI_DIR
     / "contracts"
 ) # Contratos oficiales de la Plataforma GeoAI
 
-# -----------------------------------------------------------------------------
 # 4.7 Certificación
-# -----------------------------------------------------------------------------
-
 GEOAI_CERTIFICATES_DIR = (
     GEOAI_DIR
     / "certificates"
 ) # Certificados científicos de la Plataforma GeoAI
 
-# -----------------------------------------------------------------------------
 # 4.8 Auditoría
-# -----------------------------------------------------------------------------
-
 GEOAI_AUDITS_DIR = (
     GEOAI_DIR
     / "audits"
 ) # Auditorías de la Plataforma GeoAI
 
-# -----------------------------------------------------------------------------
 # 4.9 Registros
-# -----------------------------------------------------------------------------
-
 GEOAI_LOGS_DIR = (
     GEOAI_DIR
     / "logs"
 ) # Registros de ejecución de la plataforma
 
-# -----------------------------------------------------------------------------
 # 4.10 Caché
-# -----------------------------------------------------------------------------
-
 GEOAI_CACHE_DIR = (
     GEOAI_DIR
     / "cache"
 ) # Caché utilizada por la plataforma
 
-# -----------------------------------------------------------------------------
 # BLOQUE 5. Archivos Oficiales del Proyecto
-# -----------------------------------------------------------------------------
 # Objetivo: Centralizar las rutas oficiales de todos los artefactos científicos, metadatos, contratos, manifiestos,
 # certificaciones y auditorías generados por el pipeline.
-#
 # Organización: 5.1 Dataset Científico. 5.2 GraphData. 5.2.1 Artefactos científicos. 5.2.2 Reportes de validación.
 # 5.2.3 Reportes estadísticos. 5.2.4 Certificación. 5.2.5 Auditoría.
-# -----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
 # 5.1 Dataset Científico Oficial
-# -----------------------------------------------------------------------------
-
 DATASET_DIR = (
     PROCESSED_DIR
     / "dataset"
@@ -392,14 +330,9 @@ DATASET_AUDIT_LOG_FILE = (
     / "dataset_audit.json"
 ) # Registro detallado de auditoría del Dataset Científico
 
-# -----------------------------------------------------------------------------
 # 5.2 GraphData
-# -----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
 # 5.2.1 Artefactos Científicos del GraphData
-# -----------------------------------------------------------------------------
-
 GRAPH_FILES_DIR = (
     GRAPH_DATA_DIR
     / "graphs"
@@ -475,19 +408,13 @@ GRAPH_SUMMARY_FILE = (
     / "graph_summary.json"
 ) # Resumen científico oficial de la colección GraphData
 
-# -----------------------------------------------------------------------------
 # 5.2.2 Metadatos
-# -----------------------------------------------------------------------------
-
 GRAPH_METADATA_FILE = (
     GRAPH_DATA_DIR
     / "graph_metadata.json"
 ) # Metadatos científicos del GraphData
 
-# -----------------------------------------------------------------------------
 # 5.2.3 Manifiestos
-# -----------------------------------------------------------------------------
-
 DATASET_MANIFEST_FILE = (
     R_MASTER_DIR
     / "dataset_manifest.json"
@@ -498,19 +425,13 @@ GRAPH_MANIFEST_FILE = (
     / "graph_manifest.json"
 ) # Manifiesto oficial del GraphData
 
-# -----------------------------------------------------------------------------
 # 5.2.4 Contrato del GraphData
-# -----------------------------------------------------------------------------
-
 GRAPH_CONTRACT_FILE = (
     GRAPH_DATA_DIR
     / "graph_contract.json"
 ) # Contrato oficial del GraphData
 
-# -----------------------------------------------------------------------------
 # 5.2.5 Reportes de Validación del GraphData
-# -----------------------------------------------------------------------------
-
 GRAPH_VALIDATION_DIR = (
     REPORTS_DIR
     / "graph_validation"
@@ -526,10 +447,7 @@ GRAPH_TOPOLOGY_VALIDATION_FILE = (
     / "graph_topology_validation.json"
 ) # Validación topológica del grafo
 
-# -----------------------------------------------------------------------------
 # 5.2.6 Reportes Estadísticos del GraphData
-# -----------------------------------------------------------------------------
-
 GRAPH_STATISTICS_DIR = (
     REPORTS_DIR
     / "graph_statistics"
@@ -580,10 +498,7 @@ GRAPH_PATH_STATISTICS_FILE = (
     / "path_statistics.json"
 ) # Estadísticas de caminos mínimos, diámetro y radio
 
-# -----------------------------------------------------------------------------
 # 5.2.7 Certificación del GraphData
-# -----------------------------------------------------------------------------
-
 GRAPH_CERTIFICATES_DIR = (
     CERTIFICATES_DIR
     / "graph_data"
@@ -599,10 +514,7 @@ GRAPH_CERTIFICATE_SIGNATURE_FILE = (
     / "graph_signature.json"
 ) # Firma digital del certificado científico
 
-# -----------------------------------------------------------------------------
 # 5.2.8 Auditoría del GraphData
-# -----------------------------------------------------------------------------
-
 GRAPH_AUDITS_DIR = (
     AUDITS_DIR
     / "graph_data"
@@ -618,14 +530,18 @@ GRAPH_AUDIT_LOG_FILE = (
     / "graph_audit.json"
 ) # Registro detallado de auditoría del GraphData
 
-# -----------------------------------------------------------------------------
 # 5.3 Benchmark Científico
-# -----------------------------------------------------------------------------
+BENCHMARK_DIR = (
+    OUTPUTS_DIR
+    / "benchmark"
+) # Módulo 02_benchmark
 
-# -----------------------------------------------------------------------------
+OFFICIAL_MODEL_CONFIG_FILE = (
+    BENCHMARK_DIR
+    / "official_model_config.json"
+) # Configuración oficial del Modelo seleccionada por el Benchmark
+
 # 5.3.1 Artefactos Científicos del Benchmark
-# -----------------------------------------------------------------------------
-
 BENCHMARK_EXPERIMENT_FILE = (
     BENCHMARK_DIR
     / "benchmark_experiment.joblib"
@@ -636,10 +552,7 @@ BENCHMARK_MODELS_FILE = (
     / "benchmark_models.csv"
 ) # Catálogo oficial de modelos evaluados
 
-# -----------------------------------------------------------------------------
 # 5.3.2 Ranking Científico
-# -----------------------------------------------------------------------------
-
 BENCHMARK_RANKING_CSV_FILE = (
     BENCHMARK_DIR
     / "benchmark_ranking.csv"
@@ -650,10 +563,7 @@ BENCHMARK_RANKING_XLSX_FILE = (
     / "benchmark_ranking.xlsx"
 ) # Ranking científico en formato Excel
 
-# -----------------------------------------------------------------------------
 # 5.3.3 Métricas Científicas
-# -----------------------------------------------------------------------------
-
 BENCHMARK_METRICS_FILE = (
     BENCHMARK_DIR
     / "benchmark_metrics.parquet"
@@ -669,10 +579,7 @@ BENCHMARK_MULTICRITERIA_FILE = (
     / "benchmark_multicriteria.csv"
 ) # Resultados del análisis multicriterio
 
-# -----------------------------------------------------------------------------
 # 5.3.4 Resumen Científico
-# -----------------------------------------------------------------------------
-
 BENCHMARK_SUMMARY_CSV_FILE = (
     BENCHMARK_DIR
     / "benchmark_summary.csv"
@@ -688,28 +595,19 @@ BENCHMARK_SUMMARY_JSON_FILE = (
     / "benchmark_summary.json"
 ) # Resumen científico en formato JSON
 
-# -----------------------------------------------------------------------------
 # 5.3.5 Metadatos del Benchmark
-# -----------------------------------------------------------------------------
-
 BENCHMARK_METADATA_FILE = (
     BENCHMARK_DIR
     / "benchmark_metadata.json"
 ) # Metadatos científicos del Benchmark
 
-# -----------------------------------------------------------------------------
 # 5.3.6 Contrato del Benchmark
-# -----------------------------------------------------------------------------
-
 BENCHMARK_CONTRACT_FILE = (
     BENCHMARK_DIR
     / "benchmark_contract.json"
 ) # Contrato oficial del Benchmark
 
-# -----------------------------------------------------------------------------
 # 5.3.7 Certificación del Benchmark
-# -----------------------------------------------------------------------------
-
 BENCHMARK_CERTIFICATES_DIR = (
     CERTIFICATES_DIR
     / "benchmark"
@@ -730,10 +628,7 @@ BENCHMARK_MANIFEST_FILE = (
     / "benchmark_manifest.json"
 ) # Manifiesto oficial del Benchmark
 
-# -----------------------------------------------------------------------------
 # 5.3.8 Auditoría del Benchmark
-# -----------------------------------------------------------------------------
-
 BENCHMARK_AUDITS_DIR = (
     AUDITS_DIR
     / "benchmark"
@@ -749,14 +644,9 @@ BENCHMARK_AUDIT_LOG_FILE = (
     / "benchmark_audit.json"
 ) # Registro detallado de auditoría del Benchmark
 
-# -----------------------------------------------------------------------------
 # 5.4 Entrenamiento del Modelo Oficial
-# -----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
 # 5.4.1 Artefactos Científicos
-# -----------------------------------------------------------------------------
-
 OFFICIAL_MODEL_TORCH_FILE = (
     MODELS_DIR
     / "official_model.pt"
@@ -779,45 +669,32 @@ TRAINING_METRICS_FILE = (
 
 TRAINING_CHECKPOINT_FILE = (
     TRAINING_DIR
-    / "training_checkpoint.pt"
-) # Punto de restauración del entrenamiento
-
-# -----------------------------------------------------------------------------
-# 5.4.2 Metadatos
-# -----------------------------------------------------------------------------
+    / "graphsage_model.pt"
+) # Checkpoint binario oficial del Modelo GraphSAGE
 
 TRAINING_METADATA_FILE = (
     TRAINING_DIR
     / "training_metadata.json"
-) # Metadatos científicos del entrenamiento
+) # Metadatos científicos oficiales del entrenamiento
 
-# -----------------------------------------------------------------------------
+TRAINING_SUMMARY_FILE = (
+    TRAINING_DIR
+    / "training_summary.json"
+) # Resumen científico oficial del entrenamiento
+
 # 5.4.3 Manifest
-# -----------------------------------------------------------------------------
-
 TRAINING_MANIFEST_FILE = (
     TRAINING_DIR
     / "training_manifest.json"
 ) # Manifiesto oficial del entrenamiento
 
-# -----------------------------------------------------------------------------
 # 5.4.4 Contrato
-# -----------------------------------------------------------------------------
-
 TRAINING_CONTRACT_FILE = (
     TRAINING_DIR
     / "training_contract.json"
 ) # Contrato oficial del entrenamiento
 
-# -----------------------------------------------------------------------------
 # 5.4.5 Reportes
-# -----------------------------------------------------------------------------
-
-TRAINING_SUMMARY_FILE = (
-    TRAINING_DIR
-    / "training_summary.json"
-) # Resumen oficial del entrenamiento
-
 TRAINING_LOG_FILE = (
     TRAINING_DIR
     / "training_log.json"
@@ -828,10 +705,7 @@ TRAINING_CURVES_FILE = (
     / "training_curves.parquet"
 ) # Curvas de aprendizaje del entrenamiento
 
-# -----------------------------------------------------------------------------
 # 5.4.6 Certificación
-# -----------------------------------------------------------------------------
-
 TRAINING_CERTIFICATES_DIR = (
     CERTIFICATES_DIR
     / "training"
@@ -847,10 +721,7 @@ TRAINING_CERTIFICATE_SIGNATURE_FILE = (
     / "training_signature.json"
 ) # Firma digital del certificado científico
 
-# -----------------------------------------------------------------------------
 # 5.4.7 Auditoría
-# -----------------------------------------------------------------------------
-
 TRAINING_AUDITS_DIR = (
     AUDITS_DIR
     / "training"
@@ -866,14 +737,9 @@ TRAINING_AUDIT_LOG_FILE = (
     / "training_audit.json"
 ) # Registro detallado de auditoría del entrenamiento
 
-# -----------------------------------------------------------------------------
 # 5.5 Evaluación del Modelo
-# -----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
 # 5.5.1 Artefactos Científicos
-# -----------------------------------------------------------------------------
-
 EVALUATION_RESULTS_FILE = (
     EVALUATION_DIR
     / "evaluation_results.parquet"
@@ -909,10 +775,7 @@ GNN_EMBEDDINGS_FILE = (
     / "gnn_embeddings.pt"
 ) # Embeddings generados por la GNN
 
-# -----------------------------------------------------------------------------
 # 5.5.2 Reportes
-# -----------------------------------------------------------------------------
-
 EVALUATION_REPORT_FILE = (
     EVALUATION_DIR
     / "evaluation_report.json"
@@ -928,37 +791,27 @@ METRICS_BY_YEAR_FILE = (
     / "metrics_by_year.parquet"
 ) # Métricas por año del panel
 
-# -----------------------------------------------------------------------------
 # 5.5.3 Metadatos
-# -----------------------------------------------------------------------------
-
 EVALUATION_METADATA_FILE = (
     EVALUATION_DIR
     / "evaluation_metadata.json"
 ) # Metadatos científicos de la evaluación
 
-# -----------------------------------------------------------------------------
 # 5.5.4 Manifest
-# -----------------------------------------------------------------------------
-
 EVALUATION_MANIFEST_FILE = (
     EVALUATION_DIR
     / "evaluation_manifest.json"
 ) # Manifiesto oficial de la evaluación
 
-# -----------------------------------------------------------------------------
 # 5.5.5 Contrato
-# -----------------------------------------------------------------------------
+
 
 EVALUATION_CONTRACT_FILE = (
     EVALUATION_DIR
     / "evaluation_contract.json"
 ) # Contrato oficial de la evaluación
 
-# -----------------------------------------------------------------------------
 # 5.5.6 Certificación
-# -----------------------------------------------------------------------------
-
 EVALUATION_CERTIFICATES_DIR = (
     CERTIFICATES_DIR
     / "evaluation"
@@ -974,10 +827,7 @@ EVALUATION_CERTIFICATE_SIGNATURE_FILE = (
     / "evaluation_signature.json"
 ) # Firma digital del certificado científico
 
-# -----------------------------------------------------------------------------
 # 5.5.7 Auditoría
-# -----------------------------------------------------------------------------
-
 EVALUATION_AUDITS_DIR = (
     AUDITS_DIR
     / "evaluation"
@@ -993,14 +843,9 @@ EVALUATION_AUDIT_LOG_FILE = (
     / "evaluation_audit.json"
 ) # Registro detallado de auditoría de la evaluación
 
-# -----------------------------------------------------------------------------
 # 5.6 Forecasting
-# -----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
 # 5.6.1 Artefactos Científicos
-# -----------------------------------------------------------------------------
-
 FORECAST_RESULTS_FILE = (
     FORECASTING_DIR
     / "forecast_results.parquet"
@@ -1026,10 +871,7 @@ FORECAST_UNCERTAINTY_FILE = (
     / "forecast_uncertainty.parquet"
 ) # Intervalos de confianza, cuantiles e incertidumbre de las predicciones
 
-# -----------------------------------------------------------------------------
 # 5.6.2 Reportes
-# -----------------------------------------------------------------------------
-
 FORECAST_REPORT_FILE = (
     FORECASTING_DIR
     / "forecast_report.pdf"
@@ -1045,37 +887,25 @@ FORECAST_SCENARIOS_FILE = (
     / "forecast_scenarios.json"
 ) # Descripción de los escenarios evaluados
 
-# -----------------------------------------------------------------------------
 # 5.6.3 Metadatos
-# -----------------------------------------------------------------------------
-
 FORECAST_METADATA_FILE = (
     FORECASTING_DIR
     / "forecast_metadata.json"
 ) # Metadatos científicos del Forecasting
 
-# -----------------------------------------------------------------------------
 # 5.6.4 Manifest
-# -----------------------------------------------------------------------------
-
 FORECAST_MANIFEST_FILE = (
     FORECASTING_DIR
     / "forecast_manifest.json"
 ) # Manifiesto oficial del Forecasting
 
-# -----------------------------------------------------------------------------
 # 5.6.5 Contrato
-# -----------------------------------------------------------------------------
-
 FORECAST_CONTRACT_FILE = (
     FORECASTING_DIR
     / "forecast_contract.json"
 ) # Contrato oficial del Forecasting
 
-# -----------------------------------------------------------------------------
 # 5.6.6 Certificación
-# -----------------------------------------------------------------------------
-
 FORECAST_CERTIFICATES_DIR = (
     CERTIFICATES_DIR
     / "forecasting"
@@ -1091,10 +921,7 @@ FORECAST_CERTIFICATE_SIGNATURE_FILE = (
     / "forecast_signature.json"
 ) # Firma digital del certificado científico
 
-# -----------------------------------------------------------------------------
 # 5.6.7 Auditoría
-# -----------------------------------------------------------------------------
-
 FORECAST_AUDITS_DIR = (
     AUDITS_DIR
     / "forecasting"
@@ -1110,28 +937,14 @@ FORECAST_AUDIT_LOG_FILE = (
     / "forecast_audit.json"
 ) # Registro detallado de auditoría del Forecasting
 
-# -----------------------------------------------------------------------------
 # BLOQUE 6. Catálogo Oficial de Directorios
-# -----------------------------------------------------------------------------
-# Objetivo:
-# Centralizar el acceso a todos los directorios oficiales del proyecto mediante
-# una arquitectura jerárquica organizada por dominios funcionales, facilitando
-# la reutilización, el mantenimiento y la escalabilidad del pipeline científico.
-#
-# Organización:
-#   6.1 Directorios Generales
-#   6.2 Ingeniería de Datos (R)
-#   6.3 Pipeline Científico (Python)
-#   6.4 Figuras Científicas
-#   6.5 Plataforma GeoAI
-# -----------------------------------------------------------------------------
+# Objetivo: Centralizar el acceso a todos los directorios oficiales del proyecto mediante una arquitectura jerárquica
+# organizada por dominios funcionales, facilitando la reutilización, el mantenimiento y la escalabilidad del pipeline científico.
+# Organización: 6.1 Directorios Generales 6.2 Ingeniería de Datos (R) 6.3 Pipeline Científico (Python)
+# 6.4 Figuras Científicas  6.5 Plataforma GeoAI
 
 PROJECT_DIRECTORIES = {
-
-    # -------------------------------------------------------------------------
     # 6.1 Directorios Generales
-    # -------------------------------------------------------------------------
-
     "general": {
         "root": ROOT_DIR,
         "data": DATA_DIR,
@@ -1144,10 +957,7 @@ PROJECT_DIRECTORIES = {
         "docs": DOCS_DIR
     },
 
-    # -------------------------------------------------------------------------
     # 6.2 Ingeniería de Datos (R)
-    # -------------------------------------------------------------------------
-
     "r_pipeline": {
         "root": R_DIR,
         "master": R_MASTER_DIR,
@@ -1159,10 +969,7 @@ PROJECT_DIRECTORIES = {
         "audits": R_AUDITS_DIR
     },
 
-    # -------------------------------------------------------------------------
     # 6.3 Pipeline Científico (Python)
-    # -------------------------------------------------------------------------
-
     "python_pipeline": {
         "root": OUTPUTS_DIR,
         "graph_data": GRAPH_DATA_DIR,
@@ -1174,13 +981,11 @@ PROJECT_DIRECTORIES = {
         "metadata": METADATA_DIR,
         "contracts": CONTRACTS_DIR,
         "certificates": CERTIFICATES_DIR,
-        "audits": AUDITS_DIR
+        "audits": AUDITS_DIR,
+        "analysis": ANALYSIS_DIR
     },
 
-    # -------------------------------------------------------------------------
-    # 6.5 Plataforma GeoAI
-    # -------------------------------------------------------------------------
-
+    # 6.4 Plataforma GeoAI
     "geoai": {
         "root": GEOAI_DIR,
         "reports": GEOAI_REPORTS_DIR,
@@ -1195,13 +1000,9 @@ PROJECT_DIRECTORIES = {
     }
 }
 
-# -----------------------------------------------------------------------------
 # BLOQUE 7. Validación de la Estructura del Proyecto
-# -----------------------------------------------------------------------------
-# Objetivo:
-# Crear y validar automáticamente toda la estructura oficial de directorios del
-# proyecto definida en PROJECT_DIRECTORIES.
-# -----------------------------------------------------------------------------
+# Objetivo: Crear y validar automáticamente toda la estructura oficial de directorios del proyecto definida en
+# PROJECT_DIRECTORIES.
 
 def get_project_directories() -> list[Path]:
     """
@@ -1211,7 +1012,6 @@ def get_project_directories() -> list[Path]:
     for group in PROJECT_DIRECTORIES.values():
         directories.extend(group.values())
     return directories
-
 
 def validate_directory(
     directory: Path,
@@ -1229,14 +1029,12 @@ def validate_directory(
     if verbose:
         print(f"Directorio verificado: {directory}")
 
-
 def validate_project_structure(
     verbose: bool = True,
 ) -> bool:
     """
     Crea y valida la estructura oficial de directorios del proyecto.
     """
-
     try:
         for directory in get_project_directories():
 
@@ -1251,20 +1049,14 @@ def validate_project_structure(
         return True
 
     except Exception as error:
-
         if verbose:
             print(f"Error al validar la estructura del proyecto: {error}")
 
         return False
 
-# -----------------------------------------------------------------------------
 # BLOQUE 8. Funciones Auxiliares
-# -----------------------------------------------------------------------------
-# Objetivo:
-# Proporcionar funciones auxiliares para acceder de forma segura y uniforme a
-# los directorios oficiales definidos en PROJECT_DIRECTORIES, desacoplando el
-# resto del proyecto de la estructura interna del catálogo.
-# -----------------------------------------------------------------------------
+# Objetivo: Proporcionar funciones auxiliares para acceder de forma segura y uniforme a los directorios oficiales
+# definidos en PROJECT_DIRECTORIES, desacoplando el resto del proyecto de la estructura interna del catálogo.
 
 def get_directory_group(
     group: str,

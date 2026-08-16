@@ -1,9 +1,14 @@
 # results.py
 
-# BLOQUE 1. Construcción del Resultado del Benchmark -------------------------
+import numpy as np
+from src.python.config.config_project import (
+    BENCHMARK_METRICS,
+    BENCHMARK_CONFIG,
+)
+
+# BLOQUE 1. Construcción del Resultado del Benchmark
 ## Objetivo: Construir la estructura oficial de resultados utilizada por el
 ## Benchmark Científico del proyecto.
-
 def build_benchmark_result(
     model_config: dict,
     prediction_result: dict,
@@ -13,59 +18,28 @@ def build_benchmark_result(
     """
     Construye la estructura oficial de resultados utilizada por el
     Benchmark Científico.
-
-    Parameters
-    ----------
-    model_config : dict
-        Configuración oficial del modelo.
-
-    prediction_result : dict
-        Resultado de la predicción.
-
-    evaluation_result : dict
-        Resultado de la evaluación.
-
-    training_result : dict, optional
-        Resultado del entrenamiento.
-
-    Returns
-    -------
-    dict
-        Resultado oficial del Benchmark.
     """
 
-    # Validar tipos de entrada --------------------------------------------
-
     if not isinstance(model_config, dict):
-        raise TypeError(
-            "'model_config' debe ser un diccionario."
-        )
+        raise TypeError("'model_config' debe ser un diccionario.")
 
     if not isinstance(prediction_result, dict):
-        raise TypeError(
-            "'prediction_result' debe ser un diccionario."
-        )
+        raise TypeError("'prediction_result' debe ser un diccionario.")
 
     if not isinstance(evaluation_result, dict):
-        raise TypeError(
-            "'evaluation_result' debe ser un diccionario."
-        )
+        raise TypeError("'evaluation_result' debe ser un diccionario.")
 
     if training_result is None:
-        training_result = {}  # Resultado vacío
+        training_result = {} # Utilizar configuración de entrenamiento vacía
 
     elif not isinstance(training_result, dict):
-        raise TypeError(
-            "'training_result' debe ser un diccionario."
-        )
-
-    # Validar configuración del modelo ------------------------------------
+        raise TypeError("'training_result' debe ser un diccionario.")
 
     required_model_keys = [
         "model_code",
         "model_name",
-        "family"
-    ]
+        "family",
+    ] # Definir identificación oficial obligatoria
 
     missing_model_keys = [
         key
@@ -74,21 +48,32 @@ def build_benchmark_result(
     ]
 
     if missing_model_keys:
-
         missing = ", ".join(missing_model_keys)
-
         raise ValueError(
             f"Faltan las siguientes claves en 'model_config': {missing}."
         )
 
-    # Validar métricas de evaluación --------------------------------------
+    if not isinstance(model_config["model_code"], str):
+        raise TypeError("'model_code' debe ser una cadena.")
 
-    required_evaluation_keys = [
-        "rmse",
-        "mae",
-        "mape",
-        "r2"
-    ]
+    if not model_config["model_code"].strip():
+        raise ValueError("'model_code' no puede estar vacío.")
+
+    if not isinstance(model_config["model_name"], str):
+        raise TypeError("'model_name' debe ser una cadena.")
+
+    if not model_config["model_name"].strip():
+        raise ValueError("'model_name' no puede estar vacío.")
+
+    if not isinstance(model_config["family"], str):
+        raise TypeError("'family' debe ser una cadena.")
+
+    if not model_config["family"].strip():
+        raise ValueError("'family' no puede estar vacía.")
+
+    required_evaluation_keys = list(
+        BENCHMARK_METRICS
+    ) # Definir métricas científicas obligatorias
 
     missing_evaluation_keys = [
         key
@@ -97,48 +82,33 @@ def build_benchmark_result(
     ]
 
     if missing_evaluation_keys:
-
         missing = ", ".join(missing_evaluation_keys)
-
         raise ValueError(
             f"Faltan las siguientes métricas de evaluación: {missing}."
         )
 
-    # Construir resultado oficial del Benchmark ---------------------------
-
     benchmark_result = {
-
-        # Identificación ---------------------------------------------------
         "model_code": model_config["model_code"],
         "model_name": model_config["model_name"],
         "family": model_config["family"],
-
-        # Configuración ----------------------------------------------------
         "model_config": model_config,
-
-        # Modelo -----------------------------------------------------------
         "model": training_result.get("model"),
-
-        # Entrenamiento ----------------------------------------------------
         "training_time": training_result.get("training_time"),
         "loss": training_result.get("loss"),
-
-        # Inferencia -------------------------------------------------------
         "inference_time": prediction_result.get("inference_time"),
         "y_pred": prediction_result.get("y_pred"),
         "y_true": prediction_result.get("y_true"),
+    } # Construir estructura oficial del resultado
 
-        # Evaluación -------------------------------------------------------
-        "rmse": evaluation_result["rmse"],
-        "mae": evaluation_result["mae"],
-        "mape": evaluation_result["mape"],
-        "r2": evaluation_result["r2"]
+    for metric in BENCHMARK_METRICS:
+        benchmark_result[metric] = evaluation_result[metric] # Incorporar métrica oficial
 
-        # Metadatos --------------------------------------------------------
-        # Espacio reservado para futuras versiones del Benchmark
-        # (timestamp, seed, fold, device, framework, etc.)
-
-    }
+    benchmark_result = validate_model_result(
+        result=benchmark_result,
+        model_code=model_config["model_code"],
+        model_name=model_config["model_name"],
+        family=model_config["family"],
+    ) # Validar identificación y métricas oficiales
 
     return benchmark_result
 
@@ -197,100 +167,167 @@ def save_benchmark_result(
             default=str
         )  # Exportar resultado del Benchmark
 
-# BLOQUE 2A. Construcción del Resultado Exportable ----------------------------
-## Objetivo: Generar una versión serializable del Benchmark para exportación
-## en formatos CSV, Parquet y JSON.
+# BLOQUE 2A. Construcción del Resultado Exportable
 def build_exportable_benchmark_result(
     benchmark_result: dict
 ) -> dict:
     """
-    Construye una versión completamente serializable del resultado
-    oficial del Benchmark Científico.
-
-    Parameters
-    ----------
-    benchmark_result : dict
-        Resultado oficial del Benchmark.
-
-    Returns
-    -------
-    dict
-        Resultado exportable.
+    Construye una versión serializable del resultado oficial
+    del Benchmark Científico.
     """
 
     if not isinstance(benchmark_result, dict):
-        raise TypeError(
-            "'benchmark_result' debe ser un diccionario."
-        )
+        raise TypeError("'benchmark_result' debe ser un diccionario.")
 
-    export_result = benchmark_result.copy()
+    export_result = benchmark_result.copy() # Crear copia independiente del resultado
 
-    # -------------------------------------------------------
-    # Modelo entrenado
-    # -------------------------------------------------------
-
-    export_result.pop(
-        "model",
-        None
-    )
-
-    # -------------------------------------------------------
-    # Predicciones
-    # -------------------------------------------------------
-
-    export_result.pop(
-        "y_pred",
-        None
-    )
-
-    export_result.pop(
-        "y_true",
-        None
-    )
-
-    # -------------------------------------------------------
-    # Configuración
-    # -------------------------------------------------------
+    export_result.pop("model", None) # Eliminar objeto del modelo entrenado
+    export_result.pop("y_pred", None) # Eliminar predicciones
+    export_result.pop("y_true", None) # Eliminar valores observados
 
     if "model_config" in export_result:
 
-        model_config = export_result[
-            "model_config"
-        ].copy()
+        if export_result["model_config"] is None:
+            export_result["model_config"] = {} # Normalizar configuración ausente
 
-        estimator = model_config.get(
-            "estimator"
-        )
+        if not isinstance(export_result["model_config"], dict):
+            raise TypeError("'model_config' debe ser un diccionario.")
+
+        model_config = export_result["model_config"].copy() # Copiar configuración del modelo
+
+        estimator = model_config.get("estimator") # Recuperar estimador
 
         if estimator is not None:
-
             model_config["estimator"] = getattr(
                 estimator,
                 "__name__",
                 str(estimator)
-            )
+            ) # Convertir estimador a representación serializable
 
-        # Eliminar información duplicada
-        model_config.pop(
-            "model_code",
-            None
-        )
+        model_config.pop("model_code", None) # Eliminar información duplicada
+        model_config.pop("model_name", None) # Eliminar información duplicada
+        model_config.pop("family", None) # Eliminar información duplicada
 
-        model_config.pop(
-            "model_name",
-            None
-        )
-
-        model_config.pop(
-            "family",
-            None
-        )
-
-        export_result[
-            "model_config"
-        ] = model_config
+        export_result["model_config"] = model_config # Guardar configuración normalizada
 
     return export_result
+
+# BLOQUE 2B. VALIDACIÓN DEL RESULTADO DEL BENCHMARK
+def validate_model_result(
+    result: dict,
+    model_code: str,
+    model_name: str,
+    family: str,
+) -> dict:
+    """Validar el contrato científico común de un resultado del Benchmark."""
+
+    if not isinstance(result, dict):
+        raise TypeError(
+            f"El resultado del modelo '{model_name}' debe ser un diccionario."
+        )
+
+    if not isinstance(model_code, str):
+        raise TypeError(
+            "El código oficial del modelo debe ser una cadena."
+        )
+
+    if not model_code.strip():
+        raise ValueError(
+            "El código oficial del modelo no puede estar vacío."
+        )
+
+    if not isinstance(model_name, str):
+        raise TypeError(
+            "El nombre oficial del modelo debe ser una cadena."
+        )
+
+    if not model_name.strip():
+        raise ValueError(
+            "El nombre oficial del modelo no puede estar vacío."
+        )
+
+    if not isinstance(family, str):
+        raise TypeError(
+            "La familia oficial del modelo debe ser una cadena."
+        )
+
+    if not family.strip():
+        raise ValueError(
+            "La familia oficial del modelo no puede estar vacía."
+        )
+
+    required_keys = [
+        "model_code",
+        "model_name",
+        "family",
+        *BENCHMARK_METRICS,
+    ] # Definir contrato científico común del resultado
+
+    missing_keys = [
+        key
+        for key in required_keys
+        if key not in result
+    ]
+
+    if missing_keys:
+        raise ValueError(
+            f"El resultado del modelo '{model_name}' está incompleto: "
+            f"{missing_keys}"
+        )
+
+    if not isinstance(result["model_code"], str):
+        raise TypeError(
+            f"El 'model_code' del modelo '{model_name}' debe ser una cadena."
+        )
+
+    if not result["model_code"].strip():
+        raise ValueError(
+            f"El 'model_code' del modelo '{model_name}' está vacío."
+        )
+
+    if result["model_code"] != model_code:
+        raise ValueError(
+            f"El código del resultado '{result['model_code']}' "
+            f"no coincide con el código esperado '{model_code}'."
+        )
+
+    if result["model_name"] != model_name:
+        raise ValueError(
+            f"El nombre del resultado '{result['model_name']}' "
+            f"no coincide con el modelo esperado '{model_name}'."
+        )
+
+    if result["family"] != family:
+        raise ValueError(
+            f"La familia del resultado '{result['family']}' "
+            f"no coincide con la familia esperada '{family}'."
+        )
+
+    for metric in BENCHMARK_METRICS:
+
+        value = result[metric]
+
+        if value is None:
+            raise ValueError(
+                f"El modelo '{model_name}' contiene "
+                f"la métrica '{metric}' con valor None."
+            )
+
+        try:
+            numeric_value = float(value)
+        except (TypeError, ValueError) as error:
+            raise TypeError(
+                f"La métrica '{metric}' del modelo '{model_name}' "
+                "debe ser numérica."
+            ) from error
+
+        if not np.isfinite(numeric_value):
+            raise ValueError(
+                f"El modelo '{model_name}' contiene "
+                f"un valor inválido para '{metric}'."
+            )
+
+    return result
 
 # BLOQUE 3. Conversión de Resultados del Benchmark --------------------------
 ## Objetivo: Convertir los resultados oficiales del Benchmark Científico en un
@@ -331,7 +368,7 @@ def benchmark_results_to_dataframe(
 
     return benchmark_dataframe
 
-# BLOQUE 4. Resumen del Benchmark Científico -------------------------------
+# BLOQUE 4. Resumen del Benchmark Científico
 ## Objetivo: Generar un resumen homogéneo del Benchmark Científico para su
 ## utilización en reportes, dashboards y la Plataforma GeoAI.
 
@@ -362,26 +399,51 @@ def generate_benchmark_summary(
             "El DataFrame del Benchmark está vacío."
         )
 
-    best_model = benchmark_dataframe.loc[
-        benchmark_dataframe["rmse"].idxmin()
-    ]
+    ranking_metric = BENCHMARK_CONFIG.get("ranking_metric") # Recuperar métrica oficial de ranking
+
+    if ranking_metric is None:
+        raise KeyError(
+            "BENCHMARK_CONFIG no contiene 'ranking_metric'."
+        )
+
+    if ranking_metric not in benchmark_dataframe.columns:
+        raise ValueError(
+            f"La métrica oficial '{ranking_metric}' no existe en el DataFrame."
+        )
+
+    metric_directions = BENCHMARK_CONFIG.get(
+        "metric_directions",
+        {}
+    ) # Recuperar direcciones oficiales de optimización
+
+    direction = metric_directions.get(
+        ranking_metric,
+        "min"
+    ) # Recuperar dirección de optimización
+
+    if direction not in {"min", "max"}:
+        raise ValueError(
+            f"Dirección de optimización inválida para '{ranking_metric}': {direction}"
+        )
+
+    if direction == "min":
+        best_index = benchmark_dataframe[ranking_metric].idxmin() # Identificar mejor resultado mediante minimización
+    else:
+        best_index = benchmark_dataframe[ranking_metric].idxmax() # Identificar mejor resultado mediante maximización
+
+    best_model = benchmark_dataframe.loc[best_index] # Recuperar mejor modelo según el protocolo oficial
 
     benchmark_summary = {
-
-        # Información general ---------------------------------------------
         "n_models": len(benchmark_dataframe),
-
-        # Mejor modelo ----------------------------------------------------
+        "ranking_metric": ranking_metric,
+        "ranking_direction": direction,
         "best_model_code": best_model["model_code"],
         "best_model_name": best_model["model_name"],
         "best_family": best_model["family"],
-
-        # Métricas --------------------------------------------------------
         "best_rmse": best_model["rmse"],
         "best_mae": best_model["mae"],
         "best_mape": best_model["mape"],
-        "best_r2": best_model["r2"]
-
+        "best_r2": best_model["r2"],
     }
 
     return benchmark_summary

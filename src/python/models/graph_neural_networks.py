@@ -1,16 +1,10 @@
 # graph_neural_networks.py
 
 # BLOQUE 1. Importaciones --------------------------------------------------
-## Objetivo: Importar las librerías necesarias para construir, entrenar,
-## evaluar y exportar las arquitecturas Graph Neural Networks utilizadas
-## durante el Benchmark Científico.
-##
-## Producto:
-## - Librerías cargadas correctamente.
-##
-## Responde:
-## ¿Las dependencias necesarias para implementar las arquitecturas GNN
-## fueron importadas correctamente?
+# Objetivo: Importar las librerías necesarias para construir, entrenar, evaluar y exportar las arquitecturas
+# GNNs utilizadas durante el Benchmark Científico.
+# Producto: - Librerías cargadas correctamente.
+# Responde: ¿Las dependencias necesarias para implementar las arquitecturas GNN fueron importadas correctamente?
 
 # Funciones del sistema
 import time  # Medición del tiempo de entrenamiento
@@ -68,19 +62,15 @@ if torch.cuda.is_available():
     )  # Semilla para GPU
 
 # BLOQUE 2. Configuración --------------------------------------------------
-## Objetivo: Definir la configuración oficial de las arquitecturas Graph
-## Neural Networks utilizadas durante el Benchmark Científico.
-## Producto:
-## - GNN_CONFIG
-## Responde:
-## ¿Las arquitecturas Graph Neural Networks disponen de una configuración
-## oficial, reproducible y consistente con el Benchmark Científico?
+# Objetivo: Definir la configuración oficial de las arquitecturas GNNs utilizadas durante el Benchmark Científico.
+# Producto: - GNN_CONFIG
+# Responde: ¿Las arquitecturas GNNs disponen de una configuración oficial, reproducible y consistente con el Benchmark Científico?
 
 # Configuración oficial de las arquitecturas -------------------------------
 GNN_CONFIG = {
     "gcn": {
         # Identificación
-        "model_code": BENCHMARK_MODEL_CODES["GNN01"],
+        "model_code": "GNN01",
         "model_name": "gcn",
         "family": "graph_neural_networks",
 
@@ -94,7 +84,7 @@ GNN_CONFIG = {
 
     "graphsage": {
         # Identificación
-        "model_code": BENCHMARK_MODEL_CODES["GNN02"],
+        "model_code": "GNN02", # Código oficial del modelo
         "model_name": "graphsage",
         "family": "graph_neural_networks",
 
@@ -108,7 +98,7 @@ GNN_CONFIG = {
 
     "gat": {
         # Identificación
-        "model_code": BENCHMARK_MODEL_CODES["GNN03"],
+        "model_code": "GNN03", # Código oficial del modelo
         "model_name": "gat",
         "family": "graph_neural_networks",
 
@@ -123,7 +113,7 @@ GNN_CONFIG = {
 
     "gin": {
         # Identificación
-        "model_code": BENCHMARK_MODEL_CODES["GNN04"],
+        "model_code": "GNN04", # Código oficial del modelo
         "model_name": "gin",
         "family": "graph_neural_networks",
 
@@ -133,12 +123,11 @@ GNN_CONFIG = {
         "learning_rate": 0.001,
         "weight_decay": 5e-4,
         "epochs": 300
-
     },
 
     "tagcn": {
         # Identificación
-        "model_code": BENCHMARK_MODEL_CODES["GNN05"],
+        "model_code": "GNN05", # Código oficial del modelo
         "model_name": "tagcn",
         "family": "graph_neural_networks",
 
@@ -153,32 +142,11 @@ GNN_CONFIG = {
 }  # Configuración oficial de las arquitecturas GNN
 
 # BLOQUE 3. Construcción de Arquitecturas GNN -------------------------------
-## Objetivo: Definir las arquitecturas oficiales Graph Neural Networks (GNN)
-## utilizadas durante el Benchmark Científico.
-## Producto:
-## - GCNModel
-## - GraphSAGEModel
-## - GATModel
-## - GINModel
-## - TAGCNModel
-## Responde:
-## ¿Las arquitecturas oficiales Graph Neural Networks fueron construidas de
-## forma modular, reproducible y consistente con el Benchmark Científico?
+# Objetivo: Definir las arquitecturas oficiales GNNs (GNN) utilizadas durante el Benchmark Científico.
+# Producto: - GCNModel - GraphSAGEModel - GATModel - GINModel - TAGCNModel
+# Responde: ¿Las arquitecturas oficiales GNNs fueron construidas de forma modular, reproducible y consistente con el Benchmark Científico?
 
 # BLOQUE 3.1. Clase GCNModel -----------------------------------------------
-## Objetivo: Definir la arquitectura oficial del modelo Graph Convolutional
-## Network (GCN) utilizada durante el Benchmark Científico.
-## Entradas:
-## - input_channels
-## - hidden_channels
-## - output_channels
-## - dropout
-## Producto:
-## - GCNModel
-## Responde:
-## ¿La arquitectura GCN fue construida correctamente para el proceso de
-## entrenamiento del Benchmark Científico?
-
 class GCNModel(
     nn.Module
 ):
@@ -265,22 +233,6 @@ class GCNModel(
         return x  # Predicciones del modelo
     
 # BLOQUE 3.2. Clase GraphSAGEModel -----------------------------------------
-## Objetivo: Definir la arquitectura oficial del modelo GraphSAGE utilizada
-## durante el Benchmark Científico.
-##
-## Entradas:
-## - input_channels
-## - hidden_channels
-## - output_channels
-## - dropout
-##
-## Producto:
-## - GraphSAGEModel
-##
-## Responde:
-## ¿La arquitectura GraphSAGE fue construida correctamente para el proceso
-## de entrenamiento del Benchmark Científico?
-
 class GraphSAGEModel(nn.Module):
     """
     Arquitectura oficial GraphSAGE.
@@ -319,13 +271,11 @@ class GraphSAGEModel(nn.Module):
             hidden_channels,
             output_channels
         )
-
         self.dropout = dropout
 
         # Auditoría temporal
         self.debug_forward = True
 
-    # ---------------------------------------------------------------------
     def forward(
         self,
         x: torch.Tensor,
@@ -335,10 +285,7 @@ class GraphSAGEModel(nn.Module):
         Propagación hacia adelante del modelo.
         """
 
-        # ==============================================================
         # Auditoría temporal (solo la primera ejecución)
-        # ==============================================================
-
         if self.debug_forward:
 
             print("\n" + "-" * 80)
@@ -391,38 +338,20 @@ class GraphSAGEModel(nn.Module):
         )
 
         if self.debug_forward:
-
             print(f"conv2.shape    : {tuple(x.shape)}")
-
             print(
                 f"Después conv2  : "
                 f"min={x.min().item():.6f} "
                 f"max={x.max().item():.6f}"
                 f"mean={x.mean().item():.6f}"
             )
-
             print("-" * 80)
-
             # Solo imprimir la primera pasada
             self.debug_forward = False
 
         return x
 
 # BLOQUE 3.3. Clase GATModel -----------------------------------------------
-## Objetivo: Definir la arquitectura oficial del modelo Graph Attention
-## Network (GAT) utilizada durante el Benchmark Científico.
-## Entradas:
-## - input_channels
-## - hidden_channels
-## - output_channels
-## - heads
-## - dropout
-## Producto:
-## - GATModel
-## Responde:
-## ¿La arquitectura GAT fue construida correctamente para el proceso de
-## entrenamiento del Benchmark Científico?
-
 class GATModel(
     nn.Module
 ):
@@ -472,7 +401,6 @@ class GATModel(
             concat=False,
             dropout=dropout
         )  # Segunda capa GAT
-
         self.dropout = dropout  # Probabilidad de Dropout
 
     def forward(
@@ -520,21 +448,7 @@ class GATModel(
 
         return x  # Predicciones del modelo
 
-
 # BLOQUE 3.4. Clase GINModel -----------------------------------------------
-## Objetivo: Definir la arquitectura oficial del modelo Graph Isomorphism
-## Network (GIN) utilizada durante el Benchmark Científico.
-## Entradas:
-## - input_channels
-## - hidden_channels
-## - output_channels
-## - dropout
-## Producto:
-## - GINModel
-## Responde:
-## ¿La arquitectura GIN fue construida correctamente para el proceso de
-## entrenamiento del Benchmark Científico?
-
 class GINModel(
     nn.Module
 ):
@@ -644,21 +558,6 @@ class GINModel(
         return x  # Predicciones del modelo
     
 # BLOQUE 3.5. Clase TAGCNModel ---------------------------------------------
-## Objetivo: Definir la arquitectura oficial del modelo Topology Adaptive
-## Graph Convolutional Network (TAGCN) utilizada durante el Benchmark
-## Científico.
-## Entradas:
-## - input_channels
-## - hidden_channels
-## - output_channels
-## - K
-## - dropout
-## Producto:
-## - TAGCNModel
-## Responde:
-## ¿La arquitectura TAGCN fue construida correctamente para el proceso de
-## entrenamiento del Benchmark Científico?
-
 class TAGCNModel(
     nn.Module
 ):
@@ -755,16 +654,10 @@ class TAGCNModel(
         return x  # Predicciones del modelo
 
 # BLOQUE 4. Construcción del Modelo ----------------------------------------
-## Objetivo: Construir la arquitectura Graph Neural Network seleccionada
-## utilizando la configuración oficial del Benchmark Científico.
-## Entradas:
-## - model_config
-## - input_channels
-## - output_channels
-## Producto:
-## - model
-## Responde:
-## ¿La arquitectura Graph Neural Network fue construida correctamente?
+# Objetivo: Construir la arquitectura GNN seleccionada utilizando la configuración oficial del Benchmark Científico.
+# Entradas: - model_config - input_channels - output_channels
+# Producto: - model
+# Responde: ¿La arquitectura GNN fue construida correctamente?
 
 def build_gnn_model(
     model_config: dict,
@@ -772,7 +665,7 @@ def build_gnn_model(
     output_channels: int
 ) -> nn.Module:
     """
-    Construye la arquitectura Graph Neural Network especificada en la
+    Construye la arquitectura GNN especificada en la
     configuración oficial del Benchmark Científico.
 
     Parameters
@@ -789,7 +682,7 @@ def build_gnn_model(
     Returns
     -------
     nn.Module
-        Arquitectura Graph Neural Network construida.
+        Arquitectura GNN construida.
     """
 
     if model_config is None:
@@ -838,7 +731,6 @@ def build_gnn_model(
             )
 
     try:
-
         model_name = str(
             model_config["model_name"]
         ).lower()
@@ -854,7 +746,6 @@ def build_gnn_model(
         print(f"output_channels : {output_channels}")
 
         if model_name == "gcn":
-
             model = GCNModel(
                 input_channels=input_channels,
                 hidden_channels=hidden_channels,
@@ -863,7 +754,6 @@ def build_gnn_model(
             )
 
         elif model_name == "graphsage":
-
             model = GraphSAGEModel(
                 input_channels=input_channels,
                 hidden_channels=hidden_channels,
@@ -872,7 +762,6 @@ def build_gnn_model(
             )
 
         elif model_name == "gat":
-
             if "heads" not in model_config:
                 raise ValueError(
                     "La configuración GAT debe contener 'heads'."
@@ -892,7 +781,6 @@ def build_gnn_model(
             )
 
         elif model_name == "gin":
-
             model = GINModel(
                 input_channels=input_channels,
                 hidden_channels=hidden_channels,
@@ -901,7 +789,6 @@ def build_gnn_model(
             )
 
         elif model_name == "tagcn":
-
             if "K" not in model_config:
                 raise ValueError(
                     "La configuración TAGCN debe contener 'K'."
@@ -929,29 +816,20 @@ def build_gnn_model(
             raise TypeError(
                 "El modelo construido no corresponde a nn.Module."
             )
-
         return model
 
     except Exception as error:
-
         raise RuntimeError(
             f"No fue posible construir la arquitectura GNN "
             f"'{model_config.get('model_name', 'desconocido')}'."
         ) from error
 
 # BLOQUE 5. Función de Pérdida y Optimizador -------------------------------
-## Objetivo: Construir la función de pérdida y el optimizador oficial
-## utilizados durante el entrenamiento de las arquitecturas Graph Neural
-## Networks.
-## Entradas:
-## - model
-## - model_config
-## Producto:
-## - criterion
-## - optimizer
-## Responde:
-## ¿La función de pérdida y el optimizador fueron configurados
-## correctamente para el entrenamiento del modelo GNN?
+# Objetivo: Construir la función de pérdida y el optimizador oficial utilizados durante el entrenamiento de 
+# las arquitecturas GNNs.
+# Entradas: - model - model_config
+# Producto: - criterion - optimizer
+# Responde: ¿La función de pérdida y el optimizador fueron configurados correctamente para el entrenamiento del modelo GNN?
 
 def build_training_components(
     model: nn.Module,
@@ -959,12 +837,12 @@ def build_training_components(
 ) -> dict:
     """
     Construye la función de pérdida y el optimizador oficial para una
-    arquitectura Graph Neural Network.
+    arquitectura GNN.
 
     Parameters
     ----------
     model : nn.Module
-        Modelo Graph Neural Network.
+        Modelo GNN.
 
     model_config : dict
         Configuración oficial del modelo.
@@ -1020,9 +898,7 @@ def build_training_components(
             )
 
     try:
-
         criterion = nn.MSELoss()  # Función de pérdida oficial
-
         optimizer = Adam(
             model.parameters(),
             lr=model_config["learning_rate"],
@@ -1030,11 +906,8 @@ def build_training_components(
         )  # Optimizador oficial
 
         training_components = {
-
             "criterion": criterion,
-
             "optimizer": optimizer
-
         }
 
         required_products = [
@@ -1043,14 +916,12 @@ def build_training_components(
         ]
 
         missing_products = [
-
             product
             for product in required_products
             if product not in training_components
         ]
 
         if missing_products:
-
             raise RuntimeError(
                 "TrainingComponents está incompleto: "
                 f"{missing_products}"
@@ -1071,33 +942,20 @@ def build_training_components(
             raise TypeError(
                 "optimizer debe ser una instancia de Optimizer."
             )
-
         return training_components
 
     except Exception as error:
-
         raise RuntimeError(
             "No fue posible construir los componentes oficiales "
             "del entrenamiento."
         ) from error
         
 # BLOQUE 6. Entrenamiento --------------------------------------------------
-## Objetivo: Entrenar la arquitectura Graph Neural Network utilizando la
-## colección oficial de grafos espacio-temporales del Benchmark Científico.
-## Entradas:
-## - model
-## - graphs
-## - criterion
-## - optimizer
-## - model_config
-## Producto:
-## - trained_model
-## - training_time
-## - loss
-## Responde:
-## ¿La arquitectura Graph Neural Network fue entrenada correctamente sobre
-## la colección oficial de grafos?
-
+# Objetivo: Entrenar la arquitectura GNN utilizando la colección oficial de grafos 
+# espacio-temporales del Benchmark Científico.
+# Entradas: - model - graphs - criterion - optimizer - model_config
+# Producto: - trained_model - training_time - loss
+# Responde: ¿La arquitectura GNN fue entrenada correctamente sobre la colección oficial de grafos?
 def train_gnn(
     model: nn.Module,
     graphs: list,
@@ -1108,30 +966,12 @@ def train_gnn(
     validation_index: np.ndarray | None = None
 ) -> dict:
     """
-    Entrena una arquitectura Graph Neural Network utilizando la colección
-    oficial de grafos del Benchmark Científico.
+    Entrena una arquitectura GNN utilizando la colección de GraphData
+    proporcionada por el protocolo oficial del Benchmark.
 
-    Parameters
-    ----------
-    model : nn.Module
-        Modelo Graph Neural Network.
-
-    graphs : list
-        Colección oficial de GraphData.
-
-    criterion : nn.Module
-        Función de pérdida.
-
-    optimizer : torch.optim.Optimizer
-        Optimizador.
-
-    model_config : dict
-        Configuración oficial.
-
-    Returns
-    -------
-    dict
-        Modelo entrenado, tiempo y pérdida final.
+    Si train_index es None, se asume que graphs contiene exclusivamente
+    los GraphData temporales destinados al entrenamiento y se utilizan
+    todos los nodos de cada GraphData.
     """
 
     if model is None:
@@ -1139,7 +979,10 @@ def train_gnn(
             "El modelo no puede ser nulo."
         )
 
-    if not isinstance(model, nn.Module):
+    if not isinstance(
+        model,
+        nn.Module
+    ):
         raise TypeError(
             "El modelo debe ser una instancia de nn.Module."
         )
@@ -1159,16 +1002,31 @@ def train_gnn(
             "El optimizador no puede ser nulo."
         )
 
+    if not isinstance(
+        optimizer,
+        torch.optim.Optimizer
+    ):
+        raise TypeError(
+            "optimizer debe ser una instancia de Optimizer."
+        )
+
     if model_config is None:
         raise ValueError(
             "La configuración del modelo no puede ser nula."
         )
 
     if train_index is not None:
-
-        if not isinstance(train_index, np.ndarray):
+        if not isinstance(
+            train_index,
+            np.ndarray
+        ):
             raise TypeError(
                 "train_index debe ser un arreglo NumPy."
+            )
+
+        if train_index.ndim != 1:
+            raise ValueError(
+                "train_index debe ser un vector unidimensional."
             )
 
         if len(train_index) == 0:
@@ -1177,10 +1035,17 @@ def train_gnn(
             )
 
     if validation_index is not None:
-
-        if not isinstance(validation_index, np.ndarray):
+        if not isinstance(
+            validation_index,
+            np.ndarray
+        ):
             raise TypeError(
                 "validation_index debe ser un arreglo NumPy."
+            )
+
+        if validation_index.ndim != 1:
+            raise ValueError(
+                "validation_index debe ser un vector unidimensional."
             )
 
         if len(validation_index) == 0:
@@ -1189,19 +1054,27 @@ def train_gnn(
             )
 
     model.train()
+
     training_start = time.time()
     epoch_loss = None
     loss_history = []
 
     try:
-        for epoch in range(model_config["epochs"]):
+
+        for epoch in range(
+            model_config["epochs"]
+        ):
+
             accumulated_loss = 0.0
+
             for graph_index, graph in enumerate(graphs):
+
                 optimizer.zero_grad()
+
                 predictions = model(
                     graph.x,
                     graph.edge_index
-                )
+                ) # Generar predicciones para todos los nodos
 
                 predictions = predictions.squeeze(-1)
 
@@ -1210,39 +1083,55 @@ def train_gnn(
                         "El GraphData no contiene la variable objetivo."
                     )
 
-                if not isinstance(graph.y, torch.Tensor):
+                if not isinstance(
+                    graph.y,
+                    torch.Tensor
+                ):
                     raise TypeError(
                         "graph.y debe ser un tensor de PyTorch."
                     )
 
-                if (
-                    train_index is not None
-                    and train_index.max() >= graph.num_nodes
-                ):
-                    raise ValueError(
-                        "train_index contiene índices fuera del rango del grafo."
-                    )
+                target = graph.y.squeeze(-1) # Normalizar dimensión del objetivo
 
                 if train_index is None:
+
                     prediction_target = predictions
-                    target = graph.y
+                    target_train = target # Utilizar todos los nodos del GraphData de entrenamiento
 
                 else:
 
-                    prediction_target = predictions[train_index]
-                    target = graph.y[train_index]
+                    if np.any(train_index < 0):
+                        raise ValueError(
+                            "train_index contiene índices negativos."
+                        )
 
-                # Validación de dimensiones
-                if prediction_target.shape != target.shape:
+                    if train_index.max() >= graph.num_nodes:
+                        raise ValueError(
+                            "train_index contiene índices fuera del rango del grafo."
+                        )
+
+                    prediction_target = predictions[
+                        train_index
+                    ]
+
+                    target_train = target[
+                        train_index
+                    ] # Utilizar únicamente los nodos indicados
+
+                prediction_target = prediction_target.reshape(-1)
+                target_train = target_train.reshape(-1)
+
+                if prediction_target.shape != target_train.shape:
                     raise ValueError(
-                        "prediction_target y target poseen dimensiones incompatibles."
+                        "prediction_target y target poseen dimensiones incompatibles: "
+                        f"{prediction_target.shape} != "
+                        f"{target_train.shape}"
                     )
 
-                # Cálculo de la pérdida
                 loss = criterion(
                     prediction_target,
-                    target
-                )
+                    target_train
+                ) # Calcular pérdida
 
                 if epoch == 0 and graph_index == 0:
 
@@ -1250,41 +1139,104 @@ def train_gnn(
                     print("AUDITORÍA DEL ENTRENAMIENTO GNN")
                     print("=" * 80)
 
-                    print(f"Cantidad de grafos : {len(graphs)}")
-                    print(f"Nodos              : {graph.num_nodes}")
-                    print(f"Variables          : {graph.num_node_features}")
+                    print(
+                        f"Cantidad de grafos : "
+                        f"{len(graphs)}"
+                    )
+
+                    print(
+                        f"Nodos              : "
+                        f"{graph.num_nodes}"
+                    )
+
+                    print(
+                        f"Variables          : "
+                        f"{graph.num_node_features}"
+                    )
 
                     if train_index is None:
-
-                        print("Protocolo          : Grafo completo")
-
+                        print(
+                            "Protocolo          : "
+                            "GraphData temporales de entrenamiento"
+                        )
                     else:
+                        print(
+                            "Protocolo          : "
+                            "Índice de nodos"
+                        )
 
-                        print("Protocolo          : Train Index")
+                    print(
+                        f"Feature mínimo     : "
+                        f"{graph.x.min().item()}"
+                    )
 
-                    print(f"Feature mínimo     : {graph.x.min().item()}")
-                    print(f"Feature máximo     : {graph.x.max().item()}")
+                    print(
+                        f"Feature máximo     : "
+                        f"{graph.x.max().item()}"
+                    )
 
-                    print(f"Predictions        : {tuple(prediction_target.shape)}")
-                    print(f"Target             : {tuple(target.shape)}")
+                    print(
+                        f"Predictions        : "
+                        f"{tuple(prediction_target.shape)}"
+                    )
 
-                    print(f"Target mínimo      : {target.min().item()}")
-                    print(f"Target máximo      : {target.max().item()}")
-                    print(f"Target promedio    : {target.mean().item()}")
+                    print(
+                        f"Target             : "
+                        f"{tuple(target_train.shape)}"
+                    )
 
-                    print(f"Pred mínimo        : {prediction_target.min().item()}")
-                    print(f"Pred máximo        : {prediction_target.max().item()}")
-                    print(f"Pred promedio      : {prediction_target.mean().item()}")
+                    print(
+                        f"Target mínimo      : "
+                        f"{target_train.min().item()}"
+                    )
 
-                    print(f"Loss inicial       : {loss.item()}")
+                    print(
+                        f"Target máximo      : "
+                        f"{target_train.max().item()}"
+                    )
+
+                    print(
+                        f"Target promedio    : "
+                        f"{target_train.mean().item()}"
+                    )
+
+                    print(
+                        f"Pred mínimo        : "
+                        f"{prediction_target.min().item()}"
+                    )
+
+                    print(
+                        f"Pred máximo        : "
+                        f"{prediction_target.max().item()}"
+                    )
+
+                    print(
+                        f"Pred promedio      : "
+                        f"{prediction_target.mean().item()}"
+                    )
+
+                    print(
+                        f"Loss inicial       : "
+                        f"{loss.item()}"
+                    )
 
                 loss.backward()
+
                 optimizer.step()
+
                 accumulated_loss += loss.item()
-            epoch_loss = accumulated_loss / len(graphs)
-            loss_history.append(epoch_loss)
+
+            epoch_loss = (
+                accumulated_loss
+                / len(graphs)
+            )
+
+            loss_history.append(
+                epoch_loss
+            )
 
     except Exception as error:
+
         raise RuntimeError(
             "Error durante el entrenamiento del modelo GNN."
         ) from error
@@ -1304,38 +1256,24 @@ def train_gnn(
     ]
 
     missing_products = [
-
         product
         for product in required_products
         if product not in training_result
     ]
 
     if missing_products:
-
         raise RuntimeError(
             "TrainingResult está incompleto: "
             f"{missing_products}"
         )
 
-        raise TypeError(
-            "optimizer debe ser una instancia de Optimizer."
-        )
-
     return training_result
 
 # BLOQUE 7. Predicción -----------------------------------------------------
-## Objetivo: Generar las predicciones utilizando la colección oficial de
-## grafos espacio-temporales del Benchmark Científico.
-## Entradas:
-## - model
-## - graphs
-## Producto:
-## - y_pred
-## - y_true
-## - inference_time
-## Responde:
-## ¿La arquitectura Graph Neural Network genera correctamente las
-## predicciones sobre la colección oficial de grafos?
+# Objetivo: Generar las predicciones utilizando la colección oficial de grafos espacio-temporales del Benchmark Científico.
+# Entradas: - model - graphs
+# Producto: - y_pred - y_true - inference_time
+# Responde: ¿La arquitectura GNN genera correctamente las predicciones sobre la colección oficial de grafos?
 
 def predict_gnn(
     model: nn.Module,
@@ -1348,7 +1286,7 @@ def predict_gnn(
     Parameters
     ----------
     model : nn.Module
-        Modelo Graph Neural Network entrenado.
+        Modelo GNN entrenado.
 
     graphs : list
         Colección oficial de GraphData.
@@ -1420,11 +1358,8 @@ def predict_gnn(
     inference_start = time.time()
 
     try:
-
         prediction_list = []
-
         with torch.no_grad():
-
             for graph in graphs:
 
                 outputs = model(
@@ -1442,17 +1377,13 @@ def predict_gnn(
         )
 
         prediction_result = {
-
             "y_pred": y_pred,
-
             "inference_time": (
                 time.time() - inference_start
             )
-
         }
 
         if y_true is not None:
-
             prediction_result["y_true"] = y_true.cpu()
 
         required_products = [
@@ -1461,14 +1392,12 @@ def predict_gnn(
         ]
 
         missing_products = [
-
             product
             for product in required_products
             if product not in prediction_result
         ]
 
         if missing_products:
-
             raise RuntimeError(
                 "PredictionResult está incompleto: "
                 f"{missing_products}"
@@ -1500,26 +1429,19 @@ def predict_gnn(
             raise TypeError(
                 "y_true debe ser un tensor de PyTorch."
             )
-
         return prediction_result
 
     except Exception as error:
-
         raise RuntimeError(
             "Error durante la inferencia del modelo GNN."
         ) from error
     
 # BLOQUE 8. Evaluación -----------------------------------------------------
-## Objetivo: Calcular las métricas oficiales de desempeño predictivo para la
-## arquitectura Graph Neural Network utilizando el conjunto de prueba.
-## Entradas:
-## - y_true
-## - y_pred
-## Producto:
-## - evaluation_result
-## Responde:
-## ¿Cuál es el desempeño predictivo de la arquitectura Graph Neural Network
-## sobre el conjunto de prueba?
+# Objetivo: Calcular las métricas oficiales de desempeño predictivo para la arquitectura GNN
+# utilizando el conjunto de prueba.
+# Entradas: - y_true - y_pred
+# Producto: - evaluation_result
+# Responde: ¿Cuál es el desempeño predictivo de la arquitectura GNN sobre el conjunto de prueba?
 
 def evaluate_gnn(
     y_true: Any,
@@ -1527,7 +1449,7 @@ def evaluate_gnn(
 ) -> dict:
     """
     Calcula las métricas oficiales de evaluación para una arquitectura
-    Graph Neural Network utilizando el pipeline oficial del proyecto.
+    GNN utilizando el pipeline oficial del proyecto.
 
     Parameters
     ----------
@@ -1554,7 +1476,6 @@ def evaluate_gnn(
         )
 
     try:
-
         if isinstance(
             y_true,
             torch.Tensor
@@ -1639,15 +1560,10 @@ def evaluate_gnn(
         )
 
         evaluation_result = {
-
             "rmse": rmse,
-
             "mae": mae,
-
             "mape": mape,
-
             "r2": r2
-
         }
 
         required_products = [
@@ -1658,21 +1574,18 @@ def evaluate_gnn(
         ]
 
         missing_products = [
-
             product
             for product in required_products
             if product not in evaluation_result
         ]
 
         if missing_products:
-
             raise RuntimeError(
                 "EvaluationResult está incompleto: "
                 f"{missing_products}"
             )
 
         for product in required_products:
-
             if evaluation_result[product] is None:
                 raise ValueError(
                     f"'{product}' es inválido."
@@ -1685,65 +1598,41 @@ def evaluate_gnn(
                 raise TypeError(
                     f"'{product}' debe ser un valor numérico."
                 )
-
         return evaluation_result
 
     except Exception as error:
-
         raise RuntimeError(
             "Error durante la evaluación del modelo GNN."
         ) from error
 
 # BLOQUE 9. Construcción del Resultado Oficial -----------------------------
-## Objetivo: Construir la estructura oficial de resultados de la arquitectura
-## Graph Neural Network compatible con el Benchmark Científico.
-## Entradas:
-## - model_config
-## - prediction_result
-## - evaluation_result
-## - training_result
-## Producto:
-## - benchmark_result
-## Responde:
-## ¿Los resultados de la arquitectura Graph Neural Network fueron
-## consolidados correctamente para el Benchmark Científico?
-
+# Objetivo: Construir la estructura oficial de resultados de la arquitectura GNN compatible con el Benchmark Científico.
+# Entradas: - model_config - prediction_result - evaluation_result - training_result
+# Producto: - benchmark_result
+# Responde: ¿Los resultados de la arquitectura GNN fueron consolidados correctamente para el Benchmark Científico?
 def build_gnn_results(
     model_config: dict,
     prediction_result: dict,
     evaluation_result: dict,
-    training_result: dict | None = None
+    training_result: dict
 ) -> dict:
     """
-    Construye el resultado oficial del Benchmark para una arquitectura
-    Graph Neural Network.
+    Construye el resultado oficial de una arquitectura GNN
+    dentro del Benchmark Científico.
 
-    Parameters
-    ----------
-    model_config : dict
-        Configuración oficial del modelo.
-
-    prediction_result : dict
-        Resultado de la predicción.
-
-    evaluation_result : dict
-        Resultado de la evaluación.
-
-    training_result : dict, optional
-        Resultado del entrenamiento.
-
-    Returns
-    -------
-    dict
-        Resultado oficial del Benchmark.
+    Integra los productos de entrenamiento, predicción y evaluación
+    bajo una única estructura científica estandarizada.
     """
 
     if model_config is None:
         raise ValueError(
-            "La configuración del modelo no puede ser nula."
+            "model_config no puede ser nulo."
         )
 
-    if not isinstance(model_config, dict):
+    if not isinstance(
+        model_config,
+        dict
+    ):
         raise TypeError(
             "model_config debe ser un diccionario."
         )
@@ -1753,7 +1642,10 @@ def build_gnn_results(
             "prediction_result no puede ser nulo."
         )
 
-    if not isinstance(prediction_result, dict):
+    if not isinstance(
+        prediction_result,
+        dict
+    ):
         raise TypeError(
             "prediction_result debe ser un diccionario."
         )
@@ -1763,89 +1655,214 @@ def build_gnn_results(
             "evaluation_result no puede ser nulo."
         )
 
-    if not isinstance(evaluation_result, dict):
+    if not isinstance(
+        evaluation_result,
+        dict
+    ):
         raise TypeError(
             "evaluation_result debe ser un diccionario."
         )
 
-    if training_result is not None:
-
-        if not isinstance(training_result, dict):
-            raise TypeError(
-                "training_result debe ser un diccionario."
-            )
-
-    try:
-
-        benchmark_result = build_benchmark_result(
-            model_config=model_config,
-            prediction_result=prediction_result,
-            evaluation_result=evaluation_result,
-            training_result=training_result
+    if training_result is None:
+        raise ValueError(
+            "training_result no puede ser nulo."
         )
 
-        if benchmark_result is None:
-            raise RuntimeError(
-                "BenchmarkResult no fue construido."
+    if not isinstance(
+        training_result,
+        dict
+    ):
+        raise TypeError(
+            "training_result debe ser un diccionario."
+        )
+
+    required_model_config_keys = [
+        "model_code",
+        "model_name",
+        "family",
+    ]
+
+    missing_model_config_keys = [
+        key
+        for key in required_model_config_keys
+        if key not in model_config
+    ]
+
+    if missing_model_config_keys:
+        raise ValueError(
+            "model_config está incompleto: "
+            f"{missing_model_config_keys}"
+        )
+
+    required_prediction_keys = [
+        "y_pred",
+        "inference_time",
+    ]
+
+    missing_prediction_keys = [
+        key
+        for key in required_prediction_keys
+        if key not in prediction_result
+    ]
+
+    if missing_prediction_keys:
+        raise ValueError(
+            "prediction_result está incompleto: "
+            f"{missing_prediction_keys}"
+        )
+
+    required_evaluation_keys = [
+        "rmse",
+        "mae",
+        "mape",
+        "r2",
+    ]
+
+    missing_evaluation_keys = [
+        key
+        for key in required_evaluation_keys
+        if key not in evaluation_result
+    ]
+
+    if missing_evaluation_keys:
+        raise ValueError(
+            "evaluation_result está incompleto: "
+            f"{missing_evaluation_keys}"
+        )
+
+    required_training_keys = [
+        "model",
+        "loss",
+        "loss_history",
+        "training_time",
+    ]
+
+    missing_training_keys = [
+        key
+        for key in required_training_keys
+        if key not in training_result
+    ]
+
+    if missing_training_keys:
+        raise ValueError(
+            "training_result está incompleto: "
+            f"{missing_training_keys}"
+        )
+
+    y_pred = prediction_result["y_pred"]
+
+    if y_pred is None:
+        raise ValueError(
+            "prediction_result['y_pred'] no puede ser nulo."
+        )
+
+    if not isinstance(
+        y_pred,
+        np.ndarray
+    ):
+        y_pred = np.asarray(
+            y_pred
+        )
+
+    if y_pred.ndim != 1:
+        y_pred = y_pred.reshape(-1)
+
+    if len(y_pred) == 0:
+        raise ValueError(
+            "prediction_result['y_pred'] está vacío."
+        )
+
+    if not np.all(
+        np.isfinite(y_pred)
+    ):
+        raise ValueError(
+            "prediction_result['y_pred'] contiene valores no finitos."
+        )
+
+    if not np.isfinite(
+        float(prediction_result["inference_time"])
+    ):
+        raise ValueError(
+            "inference_time contiene un valor inválido."
+        )
+
+    for metric in required_evaluation_keys:
+
+        metric_value = evaluation_result[metric]
+
+        if metric_value is None:
+            raise ValueError(
+                f"La métrica '{metric}' no puede ser None."
             )
 
-        if not isinstance(
-            benchmark_result,
-            dict
+        if not np.isfinite(
+            float(metric_value)
         ):
-            raise TypeError(
-                "BenchmarkResult debe ser un diccionario."
+            raise ValueError(
+                f"La métrica '{metric}' contiene un valor no finito."
             )
 
-        required_products = [
-            "model_config",
-            "prediction_result",
-            "evaluation_result"
-        ]
+    benchmark_result = {
+        "model": training_result["model"],
+        "model_code": model_config["model_code"],
+        "model_name": model_config["model_name"],
+        "family": model_config["family"],
+        "rmse": float(evaluation_result["rmse"]),
+        "mae": float(evaluation_result["mae"]),
+        "mape": float(evaluation_result["mape"]),
+        "r2": float(evaluation_result["r2"]),
+        "training_time": float(
+            training_result["training_time"]
+        ),
+        "inference_time": float(
+            prediction_result["inference_time"]
+        ),
+        "loss": float(
+            training_result["loss"]
+        ),
+        "loss_history": training_result["loss_history"],
+        "prediction_result": prediction_result,
+        "evaluation_result": evaluation_result,
+        "model_config": model_config,
+    } # Construir producto científico oficial del Benchmark
 
-        if training_result is not None:
+    required_result_keys = [
+        "model",
+        "model_code",
+        "model_name",
+        "family",
+        "rmse",
+        "mae",
+        "mape",
+        "r2",
+        "training_time",
+        "inference_time",
+        "loss",
+        "loss_history",
+        "prediction_result",
+        "evaluation_result",
+        "model_config",
+    ]
 
-            required_products.extend([
-                "model",
-                "loss",
-                "loss_history",
-                "training_time"
-            ])
+    missing_result_keys = [
+        key
+        for key in required_result_keys
+        if key not in benchmark_result
+    ]
 
-        missing_products = [
-
-            product
-            for product in required_products
-            if product not in benchmark_result
-        ]
-
-        if missing_products:
-
-            raise RuntimeError(
-                "BenchmarkResult está incompleto: "
-                f"{missing_products}"
-            )
-
-        return benchmark_result
-
-    except Exception as error:
-
+    if missing_result_keys:
         raise RuntimeError(
-            "No fue posible construir el resultado oficial "
-            "del Benchmark."
-        ) from error
+            "BenchmarkResult está incompleto: "
+            f"{missing_result_keys}"
+        )
+
+    return benchmark_result
     
 # BLOQUE 10. Ejecución del Modelo ------------------------------------------
-## Objetivo: Ejecutar el flujo completo de una arquitectura Graph Neural
-## Network utilizando la colección oficial de GraphData del proyecto.
-## Entradas:
-## - model_config
-## - graphs
-## Producto:
-## - gnn_result
-## Responde:
-## ¿La arquitectura Graph Neural Network fue ejecutada correctamente sobre
-## la colección oficial de GraphData?
+# Objetivo: Ejecutar el flujo completo de una arquitectura GNN utilizando la colección oficial de GraphData del proyecto.
+# Entradas: - model_config - graphs 
+# Producto: - gnn_result
+# Responde: ¿La arquitectura GNN fue ejecutada correctamente sobre la colección oficial de GraphData?
 
 def run_gnn(
     model_config: dict,
@@ -1853,7 +1870,7 @@ def run_gnn(
 ) -> dict:
     """
     Ejecuta el flujo oficial de entrenamiento de una arquitectura
-    Graph Neural Network.
+    GNN.
     """
 
     if model_config is None:
@@ -1867,7 +1884,6 @@ def run_gnn(
         )
 
     try:
-
         input_channels = graphs[0].num_node_features
 
         model = build_gnn_model(
@@ -1890,7 +1906,6 @@ def run_gnn(
         )
 
         run_result = {
-
             "model": training_result["model"],
             "loss": training_result["loss"],
             "loss_history": training_result["loss_history"],
@@ -1918,36 +1933,20 @@ def run_gnn(
                 "RunResult está incompleto: "
                 f"{missing_products}"
             )
-
         return run_result
 
     except Exception as error:
-
         raise RuntimeError(
             "Error durante la ejecución del flujo oficial del modelo GNN."
         ) from error
 
-# BLOQUE 11. Entrenamiento del Modelo Oficial -------------------------------******************
-## Objetivo: Ejecutar el pipeline oficial de entrenamiento de una
-## arquitectura Graph Neural Network preservando todos los productos
-## científicos generados durante el entrenamiento, la predicción y la
-## evaluación del Modelo Oficial.
-##
-## Entradas:
-## - model_config
-## - graphs
-##
-## Producto:
-## - model_config
-## - training_result
-## - prediction_result
-## - evaluation_result
-##
-## Responde:
-## ¿El pipeline oficial del Modelo Oficial genera correctamente todos los
-## productos científicos requeridos para la exportación, validación e
-## inferencia del modelo?
-
+# BLOQUE 11. Entrenamiento del Modelo Oficial -------------------------------
+# Objetivo: Ejecutar el pipeline oficial de entrenamiento de una arquitectura GNN preservando todos los productos
+# científicos generados durante el entrenamiento, la predicción y la evaluación del Modelo Oficial.
+# Entradas: - model_config - graphs
+# Producto: - model_config - training_result - prediction_result - evaluation_result
+# Responde: ¿El pipeline oficial del Modelo Oficial genera correctamente todos los productos científicos requeridos
+# para la exportación, validación e inferencia del modelo?
 def run_gnn_training(
     model_config: dict,
     graphs: list,
@@ -1955,9 +1954,7 @@ def run_gnn_training(
     validation_index: np.ndarray
 ) -> dict:
     """
-    Ejecuta el pipeline oficial de entrenamiento de una Graph Neural Network
-    para el Modelo Oficial del proyecto, conservando todos los productos
-    generados durante el entrenamiento.
+    Ejecuta el pipeline oficial de entrenamiento y validación de una GNN.
 
     Parameters
     ----------
@@ -1967,24 +1964,37 @@ def run_gnn_training(
     graphs : list
         Colección oficial de GraphData.
 
+    train_index : np.ndarray
+        Índices oficiales utilizados para el entrenamiento.
+
+    validation_index : np.ndarray
+        Índices oficiales utilizados para la validación.
+
     Returns
     -------
     dict
-        Resultado oficial del entrenamiento del Modelo Oficial.
+        Resultado oficial del entrenamiento y validación del modelo GNN.
     """
 
-    # --------------------------------------------------------------------------
-    # Validación
-    # --------------------------------------------------------------------------
-
+    # Validación de entradas
     if model_config is None:
         raise ValueError(
             "La configuración del modelo no puede ser nula."
         )
 
+    if not isinstance(model_config, dict):
+        raise TypeError(
+            "model_config debe ser un diccionario."
+        )
+
     if graphs is None or len(graphs) == 0:
         raise ValueError(
             "La colección de GraphData está vacía."
+        )
+
+    if not isinstance(graphs, (list, tuple)):
+        raise TypeError(
+            "graphs debe ser una lista o tupla de GraphData."
         )
 
     if train_index is None:
@@ -1997,33 +2007,91 @@ def run_gnn_training(
             "validation_index no puede ser nulo."
         )
 
+    if not isinstance(train_index, np.ndarray):
+        raise TypeError(
+            "train_index debe ser un arreglo NumPy."
+        )
+
+    if not isinstance(validation_index, np.ndarray):
+        raise TypeError(
+            "validation_index debe ser un arreglo NumPy."
+        )
+
+    if train_index.ndim != 1:
+        raise ValueError(
+            "train_index debe ser un vector unidimensional."
+        )
+
+    if validation_index.ndim != 1:
+        raise ValueError(
+            "validation_index debe ser un vector unidimensional."
+        )
+
+    if len(train_index) == 0:
+        raise ValueError(
+            "train_index está vacío."
+        )
+
+    if len(validation_index) == 0:
+        raise ValueError(
+            "validation_index está vacío."
+        )
+
+    if not np.issubdtype(
+        train_index.dtype,
+        np.integer
+    ):
+        raise TypeError(
+            "train_index debe contener índices enteros."
+        )
+
+    if not np.issubdtype(
+        validation_index.dtype,
+        np.integer
+    ):
+        raise TypeError(
+            "validation_index debe contener índices enteros."
+        )
+
+    if np.any(train_index < 0) or np.any(
+        train_index >= len(graphs)
+    ):
+        raise IndexError(
+            "train_index contiene índices fuera del rango de GraphData."
+        )
+
+    if np.any(validation_index < 0) or np.any(
+        validation_index >= len(graphs)
+    ):
+        raise IndexError(
+            "validation_index contiene índices fuera del rango de GraphData."
+        )
+
+    if set(train_index.tolist()) & set(
+        validation_index.tolist()
+    ):
+        raise ValueError(
+            "Existe solapamiento entre train_index y validation_index."
+        )
+
     try:
 
-        # ----------------------------------------------------------------------
         # Construcción del modelo
-        # ----------------------------------------------------------------------
-
-        input_channels = graphs[0].num_node_features
+        input_channels = graphs[0].num_node_features # Recuperar número de variables de entrada
 
         model = build_gnn_model(
             model_config=model_config,
             input_channels=input_channels,
             output_channels=1
-        )
+        ) # Construir arquitectura GNN oficial
 
-        # ----------------------------------------------------------------------
         # Componentes oficiales del entrenamiento
-        # ----------------------------------------------------------------------
-
         training_components = build_training_components(
             model=model,
             model_config=model_config
-        )
+        ) # Construir criterio y optimizador oficiales
 
-        # ----------------------------------------------------------------------
         # Entrenamiento
-        # ----------------------------------------------------------------------
-
         training_result = train_gnn(
             model=model,
             graphs=graphs,
@@ -2032,30 +2100,62 @@ def run_gnn_training(
             criterion=training_components["criterion"],
             optimizer=training_components["optimizer"],
             model_config=model_config
-        )
+        ) # Entrenar modelo utilizando exclusivamente train_index
 
-        # ----------------------------------------------------------------------
-        # Predicción
-        # ----------------------------------------------------------------------
+        # Selección de grafos de validación
+        validation_graphs = [
+            graphs[int(index)]
+            for index in validation_index
+        ] # Seleccionar únicamente los GraphData de validación
 
+        if len(validation_graphs) == 0:
+            raise RuntimeError(
+                "No existen GraphData para el conjunto de validación."
+            )
+
+        # Predicción sobre validación
         prediction_result = predict_gnn(
             model=training_result["model"],
-            graphs=graphs
-        )
+            graphs=validation_graphs
+        ) # Generar predicciones exclusivamente sobre validación
 
-        # ----------------------------------------------------------------------
-        # Evaluación
-        # ----------------------------------------------------------------------
+        if not isinstance(prediction_result, dict):
+            raise TypeError(
+                "prediction_result debe ser un diccionario."
+            )
 
+        if "y_pred" not in prediction_result:
+            raise RuntimeError(
+                "prediction_result no contiene 'y_pred'."
+            )
+
+        if "y_true" not in prediction_result:
+            raise RuntimeError(
+                "prediction_result no contiene 'y_true'."
+            )
+
+        y_pred = np.asarray(
+            prediction_result["y_pred"]
+        ).reshape(-1) # Normalizar predicciones de validación
+
+        y_true = np.asarray(
+            prediction_result["y_true"]
+        ).reshape(-1) # Normalizar valores reales de validación
+
+        if y_pred.shape != y_true.shape:
+            raise RuntimeError(
+                f"Las dimensiones de validación no coinciden: "
+                f"y_pred={y_pred.shape}, "
+                f"y_true={y_true.shape}."
+            )
+
+        # Evaluación sobre validación
         evaluation_result = evaluate_gnn(
-            y_true=prediction_result["y_true"],
-            y_pred=prediction_result["y_pred"]
-        )
+            y_true=y_true,
+            y_pred=y_pred
+        ) # Evaluar exclusivamente el conjunto de validación
 
-        # ----------------------------------------------------------------------
         # Resultado oficial del entrenamiento
-        # ----------------------------------------------------------------------
-
         training_output = {
             "model": training_result["model"],
             "loss": training_result["loss"],
@@ -2063,13 +2163,10 @@ def run_gnn_training(
             "training_time": training_result["training_time"],
             "model_config": model_config,
             "prediction_result": prediction_result,
-            "evaluation_result": evaluation_result
-        }
+            "evaluation_result": evaluation_result,
+        } # Construir producto oficial de entrenamiento y validación
 
-        # ----------------------------------------------------------------------
         # Validación del producto
-        # ----------------------------------------------------------------------
-
         required_products = [
             "model",
             "loss",
@@ -2078,7 +2175,7 @@ def run_gnn_training(
             "model_config",
             "prediction_result",
             "evaluation_result",
-        ]
+        ] # Definir productos obligatorios
 
         missing_products = [
             product
@@ -2095,31 +2192,24 @@ def run_gnn_training(
         return training_output
 
     except Exception as error:
-
         raise RuntimeError(
-            "Error durante la ejecución del entrenamiento oficial Graph Neural Network."
+            "Error durante la ejecución del entrenamiento oficial GNN."
         ) from error
 
 # BLOQUE 12. Entrenamiento Oficial del Benchmark ----------------------------
-## Objetivo: Ejecutar el protocolo oficial de entrenamiento, predicción y
-## evaluación de una arquitectura Graph Neural Network utilizando la
-## estructura oficial BenchmarkData del Benchmark Científico.
-## Entradas:
-## - model_config
-## - benchmark_data
-## Producto:
-## - benchmark_result
-## Responde:
-## ¿La arquitectura Graph Neural Network fue ejecutada correctamente bajo
-## el protocolo oficial del Benchmark Científico?
+# Objetivo: Ejecutar el protocolo oficial de entrenamiento, predicción y evaluación de una arquitectura GNN 
+# utilizando la estructura oficial BenchmarkData del Benchmark Científico.
+# Entradas: - model_config - benchmark_data
+# Producto: - benchmark_result
+# Responde: ¿La arquitectura GNN fue ejecutada correctamente bajo el protocolo oficial del Benchmark Científico?
+
 def run_gnn_benchmark(
     model_config: dict,
     benchmark_data: dict
 ) -> dict:
     """
     Ejecuta el protocolo oficial del Benchmark Científico para una
-    arquitectura Graph Neural Network utilizando la colección oficial
-    BenchmarkData.
+    arquitectura GNN utilizando la colección oficial BenchmarkData.
 
     Parameters
     ----------
@@ -2134,10 +2224,6 @@ def run_gnn_benchmark(
     dict
         Resultado oficial del Benchmark Científico.
     """
-
-    # --------------------------------------------------------------------------
-    # Validación
-    # --------------------------------------------------------------------------
 
     if model_config is None:
         raise ValueError(
@@ -2168,7 +2254,7 @@ def run_gnn_benchmark(
         "y_validation",
         "x_test",
         "y_test",
-    ]
+    ] # Definir productos obligatorios de BenchmarkData
 
     missing_products = [
         product
@@ -2182,92 +2268,187 @@ def run_gnn_benchmark(
             f"{missing_products}"
         )
 
-    # --------------------------------------------------------------------------
-    # Recuperación
-    # --------------------------------------------------------------------------
+    graphs = benchmark_data["graphs"] # Recuperar GraphData oficiales
+    train_index = np.asarray(
+        benchmark_data["train_index"],
+        dtype=int
+    ) # Recuperar índices temporales de entrenamiento
+    validation_index = np.asarray(
+        benchmark_data["validation_index"],
+        dtype=int
+    ) # Recuperar índices temporales de validación
+    test_index = np.asarray(
+        benchmark_data["test_index"],
+        dtype=int
+    ) # Recuperar índices temporales de prueba
 
-    graphs = benchmark_data["graphs"]
+    y_test = np.asarray(
+        benchmark_data["y_test"]
+    ).reshape(-1) # Recuperar objetivo real de prueba
 
-    train_index = benchmark_data["train_index"]
+    if len(graphs) == 0:
+        raise ValueError(
+            "BenchmarkData no contiene GraphData."
+        )
 
-    validation_index = benchmark_data["validation_index"]
+    if train_index.ndim != 1:
+        raise ValueError(
+            "train_index debe ser un vector unidimensional."
+        )
 
-    test_index = benchmark_data["test_index"]
+    if validation_index.ndim != 1:
+        raise ValueError(
+            "validation_index debe ser un vector unidimensional."
+        )
 
-    y_test = benchmark_data["y_test"]
+    if test_index.ndim != 1:
+        raise ValueError(
+            "test_index debe ser un vector unidimensional."
+        )
 
-    # ----------------------------------------------------------------------
-    # Construcción del modelo
-    # ----------------------------------------------------------------------
+    if len(train_index) == 0:
+        raise ValueError(
+            "train_index está vacío."
+        )
 
-    input_channels = graphs[0].num_node_features
+    if len(validation_index) == 0:
+        raise ValueError(
+            "validation_index está vacío."
+        )
+
+    if len(test_index) == 0:
+        raise ValueError(
+            "test_index está vacío."
+        )
+
+    if np.any(train_index < 0) or np.any(train_index >= len(graphs)):
+        raise IndexError(
+            "train_index contiene índices temporales fuera de rango."
+        )
+
+    if np.any(validation_index < 0) or np.any(validation_index >= len(graphs)):
+        raise IndexError(
+            "validation_index contiene índices temporales fuera de rango."
+        )
+
+    if np.any(test_index < 0) or np.any(test_index >= len(graphs)):
+        raise IndexError(
+            "test_index contiene índices temporales fuera de rango."
+        )
+
+    train_graphs = [
+        graphs[index]
+        for index in train_index
+    ] # Recuperar GraphData temporales de entrenamiento
+
+    validation_graphs = [
+        graphs[index]
+        for index in validation_index
+    ] # Recuperar GraphData temporales de validación
+
+    test_graphs = [
+        graphs[index]
+        for index in test_index
+    ] # Recuperar GraphData temporales de prueba
+
+    if len(train_graphs) == 0:
+        raise RuntimeError(
+            "No existen GraphData para entrenamiento."
+        )
+
+    if len(validation_graphs) == 0:
+        raise RuntimeError(
+            "No existen GraphData para validación."
+        )
+
+    if len(test_graphs) == 0:
+        raise RuntimeError(
+            "No existen GraphData para prueba."
+        )
+
+    print("\n" + "=" * 80)
+    print("PROTOCOLO TEMPORAL GNN")
+    print("=" * 80)
+
+    print(f"GraphData totales       : {len(graphs)}")
+    print(f"GraphData entrenamiento : {len(train_graphs)}")
+    print(f"GraphData validación    : {len(validation_graphs)}")
+    print(f"GraphData prueba        : {len(test_graphs)}")
+    print(f"Índices train           : {train_index}")
+    print(f"Índices validation      : {validation_index}")
+    print(f"Índices test            : {test_index}")
+    print(f"Nodos por GraphData     : {graphs[0].num_nodes}")
+    print(f"Variables predictoras   : {graphs[0].num_node_features}")
+
+    input_channels = graphs[0].num_node_features # Determinar dimensión de entrada
 
     model = build_gnn_model(
         model_config=model_config,
         input_channels=input_channels,
         output_channels=1
-    )
-
-    # ----------------------------------------------------------------------
-    # Componentes oficiales del entrenamiento
-    # ----------------------------------------------------------------------
+    ) # Construir modelo GNN
 
     training_components = build_training_components(
         model=model,
         model_config=model_config
-    )
-
-    # ----------------------------------------------------------------------
-    # Entrenamiento
-    # ----------------------------------------------------------------------
+    ) # Construir componentes oficiales de entrenamiento
 
     training_result = train_gnn(
         model=model,
-        graphs=graphs,
+        graphs=train_graphs,
         criterion=training_components["criterion"],
         optimizer=training_components["optimizer"],
         model_config=model_config,
-        train_index=train_index,
-        validation_index=validation_index
-    )
-    
-    # --------------------------------------------------------------------------
-    # Predicción
-    # --------------------------------------------------------------------------
+        train_index=None,
+        validation_index=None
+    ) # Entrenar exclusivamente con GraphData temporales de entrenamiento
 
     prediction_result = predict_gnn(
         model=training_result["model"],
-        graphs=graphs,
-    )
+        graphs=test_graphs
+    ) # Generar predicciones exclusivamente sobre GraphData de prueba
 
-    y_pred = prediction_result["y_pred"][test_index]
+    y_pred = np.asarray(
+        prediction_result["y_pred"]
+    ).reshape(-1) # Convertir predicciones de prueba a vector
 
-    # --------------------------------------------------------------------------
-    # Evaluación
-    # --------------------------------------------------------------------------
+    y_test = np.asarray(
+        [
+            graph.y.detach().cpu().numpy().reshape(-1)
+            for graph in test_graphs
+        ]
+    ).reshape(-1) # Construir objetivo real de prueba desde los mismos GraphData
+
+    print("\n" + "=" * 80)
+    print("AUDITORÍA DE PREDICCIONES GNN")
+    print("=" * 80)
+
+    print(f"y_pred shape             : {y_pred.shape}")
+    print(f"y_test shape             : {y_test.shape}")
+    print(f"Predicciones             : {len(y_pred)}")
+    print(f"Objetivos                : {len(y_test)}")
+
+    if len(y_pred) != len(y_test):
+        raise RuntimeError(
+            "Las predicciones y los objetivos de prueba "
+            "no tienen la misma cantidad de observaciones."
+        )
 
     evaluation_result = evaluate_gnn(
         y_true=y_test,
-        y_pred=y_pred,
-    )
-
-    # --------------------------------------------------------------------------
-    # Construcción del resultado oficial
-    # --------------------------------------------------------------------------
+        y_pred=y_pred
+    ) # Evaluar exclusivamente sobre el conjunto de prueba
 
     benchmark_result = build_gnn_results(
         model_config=model_config,
         prediction_result={
             "y_pred": y_pred,
+            "y_true": y_test,
             "inference_time": prediction_result["inference_time"],
         },
         evaluation_result=evaluation_result,
         training_result=training_result,
-    )
-
-    # --------------------------------------------------------------------------
-    # Validación del producto
-    # --------------------------------------------------------------------------
+    ) # Construir resultado oficial del Benchmark
 
     required_result = [
         "model",
@@ -2277,7 +2458,7 @@ def run_gnn_benchmark(
         "model_config",
         "prediction_result",
         "evaluation_result",
-    ]
+    ] # Definir contrato del resultado
 
     missing_result = [
         product
@@ -2291,24 +2472,46 @@ def run_gnn_benchmark(
             f"{missing_result}"
         )
 
-    # --------------------------------------------------------------------------
-    # Retorno
-    # --------------------------------------------------------------------------
+    print("\n" + "=" * 80)
+    print("RESULTADO GNN")
+    print("=" * 80)
+
+    print(
+        f"Modelo                   : "
+        f"{model_config['model_name']}"
+    )
+
+    print(
+        f"RMSE                     : "
+        f"{evaluation_result['rmse']}"
+    )
+
+    print(
+        f"MAE                      : "
+        f"{evaluation_result['mae']}"
+    )
+
+    print(
+        f"MAPE                     : "
+        f"{evaluation_result['mape']}"
+    )
+
+    print(
+        f"R2                       : "
+        f"{evaluation_result['r2']}"
+    )
+
+    print("Protocolo GNN            : VALIDADO")
+    print("Predicciones de prueba   : ALINEADAS")
+    print("Objetivos de prueba      : ALINEADOS")
 
     return benchmark_result
 
-# BLOQUE 13. Inferencia ---------------------------------------------------- ***************
-## Objetivo: Generar predicciones utilizando una arquitectura Graph Neural
-## Network previamente entrenada sobre un nuevo grafo de entrada.
-## Entradas:
-## - model
-## - graph_data
-## Producto:
-## - predictions
-## - inference_time
-## Responde:
-## ¿La arquitectura Graph Neural Network genera correctamente predicciones
-## sobre un nuevo conjunto de datos?
+# BLOQUE 13. Inferencia ----------------------------------------------------
+# Objetivo: Generar predicciones utilizando una arquitectura GNN previamente entrenada sobre un nuevo grafo de entrada.
+# Entradas: - model - graph_data
+# Producto: - predictions - inference_time
+# Responde: ¿La arquitectura GNN genera correctamente predicciones sobre un nuevo conjunto de datos?
 
 def predict_new_graph(
     model: nn.Module,
@@ -2319,7 +2522,7 @@ def predict_new_graph(
     Parameters
     ----------
     model : nn.Module
-        Modelo Graph Neural Network entrenado.
+        Modelo GNN entrenado.
 
     graph_data : Any
         Nuevo grafo sobre el cual se realizará la inferencia.
@@ -2372,17 +2575,11 @@ def predict_new_graph(
     }  # Resultado oficial de la inferencia
 
 # BLOQUE 14. Exportación ---------------------------------------------------
-## Objetivo: Exportar la arquitectura Graph Neural Network entrenada junto
-## con su configuración oficial para garantizar la reproducibilidad del
-## Benchmark Científico.
-## Entradas:
-## - model
-## - model_config
-## - output_path
-## Producto:
-## - output_path
-## Responde:
-## ¿La arquitectura Graph Neural Network fue exportada correctamente?
+# Objetivo: Exportar la arquitectura GNN entrenada junto con su configuración oficial para garantizar la 
+# reproducibilidad del Benchmark Científico.
+# Entradas: - model - model_config - output_path
+# Producto: - output_path
+# Responde: ¿La arquitectura GNN fue exportada correctamente?
 
 def export_gnn_model(
     model: nn.Module,
@@ -2390,11 +2587,11 @@ def export_gnn_model(
     output_path: str
 ) -> str:
     """
-    Exporta una arquitectura Graph Neural Network entrenada.
+    Exporta una arquitectura GNN entrenada.
     Parameters
     ----------
     model : nn.Module
-        Modelo Graph Neural Network entrenado.
+        Modelo GNN entrenado.
 
     model_config : dict
         Configuración oficial del modelo.

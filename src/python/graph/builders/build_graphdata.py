@@ -1,6 +1,5 @@
 # build_graphdata.py
 
-# =============================================================================
 # BUILD_GRAPHDATA.PY
 # Objetivo: Construir el GraphData Oficial del proyecto a partir de la Feature Matrix (X), la Variable 
 # Objetivo (y) y las Aristas Combinadas Oficiales, garantizando una representación
@@ -11,17 +10,14 @@
 # Producto: - GraphData Oficial compatible con PyTorch Geometric.
 # Pregunta Científica: ¿La integración de la Feature Matrix, la Variable Objetivo y las Aristas Combinadas
 # representa correctamente el Grafo Científico utilizado por los modelos Graph Neural Networks del proyecto?
-# =============================================================================
 
-# =============================================================================
 # BLOQUE 1. IMPORTACIÓN DE DEPENDENCIAS
-# =============================================================================
+
 # Objetivo: Importar las librerías científicas, la configuración oficial del proyecto y los metadatos
 # requeridos para la construcción, validación y certificación del GraphData Oficial.
 # Componentes: 1.1 Librerías Científicas 1.2 Configuración Oficial del Proyecto 1.3 Metadatos del Builder
 # Producto: Dependencias oficiales inicializadas correctamente. 
 # Responde: ¿El entorno dispone de todas las dependencias necesarias para construir el GraphData Oficial del proyecto?
-# =============================================================================
 
 import torch # Construcción y validación de tensores para PyTorch
 from torch_geometric.data import Data # Objeto GraphData de PyTorch Geometric
@@ -31,17 +27,16 @@ from src.python.config.config_project import (
     TORCH_INT_DTYPE,
 )
 
-# =============================================================================
+
 # METADATOS DEL MÓDULO
-# =============================================================================
+
 MODULE_INFO = {
     "builder": "build_graphdata",
     "version": "2.0.0",
 }
 
-# =============================================================================
 # BLOQUE 2. VALIDACIÓN DE LAS ENTRADAS
-# =============================================================================
+
 # Objetivo: Verificar la integridad estructural de la Feature Matrix (X), la Variable Objetivo (y)
 # y las Aristas Combinadas Oficiales antes de construir el GraphData Oficial del proyecto.
 # Componentes: 2.1 Validación de la Feature Matrix 2.2 Validación de la Variable Objetivo
@@ -51,7 +46,6 @@ MODULE_INFO = {
 # el GraphData Oficial.
 # Responde: ¿Las entradas poseen la estructura necesaria para construir correctamente el GraphData 
 # Oficial del proyecto?
-# =============================================================================
 
 def validate_graphdata_inputs(
     x: torch.Tensor,
@@ -66,7 +60,6 @@ def validate_graphdata_inputs(
     print("Validación de las Entradas del GraphData")
     print("-" * 80)
 
-    # -------------------------------------------------------------------------
     # 2.1 Validación de la Feature Matrix
     # -------------------------------------------------------------------------
     if x is None:
@@ -109,7 +102,6 @@ def validate_graphdata_inputs(
             "La matriz de características contiene valores Inf."
         )
 
-    # -------------------------------------------------------------------------
     # 2.2 Validación de la Variable Objetivo
     # -------------------------------------------------------------------------
     if y is None:
@@ -152,7 +144,6 @@ def validate_graphdata_inputs(
             "La variable objetivo contiene valores Inf."
         )
 
-    # -------------------------------------------------------------------------
     # 2.3 Validación de las Aristas Combinadas
     # -------------------------------------------------------------------------
     if edge_index_final is None:
@@ -205,7 +196,6 @@ def validate_graphdata_inputs(
             "Las Aristas Combinadas contienen duplicados."
         )
 
-    # -------------------------------------------------------------------------
     # 2.4 Resumen Científico
     # -------------------------------------------------------------------------
     print("Entradas del GraphData validadas correctamente.")
@@ -214,9 +204,8 @@ def validate_graphdata_inputs(
     print(f"Aristas                  : {edge_index_final.shape[1]:,}")
     print("Estado                   : CORRECTO")
 
-# =============================================================================
 # 3. CONSTRUCCIÓN DEL GRAPHDATA
-# =============================================================================
+
 # Objetivo: Construir el GraphData Oficial del proyecto integrando la Feature Matrix (X), la Variable
 # Objetivo (y) y las Aristas Combinadas Oficiales en un objeto compatible con PyTorch Geometric.
 # Componentes: 3.1 Construcción del GraphData 3.2 Validación de la Construcción 3.3 Resumen Científico
@@ -224,7 +213,6 @@ def validate_graphdata_inputs(
 # Producto: GraphData Oficial compatible con PyTorch Geometric.
 # Responde: ¿La integración de la Feature Matrix, la Variable Objetivo y las Aristas Combinadas representa
 # correctamente el GraphData Oficial del proyecto?
-# =============================================================================
 
 def build_graphdata(
     x: torch.Tensor,
@@ -255,7 +243,6 @@ def build_graphdata(
     print("Construcción del GraphData")
     print("-" * 80)
 
-    # -------------------------------------------------------------------------
     # 3.1 Construcción del GraphData
     # -------------------------------------------------------------------------
     graph_data = Data(
@@ -273,7 +260,6 @@ def build_graphdata(
         num_nodes=x.shape[0],
     ) # Construir el GraphData Oficial
 
-    # -------------------------------------------------------------------------
     # 3.2 Validación de la construcción
     # -------------------------------------------------------------------------
     if graph_data.num_nodes == 0:
@@ -291,7 +277,6 @@ def build_graphdata(
             "El GraphData no contiene Aristas Combinadas."
         )
 
-    # -------------------------------------------------------------------------
     # 3.3 Resumen científico
     # -------------------------------------------------------------------------
     print("GraphData construido correctamente.")
@@ -302,9 +287,8 @@ def build_graphdata(
 
     return graph_data
 
-# =============================================================================
 # BLOQUE 4. VALIDACIÓN DEL GRAPHDATA
-# =============================================================================
+
 # # Objetivo: Verificar la integridad estructural del GraphData Oficial, garantizando su consistencia,
 # completitud y compatibilidad con PyTorch Geometric antes de ser utilizado por los modelos Graph Neural
 # Networks del proyecto.
@@ -315,7 +299,6 @@ def build_graphdata(
 # Producto: Confirmación de la integridad estructural del GraphData Oficial.
 # Responde:  ¿El GraphData Oficial posee una estructura consistente, completa y compatible con PyTorch 
 # Geometric para el entrenamiento de Graph Neural Networks?
-# =============================================================================
 
 def validate_graphdata(
     graph_data: Data,
@@ -328,7 +311,6 @@ def validate_graphdata(
     print("Validación del GraphData")
     print("-" * 80)
 
-    # -------------------------------------------------------------------------
     # 4.1 Validación del objeto
     # -------------------------------------------------------------------------
     if graph_data is None:
@@ -341,7 +323,6 @@ def validate_graphdata(
             "El GraphData debe ser un objeto Data de PyTorch Geometric."
         )
 
-    # -------------------------------------------------------------------------
     # 4.2 Validación de la matriz de características
     # -------------------------------------------------------------------------
     if graph_data.x is None:
@@ -359,7 +340,6 @@ def validate_graphdata(
             "La matriz de características debe tener dos dimensiones."
         )
 
-    # -------------------------------------------------------------------------
     # 4.3 Validación de la variable objetivo
     # -------------------------------------------------------------------------
     if graph_data.y is None:
@@ -382,7 +362,6 @@ def validate_graphdata(
             "La variable objetivo debe contener una única columna."
         )
 
-    # -------------------------------------------------------------------------
     # 4.4 Validación de las Aristas Combinadas
     # -------------------------------------------------------------------------
     if graph_data.edge_index is None:
@@ -410,7 +389,6 @@ def validate_graphdata(
             "El GraphData no contiene Aristas Combinadas."
         )
 
-    # -------------------------------------------------------------------------
     # 4.5 Validación de coherencia estructural
     # -------------------------------------------------------------------------
     if graph_data.num_nodes != graph_data.x.shape[0]:
@@ -468,7 +446,6 @@ def validate_graphdata(
             "El GraphData contiene Aristas Combinadas duplicadas."
         )
 
-    # -------------------------------------------------------------------------
     # 4.6 Resumen científico
     # -------------------------------------------------------------------------
     print("GraphData validado correctamente.")
@@ -477,9 +454,8 @@ def validate_graphdata(
     print(f"Aristas                  : {graph_data.edge_index.shape[1]:,}")
     print("Estado                   : CORRECTO")
 
-# =============================================================================
 # BLOQUE 5. CONSTRUCCIÓN OFICIAL DEL GRAPHDATA
-# =============================================================================
+
 # Objetivo: Orquestar la validación, construcción y verificación del GraphData Oficial, proporcionando
 # una única interfaz pública para el resto del pipeline científico del proyecto.
 # Componentes: 5.1 Validación de las Entradas 5.2 Construcción del GraphData 5.3 Validación del GraphData
@@ -489,7 +465,6 @@ def validate_graphdata(
 # Neural Networks del proyecto.
 # Responde: ¿El GraphData Oficial fue construido, validado y certificado correctamente para representar 
 # el Grafo Científico del proyecto?
-# =============================================================================
 
 def prepare_graphdata(
     x: torch.Tensor,
@@ -520,7 +495,6 @@ def prepare_graphdata(
         Objeto GraphData Oficial compatible con PyTorch Geometric.
     """
 
-    # -------------------------------------------------------------------------
     # 5.1 Validación de las entradas
     # -------------------------------------------------------------------------
     validate_graphdata_inputs(
@@ -529,7 +503,6 @@ def prepare_graphdata(
         edge_index_final=edge_index_final,
     ) # Validar las entradas del GraphData
 
-    # -------------------------------------------------------------------------
     # 5.2 Construcción del GraphData
     # -------------------------------------------------------------------------
     graph_data = build_graphdata(
@@ -538,14 +511,12 @@ def prepare_graphdata(
         edge_index_final=edge_index_final,
     ) # Construir el GraphData Oficial
 
-    # -------------------------------------------------------------------------
     # 5.3 Validación del GraphData
     # -------------------------------------------------------------------------
     validate_graphdata(
         graph_data=graph_data,
     ) # Validar el GraphData Oficial
 
-    # -------------------------------------------------------------------------
     # 5.4 Incorporación de Metadatos del GraphData
     # -------------------------------------------------------------------------
     if not isinstance(current_year, int):
@@ -569,7 +540,6 @@ def prepare_graphdata(
     graph_data.builder_version = MODULE_INFO["version"] # Versión del constructor
     graph_data.graph_type = "official_graphdata" # Tipo oficial del objeto
 
-    # -------------------------------------------------------------------------
     # 5.5 Retorno del GraphData Oficial
     # -------------------------------------------------------------------------
     return graph_data

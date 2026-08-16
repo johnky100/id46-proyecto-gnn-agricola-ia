@@ -1,40 +1,22 @@
 # figure_config
 
-# =============================================================================
 # BLOQUE 0. IMPORTACIONES
-# =============================================================================
-# Objetivo:
-# Importar las constantes oficiales necesarias para definir la configuración
-# gráfica utilizada por el Pipeline Científico y la Plataforma GeoAI.
-# Producto:
-# Dependencias oficiales requeridas por figure_config.py
-# Pregunta científica:
-# ¿Qué configuraciones gráficas oficiales son necesarias para garantizar una
-# representación visual consistente, reproducible e interpretable durante el
-# Pipeline Científico y la Plataforma GeoAI?
-# =============================================================================
+# Objetivo: Importar las constantes oficiales necesarias para definir la configuración gráfica utilizada por
+# el Pipeline Científico y la Plataforma GeoAI.
+# Producto: Dependencias oficiales requeridas por figure_config.py
+# Pregunta científica: Qué configuraciones gráficas oficiales son necesarias para garantizar una
+# consistente, reproducible e interpretable durante el Pipeline Científico y la Plataforma GeoAI?
 
-# =============================================================================
 # IMPORTACIONES
-# =============================================================================
-
 from src.python.config.config_project import (
     PROJECT_SEED,
 )
 
-# ==============================================================================
 # BLOQUE 1. Proyecto
-# ------------------------------------------------------------------------------
-# Objetivo:
-# Definir la configuración gráfica oficial utilizada por todas las figuras
-# generadas durante el Pipeline Científico y la Plataforma GeoAI, garantizando
-# consistencia visual, calidad de publicación y reproducibilidad.
-# ==============================================================================
+# Objetivo: Definir la configuración gráfica oficial utilizada por todas las figuras generadas durante el Pipeline
+# Científico y la Plataforma GeoAI, garantizando consistencia visual, calidad de publicación y reproducibilidad.
 
-# ------------------------------------------------------------------------------
 # 1.1 Configuración General de Figuras
-# ------------------------------------------------------------------------------
-
 FIGURE_DPI = 300 # Resolución oficial de exportación
 FIGURE_FORMAT = "png" # Formato oficial de las figuras
 FIGURE_SIZE = (12, 8) # Tamaño estándar de las figuras
@@ -53,20 +35,12 @@ PROJECT_FIGURE = {
     "show": SHOW_FIGURES # No mostrar figuras durante la ejecución
 } # Configuración gráfica oficial del proyecto
 
-# ==============================================================================
 # BLOQUE 2. Panel Científico
-# ------------------------------------------------------------------------------
-# Objetivo:
-# Definir la configuración oficial de las figuras utilizadas para representar
-# el Panel Científico, incluyendo el Dataset, las variables, la cobertura
-# espacial y temporal, y la estructura del panel utilizada durante el Pipeline
-# Científico.
-# ==============================================================================
+# Objetivo: Definir la configuración oficial de las figuras utilizadas para representar el Panel Científico, 
+# incluyendo el Dataset, las variables, la cobertura espacial y temporal, y la estructura del panel utilizada 
+# durante el Pipeline Científico.
 
-# ------------------------------------------------------------------------------
 # 2.1 Configuración General
-# ------------------------------------------------------------------------------
-
 PANEL_FIGURE = {
     "figure_size": FIGURE_SIZE, # Tamaño oficial de las figuras del panel
     "dpi": FIGURE_DPI, # Resolución oficial
@@ -74,10 +48,7 @@ PANEL_FIGURE = {
     "save": SAVE_FIGURES # Guardar automáticamente las figuras
 } # Configuración gráfica del Panel Científico
 
-# ------------------------------------------------------------------------------
 # 2.2 Dataset Científico
-# ------------------------------------------------------------------------------
-
 DATASET_FIGURE = {
     "enabled": True, # Generar figura del Dataset Científico
     "title": "Dataset Científico", # Título oficial
@@ -85,63 +56,42 @@ DATASET_FIGURE = {
     "show_variables": True # Mostrar número de variables
 } # Configuración de la figura del Dataset Científico
 
-# ------------------------------------------------------------------------------
 # 2.3 Variables Científicas
-# ------------------------------------------------------------------------------
-
 VARIABLES_FIGURE = {
     "enabled": True, # Generar figura de variables científicas
     "group_by_domain": True, # Agrupar variables por dominio
     "show_counts": True # Mostrar cantidad de variables por dominio
 } # Configuración de la figura de variables
 
-# ------------------------------------------------------------------------------
 # 2.4 Cobertura Espacial
-# ------------------------------------------------------------------------------
-
 SPATIAL_COVERAGE_FIGURE = {
     "enabled": True, # Generar mapa de cobertura espacial
     "show_municipalities": True, # Mostrar municipios
     "show_departments": True # Mostrar departamentos
 } # Configuración de la cobertura espacial
 
-# ------------------------------------------------------------------------------
 # 2.5 Cobertura Temporal
-# ------------------------------------------------------------------------------
-
 TEMPORAL_COVERAGE_FIGURE = {
     "enabled": True, # Generar figura de cobertura temporal
     "show_period": True, # Mostrar periodo del panel
     "show_timeline": True # Mostrar línea de tiempo
 } # Configuración de la cobertura temporal
 
-# ------------------------------------------------------------------------------
 # 2.6 Panel Científico
-# ------------------------------------------------------------------------------
-
 PANEL_STRUCTURE_FIGURE = {
     "enabled": True, # Generar figura de la estructura del panel
     "show_entities": True, # Mostrar municipios
     "show_time_dimension": True # Mostrar dimensión temporal
 } # Configuración de la figura del Panel Científico
 
-# =============================================================================
 # BLOQUE 3. GraphData
-# Objetivo:
-# Centralizar la configuración oficial utilizada para la representación gráfica
-# del GraphData, definiendo los parámetros visuales para la visualización de
-# nodos, aristas, layouts, colores, tamaños y etiquetas empleados por el
-# Pipeline Científico y la Plataforma GeoAI.
-# Pregunta científica:
-# ¿La configuración gráfica del GraphData garantiza una representación visual
-# consistente, reproducible e interpretable de la estructura espacio-temporal
-# utilizada por el Pipeline Científico y la Plataforma GeoAI?
-# =============================================================================
+# Objetivo: Centralizar la configuración oficial utilizada para la representación gráfica del GraphData, definiendo
+# los parámetros visuales para la visualización de nodos, aristas, layouts, colores, tamaños y etiquetas empleados
+#  por el Pipeline Científico y la Plataforma GeoAI.
+# Pregunta científica: ¿La configuración gráfica del GraphData garantiza una representación visual consistente, 
+# reproducible e interpretable de la estructura espacio-temporal utilizada por el Pipeline Científico y la Plataforma GeoAI?
 
-# ------------------------------------------------------------------------------
 # 3.1 Configuración General
-# ------------------------------------------------------------------------------
-
 GRAPH_FIGURE = {
     "figure_size": FIGURE_SIZE, # Tamaño oficial de las figuras del GraphData (pulgadas)
     "dpi": FIGURE_DPI, # Resolución oficial de exportación
@@ -152,10 +102,7 @@ GRAPH_FIGURE = {
     "show": SHOW_FIGURES # Mostrar figuras durante la ejecución
 } # Configuración general de las figuras del GraphData
 
-# ------------------------------------------------------------------------------
 # 3.2 Nodos
-# ------------------------------------------------------------------------------
-
 NODE_FIGURE = {
     "shape": "o", # Forma oficial de los nodos
     "size": 30, # Tamaño oficial de los nodos
@@ -165,10 +112,7 @@ NODE_FIGURE = {
     "alpha": 0.90 # Nivel de transparencia
 } # Configuración gráfica oficial de los nodos
 
-# ------------------------------------------------------------------------------
 # 3.3 Aristas
-# ------------------------------------------------------------------------------
-
 EDGE_FIGURE = {
     "style": "solid", # Estilo oficial de las aristas
     "width": 0.30, # Grosor oficial de las aristas
@@ -177,10 +121,7 @@ EDGE_FIGURE = {
     "arrows": False # No mostrar flechas en grafos no dirigidos
 } # Configuración gráfica oficial de las aristas
 
-# ------------------------------------------------------------------------------
 # 3.4 Layout
-# ------------------------------------------------------------------------------
-
 GRAPH_LAYOUT = {
     "layout": "kamada_kawai", # Layout oficial para la visualización del GraphData
     "seed": PROJECT_SEED, # Semilla para obtener un layout reproducible
@@ -189,10 +130,7 @@ GRAPH_LAYOUT = {
     "iterations": 100 # Número de iteraciones del algoritmo de layout
 } # Configuración oficial del layout del GraphData
 
-# ------------------------------------------------------------------------------
 # 3.5 Colores
-# ------------------------------------------------------------------------------
-
 GRAPH_COLORS = {
     "background": "white", # Color de fondo de la figura
     "nodes": "#1f77b4", # Color oficial de los nodos
@@ -202,10 +140,7 @@ GRAPH_COLORS = {
     "title": "black" # Color oficial del título
 } # Configuración oficial de colores del GraphData
 
-# ------------------------------------------------------------------------------
 # 3.6 Tamaños
-# ------------------------------------------------------------------------------
-
 GRAPH_SIZES = {
     "node_size": 30, # Tamaño oficial de los nodos
     "node_border_width": 0.20, # Grosor del borde de los nodos
@@ -215,10 +150,7 @@ GRAPH_SIZES = {
     "legend_size": 10 # Tamaño oficial de la leyenda
 } # Configuración oficial de tamaños del GraphData
 
-# ------------------------------------------------------------------------------
 # 3.7 Etiquetas
-# ------------------------------------------------------------------------------
-
 GRAPH_LABELS = {
     "show_node_labels": False, # Mostrar etiquetas de los nodos
     "show_edge_labels": False, # Mostrar etiquetas de las aristas
@@ -229,26 +161,16 @@ GRAPH_LABELS = {
     "legend_location": "best" # Ubicación automática de la leyenda
 } # Configuración oficial de etiquetas del GraphData
 
-# =============================================================================
 # BLOQUE 4. Benchmark Científico
-#
-# Objetivo:
-# Centralizar la configuración oficial utilizada para la representación gráfica
-# de los resultados del Benchmark Científico, definiendo los parámetros
-# visuales empleados para comparar el desempeño de los modelos evaluados durante
-# el Pipeline Científico.
-# Pregunta científica:
-# ¿La configuración gráfica del Benchmark Científico garantiza una
-# representación visual consistente, reproducible e interpretable del
-# desempeño comparativo de los modelos evaluados?
-# =============================================================================
+# Objetivo: Centralizar la configuración oficial utilizada para la representación gráfica de los resultados del
+# Benchmark Científico, definiendo los parámetros visuales empleados para comparar el desempeño de los modelos 
+# evaluados durante el Pipeline Científico.
+# Pregunta científica: ¿La configuración gráfica del Benchmark Científico garantiza una representación visual 
+# consistente, reproducible e interpretable del desempeño comparativo de los modelos evaluados?
 
-# ------------------------------------------------------------------------------
-# 4.1 Configuración General
-# ------------------------------------------------------------------------------
-
+# 4.1 Configuración gráfica general
 BENCHMARK_FIGURE = {
-    "figure_size": FIGURE_SIZE, # Tamaño oficial de las figuras del Benchmark Científico (pulgadas)
+    "figure_size": FIGURE_SIZE, # Tamaño oficial de las figuras del Benchmark Científico
     "dpi": FIGURE_DPI, # Resolución oficial de exportación
     "format": FIGURE_FORMAT, # Formato oficial de las figuras
     "bbox_inches": FIGURE_BBOX, # Ajuste automático de márgenes
@@ -257,10 +179,7 @@ BENCHMARK_FIGURE = {
     "show": SHOW_FIGURES # Mostrar figuras durante la ejecución
 } # Configuración general de las figuras del Benchmark Científico
 
-# ------------------------------------------------------------------------------
-# 4.2 Métricas
-# ------------------------------------------------------------------------------
-
+# 4.2 Métricas gráficas
 BENCHMARK_METRICS_FIGURE = {
     "metrics": [
         "rmse",
@@ -268,7 +187,6 @@ BENCHMARK_METRICS_FIGURE = {
         "r2",
         "mape"
     ], # Métricas oficiales a representar
-
     "chart": "bar", # Tipo oficial de gráfico
     "show_values": True, # Mostrar valores sobre las barras
     "sort_values": True, # Ordenar métricas por desempeño
@@ -276,10 +194,7 @@ BENCHMARK_METRICS_FIGURE = {
     "legend": False # No mostrar leyenda
 } # Configuración gráfica oficial de las métricas del Benchmark Científico
 
-# ------------------------------------------------------------------------------
 # 4.3 Modelos
-# ------------------------------------------------------------------------------
-
 BENCHMARK_MODELS_FIGURE = {
     "show_model_names": True, # Mostrar nombres de los modelos
     "group_by_family": True, # Agrupar modelos por familia
@@ -289,10 +204,7 @@ BENCHMARK_MODELS_FIGURE = {
     "legend": True # Mostrar leyenda
 } # Configuración gráfica oficial de los modelos del Benchmark Científico
 
-# ------------------------------------------------------------------------------
 # 4.4 Ranking
-# ------------------------------------------------------------------------------
-
 BENCHMARK_RANKING_FIGURE = {
     "show_ranking": True, # Mostrar ranking oficial de los modelos
     "top_models": 10, # Número de modelos a visualizar
@@ -303,10 +215,7 @@ BENCHMARK_RANKING_FIGURE = {
     "show_position": True # Mostrar la posición de cada modelo
 } # Configuración gráfica oficial del ranking del Benchmark Científico
 
-# ------------------------------------------------------------------------------
 # 4.5 Colores
-# ------------------------------------------------------------------------------
-
 BENCHMARK_COLORS = {
     "background": "white", # Color de fondo de las figuras
     "bars": "#1f77b4", # Color oficial de las barras
@@ -316,10 +225,7 @@ BENCHMARK_COLORS = {
     "grid": "#d9d9d9" # Color oficial de la cuadrícula
 } # Configuración oficial de colores del Benchmark Científico
 
-# ------------------------------------------------------------------------------
 # 4.6 Tamaños
-# ------------------------------------------------------------------------------
-
 BENCHMARK_SIZES = {
     "bar_width": 0.80, # Ancho oficial de las barras
     "marker_size": 8, # Tamaño oficial de los marcadores
@@ -329,10 +235,7 @@ BENCHMARK_SIZES = {
     "legend_size": 10 # Tamaño oficial de la leyenda
 } # Configuración oficial de tamaños del Benchmark Científico
 
-# ------------------------------------------------------------------------------
 # 4.7 Etiquetas
-# ------------------------------------------------------------------------------
-
 BENCHMARK_LABELS = {
     "show_title": True, # Mostrar título de la figura
     "show_axis_labels": True, # Mostrar etiquetas de los ejes
@@ -345,24 +248,14 @@ BENCHMARK_LABELS = {
     "legend_location": "best" # Ubicación automática de la leyenda
 } # Configuración oficial de etiquetas del Benchmark Científico
 
-# =============================================================================
 # BLOQUE 5. Entrenamiento
-#
-# Objetivo:
-# Centralizar la configuración oficial utilizada para la representación gráfica
-# del proceso de entrenamiento del modelo, definiendo los parámetros visuales
-# empleados para visualizar la evolución del aprendizaje durante el Pipeline
-# Científico.
-# Pregunta científica:
-# ¿La configuración gráfica del entrenamiento garantiza una representación
-# visual consistente, reproducible e interpretable del proceso de aprendizaje
-# del modelo?
-# =============================================================================
+# Objetivo: Centralizar la configuración oficial utilizada para la representación gráfica del proceso de 
+# entrenamiento del modelo, definiendo los parámetros visuales empleados para visualizar la evolución del
+# aprendizaje durante el Pipeline Científico.
+# Pregunta científica: ¿La configuración gráfica del entrenamiento garantiza una representación
+# visual consistente, reproducible e interpretable del proceso de aprendizaje del modelo?
 
-# ------------------------------------------------------------------------------
 # 5.1 Configuración General
-# ------------------------------------------------------------------------------
-
 TRAINING_FIGURE = {
     "figure_size": FIGURE_SIZE, # Tamaño oficial de las figuras del entrenamiento (pulgadas)
     "dpi": FIGURE_DPI, # Resolución oficial de exportación
@@ -373,10 +266,7 @@ TRAINING_FIGURE = {
     "show": SHOW_FIGURES # Mostrar figuras durante la ejecución
 } # Configuración general de las figuras del entrenamiento
 
-# ------------------------------------------------------------------------------
 # 5.2 Curvas de Aprendizaje
-# ------------------------------------------------------------------------------
-
 LEARNING_CURVES_FIGURE = {
     "show_training_curve": True, # Mostrar la curva de entrenamiento
     "show_validation_curve": True, # Mostrar la curva de validación
@@ -387,10 +277,7 @@ LEARNING_CURVES_FIGURE = {
     "marker": None # No utilizar marcadores
 } # Configuración gráfica oficial de las curvas de aprendizaje
 
-# ------------------------------------------------------------------------------
 # 5.3 Métricas
-# ------------------------------------------------------------------------------
-
 TRAINING_METRICS_FIGURE = {
     "metrics": [
         "loss",
@@ -406,10 +293,7 @@ TRAINING_METRICS_FIGURE = {
     "show_legend": True # Mostrar leyenda
 } # Configuración gráfica oficial de las métricas del entrenamiento
 
-# ------------------------------------------------------------------------------
 # 5.4 Colores
-# ------------------------------------------------------------------------------
-
 TRAINING_COLORS = {
     "background": "white", # Color de fondo de las figuras
     "training_curve": "#1f77b4", # Color oficial de la curva de entrenamiento
@@ -419,10 +303,7 @@ TRAINING_COLORS = {
     "grid": "#d9d9d9" # Color oficial de la cuadrícula
 } # Configuración oficial de colores del entrenamiento
 
-# ------------------------------------------------------------------------------
 # 5.5 Tamaños
-# ------------------------------------------------------------------------------
-
 TRAINING_SIZES = {
     "line_width": 2.0, # Grosor oficial de las curvas
     "marker_size": 6, # Tamaño oficial de los marcadores
@@ -432,10 +313,7 @@ TRAINING_SIZES = {
     "legend_size": 10 # Tamaño oficial de la leyenda
 } # Configuración oficial de tamaños del entrenamiento
 
-# ------------------------------------------------------------------------------
 # 5.6 Etiquetas
-# ------------------------------------------------------------------------------
-
 TRAINING_LABELS = {
     "show_title": True, # Mostrar título de la figura
     "show_axis_labels": True, # Mostrar etiquetas de los ejes
@@ -448,23 +326,14 @@ TRAINING_LABELS = {
     "legend_location": "best" # Ubicación automática de la leyenda
 } # Configuración oficial de etiquetas del entrenamiento
 
-# =============================================================================
 # BLOQUE 6. Evaluación
-# Objetivo:
-# Centralizar la configuración oficial utilizada para la representación gráfica
-# de los resultados de la evaluación del modelo, definiendo los parámetros
-# visuales empleados para visualizar el desempeño predictivo, la explicabilidad
-# y los análisis derivados durante el Pipeline Científico.
-# Pregunta científica:
-# ¿La configuración gráfica de la evaluación garantiza una representación
-# visual consistente, reproducible e interpretable del desempeño del modelo y
-# de los resultados obtenidos durante el Pipeline Científico?
-# =============================================================================
+# Objetivo: Centralizar la configuración oficial utilizada para la representación gráfica de los resultados
+# de la evaluación del modelo, definiendo los parámetros visuales empleados para visualizar el desempeño 
+# predictivo, la explicabilidad y los análisis derivados durante el Pipeline Científico.
+# Pregunta científica: ¿La configuración gráfica de la evaluación garantiza una representación visual consistente, 
+# reproducible e interpretable del desempeño del modelo y de los resultados obtenidos durante el Pipeline Científico?
 
-# ------------------------------------------------------------------------------
 # 6.1 Configuración General
-# ------------------------------------------------------------------------------
-
 EVALUATION_FIGURE = {
     "figure_size": FIGURE_SIZE, # Tamaño oficial de las figuras de evaluación (pulgadas)
     "dpi": FIGURE_DPI, # Resolución oficial de exportación
@@ -475,10 +344,7 @@ EVALUATION_FIGURE = {
     "show": SHOW_FIGURES # Mostrar figuras durante la ejecución
 } # Configuración general de las figuras de evaluación
 
-# ------------------------------------------------------------------------------
 # 6.2 Métricas
-# ------------------------------------------------------------------------------
-
 EVALUATION_METRICS_FIGURE = {
     "metrics": [
         "rmse",
@@ -494,10 +360,7 @@ EVALUATION_METRICS_FIGURE = {
     "show_legend": False # No mostrar leyenda
 } # Configuración gráfica oficial de las métricas de evaluación
 
-# ------------------------------------------------------------------------------
 # 6.3 Explicabilidad
-# ------------------------------------------------------------------------------
-
 EXPLAINABILITY_FIGURE = {
     "methods": [
         "feature_importance",
@@ -513,10 +376,7 @@ EXPLAINABILITY_FIGURE = {
     "show_legend": False # No mostrar leyenda
 } # Configuración gráfica oficial de la explicabilidad
 
-# ------------------------------------------------------------------------------
 # 6.4 Colores
-# ------------------------------------------------------------------------------
-
 EVALUATION_COLORS = {
     "background": "white", # Color de fondo de las figuras
     "metrics": "#1f77b4", # Color oficial de las métricas de evaluación
@@ -527,10 +387,7 @@ EVALUATION_COLORS = {
     "grid": "#d9d9d9" # Color oficial de la cuadrícula
 } # Configuración oficial de colores de la evaluación
 
-# ------------------------------------------------------------------------------
 # 6.5 Tamaños
-# ------------------------------------------------------------------------------
-
 EVALUATION_SIZES = {
     "bar_width": 0.80, # Ancho oficial de las barras
     "marker_size": 8, # Tamaño oficial de los marcadores
@@ -541,10 +398,7 @@ EVALUATION_SIZES = {
     "legend_size": 10 # Tamaño oficial de la leyenda
 } # Configuración oficial de tamaños de la evaluación
 
-# ------------------------------------------------------------------------------
 # 6.6 Etiquetas
-# ------------------------------------------------------------------------------
-
 EVALUATION_LABELS = {
     "show_title": True, # Mostrar título de la figura
     "show_axis_labels": True, # Mostrar etiquetas de los ejes
@@ -557,23 +411,14 @@ EVALUATION_LABELS = {
     "legend_location": "best" # Ubicación automática de la leyenda
 } # Configuración oficial de etiquetas de la evaluación
 
-# =============================================================================
 # BLOQUE 7. Forecasting
-# Objetivo:
-# Centralizar la configuración oficial utilizada para la representación gráfica
-# de los resultados del Forecasting, definiendo los parámetros visuales
-# empleados para visualizar los pronósticos, escenarios y tendencias
-# espacio-temporales generados durante el Pipeline Científico.
-# Pregunta científica:
-# ¿La configuración gráfica del Forecasting garantiza una representación
-# visual consistente, reproducible e interpretable de los pronósticos y
-# escenarios generados por el modelo?
-# =============================================================================
+# Objetivo: Centralizar la configuración oficial utilizada para la representación gráfica de los resultados del
+# Forecasting, definiendo los parámetros visuales empleados para visualizar los pronósticos, escenarios y 
+# tendencias espacio-temporales generados durante el Pipeline Científico.
+# Pregunta científica: ¿La configuración gráfica del Forecasting garantiza una representación visual consistente,
+# reproducible e interpretable de los pronósticos y escenarios generados por el modelo?
 
-# ------------------------------------------------------------------------------
 # 7.1 Configuración General
-# ------------------------------------------------------------------------------
-
 FORECASTING_FIGURE = {
     "figure_size": FIGURE_SIZE, # Tamaño oficial de las figuras de Forecasting (pulgadas)
     "dpi": FIGURE_DPI, # Resolución oficial de exportación
@@ -584,10 +429,7 @@ FORECASTING_FIGURE = {
     "show": SHOW_FIGURES # Mostrar figuras durante la ejecución
 } # Configuración general de las figuras de Forecasting
 
-# ------------------------------------------------------------------------------
 # 7.2 Pronósticos
-# ------------------------------------------------------------------------------
-
 FORECAST_FIGURE = {
     "show_historical": True, # Mostrar la serie histórica
     "show_forecast": True, # Mostrar la serie pronosticada
@@ -598,10 +440,7 @@ FORECAST_FIGURE = {
     "show_legend": True # Mostrar leyenda
 } # Configuración gráfica oficial de los pronósticos
 
-# ------------------------------------------------------------------------------
 # 7.3 Escenarios
-# ------------------------------------------------------------------------------
-
 SCENARIO_FIGURE = {
     "show_baseline": True, # Mostrar escenario base
     "show_optimistic": True, # Mostrar escenario optimista
@@ -612,10 +451,7 @@ SCENARIO_FIGURE = {
     "highlight_reference_year": True # Resaltar el inicio del período de pronóstico
 } # Configuración gráfica oficial de los escenarios
 
-# ------------------------------------------------------------------------------
 # 7.4 Colores
-# ------------------------------------------------------------------------------
-
 FORECASTING_COLORS = {
     "background": "white", # Color de fondo de las figuras
     "historical": "#1f77b4", # Color oficial de la serie histórica
@@ -627,10 +463,7 @@ FORECASTING_COLORS = {
     "grid": "#d9d9d9" # Color oficial de la cuadrícula
 } # Configuración oficial de colores del Forecasting
 
-# ------------------------------------------------------------------------------
 # 7.5 Tamaños
-# ------------------------------------------------------------------------------
-
 FORECASTING_SIZES = {
     "line_width": 2.0, # Grosor oficial de las series
     "marker_size": 6, # Tamaño oficial de los marcadores
@@ -640,10 +473,7 @@ FORECASTING_SIZES = {
     "legend_size": 10 # Tamaño oficial de la leyenda
 } # Configuración oficial de tamaños del Forecasting
 
-# ------------------------------------------------------------------------------
 # 7.6 Etiquetas
-# ------------------------------------------------------------------------------
-
 FORECASTING_LABELS = {
     "show_title": True, # Mostrar título de la figura
     "show_axis_labels": True, # Mostrar etiquetas de los ejes
@@ -656,23 +486,14 @@ FORECASTING_LABELS = {
     "legend_location": "best" # Ubicación automática de la leyenda
 } # Configuración oficial de etiquetas del Forecasting
 
-# =============================================================================
 # BLOQUE 8. Plataforma GeoAI
-# Objetivo:
-# Centralizar la configuración oficial utilizada para la representación gráfica
-# de los componentes de la Plataforma GeoAI, definiendo los parámetros visuales
-# empleados para visualizar el Dashboard, los reportes, la API y el Agente
+# Objetivo: Centralizar la configuración oficial utilizada para la representación gráfica de los componentes de la 
+# Plataforma GeoAI, definiendo los parámetros visuales empleados para visualizar el Dashboard, los reportes, la API y el Agente
 # Inteligente durante el Pipeline Científico.
-# Pregunta científica:
-# ¿La configuración gráfica de la Plataforma GeoAI garantiza una representación
-# visual consistente, reproducible e interpretable de los componentes que
-# integran el ecosistema GeoAI?
-# =============================================================================
+# Pregunta científica: ¿La configuración gráfica de la Plataforma GeoAI garantiza una representación visual consistente,
+# reproducible e interpretable de los componentes que integran el ecosistema GeoAI?
 
-# ------------------------------------------------------------------------------
 # 8.1 Configuración General
-# ------------------------------------------------------------------------------
-
 GEOAI_PLATFORM_FIGURE = {
     "figure_size": FIGURE_SIZE, # Tamaño oficial de las figuras de la Plataforma GeoAI (pulgadas)
     "dpi": FIGURE_DPI, # Resolución oficial de exportación
@@ -683,10 +504,7 @@ GEOAI_PLATFORM_FIGURE = {
     "show": SHOW_FIGURES # Mostrar figuras durante la ejecución
 } # Configuración general de las figuras de la Plataforma GeoAI
 
-# ------------------------------------------------------------------------------
 # 8.2 Dashboard
-# ------------------------------------------------------------------------------
-
 DASHBOARD_FIGURE = {
     "show_map": True, # Mostrar mapa principal
     "show_graph": True, # Mostrar visualización del GraphData
@@ -697,10 +515,7 @@ DASHBOARD_FIGURE = {
     "layout": "grid" # Distribución oficial de los componentes
 } # Configuración gráfica oficial del Dashboard GeoAI
 
-# ------------------------------------------------------------------------------
 # 8.3 Reportes
-# ------------------------------------------------------------------------------
-
 REPORT_FIGURE = {
     "show_cover": True, # Mostrar portada del reporte
     "show_table_of_contents": True, # Mostrar tabla de contenido
@@ -711,10 +526,7 @@ REPORT_FIGURE = {
     "page_orientation": "portrait" # Orientación oficial del reporte
 } # Configuración gráfica oficial de los reportes
 
-# ------------------------------------------------------------------------------
 # 8.4 API
-# ------------------------------------------------------------------------------
-
 API_FIGURE = {
     "show_client": True, # Mostrar cliente de la API
     "show_endpoints": True, # Mostrar endpoints disponibles
@@ -725,10 +537,7 @@ API_FIGURE = {
     "layout": "horizontal" # Distribución oficial de los componentes
 } # Configuración gráfica oficial de la API
 
-# ------------------------------------------------------------------------------
 # 8.5 Colores
-# ------------------------------------------------------------------------------
-
 GEOAI_PLATFORM_COLORS = {
     "background": "white", # Color de fondo de las figuras
     "dashboard": "#1f77b4", # Color oficial del Dashboard GeoAI
@@ -739,10 +548,7 @@ GEOAI_PLATFORM_COLORS = {
     "grid": "#d9d9d9" # Color oficial de la cuadrícula
 } # Configuración oficial de colores de la Plataforma GeoAI
 
-# ------------------------------------------------------------------------------
 # 8.6 Tamaños
-# ------------------------------------------------------------------------------
-
 GEOAI_PLATFORM_SIZES = {
     "component_width": 2.0, # Ancho oficial de los componentes
     "component_height": 1.2, # Alto oficial de los componentes
@@ -752,10 +558,7 @@ GEOAI_PLATFORM_SIZES = {
     "legend_size": 10 # Tamaño oficial de la leyenda
 } # Configuración oficial de tamaños de la Plataforma GeoAI
 
-# ------------------------------------------------------------------------------
 # 8.7 Etiquetas
-# ------------------------------------------------------------------------------
-
 GEOAI_PLATFORM_LABELS = {
     "show_title": True, # Mostrar título de la figura
     "show_component_labels": True, # Mostrar etiquetas de los componentes

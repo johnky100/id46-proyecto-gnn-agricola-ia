@@ -1,8 +1,7 @@
 # build_features.py
 
-# =============================================================================
 # BLOQUE 1. INFORMACIÓN DEL MÓDULO
-# =============================================================================
+
 # Objetivo: Definir la identidad, versión y propósito científico del módulo responsable de construir la 
 # matriz oficial de características (feature_matrix) utilizada por el GraphData del proyecto.
 # Arquitectura: Este módulo construye la feature_matrix oficial a partir del Dataset Científico, garantizando
@@ -10,11 +9,9 @@
 # Producto: Matriz oficial de características (feature_matrix) del GraphData.
 # Pregunta Científica: ¿Cómo construir una matriz oficial de características consistente, reproducible y 
 # compatible con Graph Neural Networks a partir Dataset Científico?
-# =============================================================================
 
-# =============================================================================
 # 1.1 MODULE_INFO
-# =============================================================================
+
 MODULE_INFO = {
     # Nombre oficial del módulo
     "name": "Feature Builder",
@@ -40,9 +37,9 @@ MODULE_INFO = {
     "author": "AVANZADO-IA",
 }
 
-# =============================================================================
+
 # BLOQUE 2. IMPORTACIONES
-# =============================================================================
+
 # Objetivo: Importar las librerías y configuraciones necesarias para construir la matriz oficial de
 # características (feature_matrix) del GraphData.
 # Arquitectura: Este bloque organiza las dependencias del módulo en categorías funcionales, incluyendo
@@ -51,17 +48,15 @@ MODULE_INFO = {
 # Producto: Dependencias necesarias para construir la feature_matrix.
 # Pregunta Científica: ¿Qué dependencias son necesarias para construir la matriz oficial
 # de características del GraphData?
-# =============================================================================
 
-# =============================================================================
 # 2.1 LIBRERÍAS EXTERNAS
-# =============================================================================
+
 import pandas as pd
 import torch
 
-# =============================================================================
+
 # 2.2 CONFIGURACIÓN DEL PROYECTO
-# =============================================================================
+
 from src.python.config.config_project import (
     FEATURE_COLUMNS,
     MUNICIPALITY_ID_COLUMN,
@@ -70,9 +65,8 @@ from src.python.config.config_project import (
     TORCH_FLOAT_DTYPE,
 )
 
-# =============================================================================
 # BLOQUE 3. CONFIGURACIÓN DEL BUILDER
-# =============================================================================
+
 # Objetivo: Definir la configuración general utilizada durante la construcción de la matriz oficial de 
 # características (feature_matrix).
 # Arquitectura: Este bloque establece las opciones que controlan el proceso de construcción de la
@@ -81,11 +75,9 @@ from src.python.config.config_project import (
 # Producto: Configuración oficial del proceso de construcción de la feature_matrix.
 # Pregunta Científica: ¿Qué criterios de construcción deben aplicarse para garantizar una feature_matrix
 # consistente, reproducible y compatible con Graph Neural Networks?
-# =============================================================================
 
-# =============================================================================
 # 3.1 BUILD_CONFIG
-# =============================================================================
+
 BUILD_CONFIG = {
     # Validar las entradas antes de construir la feature_matrix
     "validate_inputs": True,
@@ -97,9 +89,8 @@ BUILD_CONFIG = {
     "strict_mode": True,
 }
 
-# =============================================================================
 # BLOQUE 4. FUNCIÓN build_features()
-# =============================================================================
+
 # Objetivo: Construir la matriz oficial de características (feature_matrix) y la variable objetivo (target_vector)
 # a partir del Dataset Científico Anual, garantizando una representación consistente,
 # reproducible y compatible con Graph Neural Networks (GNN).
@@ -110,13 +101,11 @@ BUILD_CONFIG = {
 # Producto: Feature Matrix (X) Target Vector (y).
 # Pregunta Científica: ¿Cómo construir de forma consistente la matriz de características (X) y la variable
 # objetivo (y) a partir del Dataset Científico Anual para su utilización en Graph Neural Networks?
-# =============================================================================
 
 def build_features(
     dataset_year: pd.DataFrame,
 ) -> tuple[torch.Tensor, torch.Tensor]:
 
-    # =========================================================================
     # 4.1 Validación del Dataset Científico
     # =========================================================================
     if BUILD_CONFIG["validate_inputs"]:
@@ -176,7 +165,6 @@ def build_features(
                 "municipality-year records."
             )
     
-    # =========================================================================
     # 4.2 Selección Oficial de Variables
     # =========================================================================
     selected_columns = [
@@ -195,7 +183,6 @@ def build_features(
             "The official feature selection produced an empty dataset."
         )
 
-    # =========================================================================
     # 4.3 Transformación de Features
     # =========================================================================
     if BUILD_CONFIG["normalize_features"]:
@@ -212,7 +199,6 @@ def build_features(
                 feature_data[feature_columns] - feature_min
             ) / feature_range
 
-    # =========================================================================
     # 4.4 Construcción de la Feature Matrix
     # =========================================================================
     feature_matrix = torch.tensor(
@@ -220,7 +206,6 @@ def build_features(
         dtype=TORCH_FLOAT_DTYPE,
     )  
 
-    # =========================================================================
     # 4.5 Construcción de la Variable Objetivo
     # =========================================================================
     target_vector = torch.tensor(
@@ -228,7 +213,6 @@ def build_features(
         dtype = TORCH_FLOAT_DTYPE,
     ).view(-1, 1)
 
-    # =========================================================================
     # 4.6 Validación de la Feature Matrix
     # =========================================================================
     if BUILD_CONFIG["validate_inputs"]:
@@ -258,8 +242,6 @@ def build_features(
                 "The feature_matrix contains infinite values."
             )
 
-
-    # =========================================================================
     # 4.7 Validación de la Variable Objetivo
     # =========================================================================
     if BUILD_CONFIG["validate_inputs"]:
@@ -299,14 +281,12 @@ def build_features(
                 "The target_vector contains infinite values."
             )
 
-    # =========================================================================
     # 4.8 Retorno de la Feature Matrix y Variable Objetivo
     # =========================================================================
     return feature_matrix, target_vector
 
-# =============================================================================
 # BLOQUE 5. EXPORTACIONES
-# =============================================================================
+
 # Objetivo: Definir la interfaz pública del módulo, indicando los elementos disponibles para ser utilizados
 # por otros componentes del proyecto.
 # Arquitectura: Este bloque expone únicamente la función oficial encargada de construir la matriz de 
@@ -314,11 +294,9 @@ def build_features(
 # Producto: Interfaz pública del módulo build_features.
 # Pregunta Científica: ¿Qué elemento oficial debe exponerse para Construir la Feature Matrix y la Variable 
 # Objetivo. dentro del pipeline de Graph Construction?
-# =============================================================================
 
-# =============================================================================
 # EXPORTACIONES
-# =============================================================================
+
 __all__ = [
     "build_features",
 ]

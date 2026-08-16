@@ -36,25 +36,22 @@ from src.python.config.config_project import (
 ## ¿El modelo dispone de una configuración oficial, reproducible y
 ## consistente con el Benchmark Científico?
 
-# 2.1. Configuración oficial del modelo -------------------------------------
-
+# 2.1 Configuración oficial del modelo
 STATISTICAL_CONFIG = {
-
-    # Identificación --------------------------------------------------------
-    "model_code": BENCHMARK_MODEL_CODES["ST01"],
+    # Identificación
+    "model_code": "STAT01",
     "model_name": "linear_regression",
     "family": "statistical",
 
-    # Implementación --------------------------------------------------------
+    # Implementación
     "library": "scikit-learn",
     "estimator": LinearRegression,
 
-    # Hiperparámetros -------------------------------------------------------
+    # Hiperparámetros
     "fit_intercept": True,
     "copy_X": True,
-    "positive": False
-
-}  # Configuración oficial del modelo de Regresión Lineal
+    "positive": False,
+} # Configuración oficial del modelo de Regresión Lineal
 
 # BLOQUE 3. Entrenamiento del Modelo ---------------------------------------
 ## Objetivo: Construir y entrenar el modelo oficial de Regresión Lineal

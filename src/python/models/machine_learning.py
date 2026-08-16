@@ -56,7 +56,7 @@ MACHINE_LEARNING_CONFIG = {
     "random_forest": {
 
         # Identificación
-        "model_code": BENCHMARK_MODEL_CODES["ML01"],
+        "model_code": "ML01",
         "model_name": "random_forest",
         "family": "machine_learning",
 
@@ -75,7 +75,7 @@ MACHINE_LEARNING_CONFIG = {
     "xgboost": {
 
         # Identificación
-        "model_code": BENCHMARK_MODEL_CODES["ML02"],
+        "model_code": "ML02", # Código oficial del modelo
         "model_name": "xgboost",
         "family": "machine_learning",
 
@@ -95,7 +95,7 @@ MACHINE_LEARNING_CONFIG = {
     "lightgbm": {
 
         # Identificación
-        "model_code": BENCHMARK_MODEL_CODES["ML03"],
+        "model_code": "ML03", # Código oficial del modelo
         "model_name": "lightgbm",
         "family": "machine_learning",
 
@@ -113,7 +113,7 @@ MACHINE_LEARNING_CONFIG = {
     "catboost": {
 
         # Identificación
-        "model_code": BENCHMARK_MODEL_CODES["ML04"],
+        "model_code": "ML04", # Código oficial del modelo
         "model_name": "catboost",
         "family": "machine_learning",
 
